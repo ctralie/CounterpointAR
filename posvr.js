@@ -29,6 +29,14 @@ function VRFrameData () {
 
 
 class PositionalVR {
+    /**
+     * 
+     * @param {object} sceneObj An object that contains the fields scene, camera, and sceneRoot,
+     *                     as well as a method animate(dt)
+     * @param {*boolean} antialias Whether or not to do antialiasing (false by default, since it causes
+     *                      a performance hit)
+     * @param {boolean} debug     Whether to print information about how many markers were seen
+     */
     constructor(sceneObj, antialias, debug) {
         let that = this;
         this.sceneObj = sceneObj;
@@ -122,6 +130,9 @@ class PositionalVR {
         }
     }
 
+    /**
+     * Setup the AR system, which is used to track position
+     */
     setupTracker() {
         // create this.arToolkitSource
         let that = this;
@@ -178,6 +189,11 @@ class PositionalVR {
         this.scene.add(this.arGroup);
     }
 
+    /**
+     * Perform an animation step, which consists of tracking the AR target and updating
+     * the global AR position, as well as animating the scene forward in time
+     * @param {float} timestamp The current time
+     */
     animate(timestamp) {
         if ( this.arToolkitSource.ready !== false ) {
             this.arToolkitContext.update( this.arToolkitSource.domElement );
