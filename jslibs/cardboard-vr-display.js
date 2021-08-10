@@ -80,6 +80,25 @@
  * THE SOFTWARE.
  */
 
+// https://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+function findGetParameter(parameterName) {
+  var result = null,
+      tmp = [];
+  location.search
+      .substr(1)
+      .split("&")
+      .forEach(function (item) {
+        tmp = item.split("=");
+        if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+      });
+  return result;
+}
+
+var eyefac = findGetParameter("eyefac");
+if (eyefac === null) {
+  eyefac = 1.0;
+}
+
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
@@ -378,6 +397,7 @@ var isTimestampDeltaValid = function isTimestampDeltaValid(timestampDeltaS) {
   }
   return true;
 };
+
 var getScreenWidth = function getScreenWidth() {
   return Math.max(window.screen.width, window.screen.height) * window.devicePixelRatio;
 };
@@ -1778,8 +1798,8 @@ DeviceInfo.prototype.getDistortedFieldOfViewLeftEye = function () {
   var device = this.device;
   var distortion = this.distortion;
   var eyeToScreenDistance = viewer.screenLensDistance;
-  var outerDist = (device.widthMeters - viewer.interLensDistance) / 2;
-  var innerDist = viewer.interLensDistance / 2;
+  var outerDist = (device.widthMeters - viewer.interLensDistance*eyefac) / 2;
+  var innerDist = viewer.interLensDistance*eyefac / 2;
   var bottomDist = viewer.baselineLensDistance - device.bevelMeters;
   var topDist = device.heightMeters - bottomDist;
   var outerAngle = radToDeg * Math.atan(distortion.distort(outerDist / eyeToScreenDistance));
@@ -1804,7 +1824,7 @@ DeviceInfo.prototype.getLeftEyeVisibleTanAngles = function () {
   var halfWidth = device.widthMeters / 4;
   var halfHeight = device.heightMeters / 2;
   var verticalLensOffset = viewer.baselineLensDistance - device.bevelMeters - halfHeight;
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
+  var centerX = viewer.interLensDistance*eyefac / 2 - halfWidth;
   var centerY = -verticalLensOffset;
   var centerZ = viewer.screenLensDistance;
   var screenLeft = distortion.distort((centerX - halfWidth) / centerZ);
@@ -1830,7 +1850,7 @@ DeviceInfo.prototype.getLeftEyeNoLensTanAngles = function () {
   var halfWidth = device.widthMeters / 4;
   var halfHeight = device.heightMeters / 2;
   var verticalLensOffset = viewer.baselineLensDistance - device.bevelMeters - halfHeight;
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
+  var centerX = viewer.interLensDistance*eyefac / 2 - halfWidth;
   var centerY = -verticalLensOffset;
   var centerZ = viewer.screenLensDistance;
   var screenLeft = (centerX - halfWidth) / centerZ;
@@ -1847,7 +1867,7 @@ DeviceInfo.prototype.getLeftEyeVisibleScreenRect = function (undistortedFrustum)
   var viewer = this.viewer;
   var device = this.device;
   var dist = viewer.screenLensDistance;
-  var eyeX = (device.widthMeters - viewer.interLensDistance) / 2;
+  var eyeX = (device.widthMeters - viewer.interLensDistance*eyefac) / 2;
   var eyeY = viewer.baselineLensDistance - device.bevelMeters;
   var left = (undistortedFrustum[0] * dist + eyeX) / device.widthMeters;
   var top = (undistortedFrustum[1] * dist + eyeY) / device.heightMeters;
@@ -1904,7 +1924,7 @@ DeviceInfo.prototype.getUndistortedParams_ = function () {
   var device = this.device;
   var distortion = this.distortion;
   var eyeToScreenDistance = viewer.screenLensDistance;
-  var halfLensDistance = viewer.interLensDistance / 2 / eyeToScreenDistance;
+  var halfLensDistance = viewer.interLensDistance*eyefac / 2 / eyeToScreenDistance;
   var screenWidth = device.widthMeters / eyeToScreenDistance;
   var screenHeight = device.heightMeters / eyeToScreenDistance;
   var eyePosX = screenWidth / 2 - halfLensDistance;
@@ -3282,9 +3302,9 @@ CardboardVRDisplay.prototype._getFieldOfView = function (whichEye) {
 CardboardVRDisplay.prototype._getEyeOffset = function (whichEye) {
   var offset;
   if (whichEye == Eye.LEFT) {
-    offset = [-this.deviceInfo_.viewer.interLensDistance * 0.5, 0.0, 0.0];
+    offset = [-this.deviceInfo_.viewer.interLensDistance*eyefac * 0.5, 0.0, 0.0];
   } else if (whichEye == Eye.RIGHT) {
-    offset = [this.deviceInfo_.viewer.interLensDistance * 0.5, 0.0, 0.0];
+    offset = [this.deviceInfo_.viewer.interLensDistance*eyefac * 0.5, 0.0, 0.0];
   } else {
     console.error('Invalid eye provided: %s', whichEye);
     return null;
