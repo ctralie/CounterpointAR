@@ -29,7 +29,7 @@ function VRFrameData () {
 
 
 class PositionalVR {
-    constructor(sceneObj, antialias) {
+    constructor(sceneObj, antialias, debug) {
         let that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
@@ -42,6 +42,10 @@ class PositionalVR {
         if (antialias === undefined) {
             antialias = false;
         }
+        if (debug === undefined) {
+            debug = false;
+        }
+        this.debug = debug;
         // Get config from URL
         let config = getVRConfig();
         console.log('creating CardboardVRDisplay with options', config);
@@ -148,8 +152,10 @@ class PositionalVR {
         const patterns = ["data/hiro.patt", "data/kanji.patt", "data/letterA.patt", "data/letterB.patt", "data/letterC.patt", "data/letterD.patt", "data/letterF.patt", "data/letterG.patt"];
         let markerRoots = [];
         let markersVisible = [];
+        let lastMarkerPos = []; // For keeping track of the last marker positions
         this.markerRoots = markerRoots;
         this.markersVisible = markersVisible;
+        this.lastMarkerPos = lastMarkerPos;
         for (let i = 0; i < patterns.length; i++) {
             const markerRoot = new THREE.Group();
             this.scene.add(markerRoot);
@@ -165,6 +171,7 @@ class PositionalVR {
                 markersVisible[e.target.i] = false;
             });*/
             markersVisible.push(false);
+            lastMarkerPos.push([0, 0, 0]);
         }
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
@@ -195,38 +202,61 @@ class PositionalVR {
             // Use markers
             const markerRoots = this.markerRoots;
             const markersVisible = this.markersVisible;
-            let x = 0;
-            let y = 0;
-            let z = 0;
+            const lastMarkerPos = this.lastMarkerPos;
+            let dx = 0;
+            let dy = 0;
+            let dz = 0;
             let count = 0;
-            // Average the positions of the visible markers
+            // Step 1: Average the changes in position of the visible markers
             for (let i = 0; i < markerRoots.length; i++) {
                 if (markersVisible[i]) {
-                    x += markerRoots[i].position.x;
-                    y += markerRoots[i].position.y;
-                    z += markerRoots[i].position.z;
+                    dx += markerRoots[i].position.x - lastMarkerPos[i][0];
+                    dy += markerRoots[i].position.y - lastMarkerPos[i][1];
+                    dz += markerRoots[i].position.z - lastMarkerPos[i][2];
                     count += 1;
+                    lastMarkerPos[i][0] = markerRoots[i].position.x;
+                    lastMarkerPos[i][1] = markerRoots[i].position.y;
+                    lastMarkerPos[i][2] = markerRoots[i].position.z;
                 }
-                markersVisible[i] = false;
             }
             if (count > 0) {
-                console.log("Averaging " + count + " markers");
-                arGroup.position.x = x/count;
-                arGroup.position.y = y/count;
-                arGroup.position.z = z/count;
+                // Step 2: Apply this change to the unseen markers and add up all
+                // of the positions
+                let x = 0;
+                let y = 0;
+                let z = 0;
+                for (let i = 0; i < markerRoots.length; i++) {
+                    if (!markersVisible[i]) {
+                        lastMarkerPos[i][0] += dx/count;
+                        lastMarkerPos[i][1] += dy/count;
+                        lastMarkerPos[i][2] += dz/count;
+                    }
+                    x += lastMarkerPos[i][0];
+                    y += lastMarkerPos[i][1];
+                    z += lastMarkerPos[i][2];
+                    markersVisible[i] = false;
+                }
+                // Step 3: Set the position to be the average
+                arGroup.position.x = x/markerRoots.length;
+                arGroup.position.y = y/markerRoots.length;
+                arGroup.position.z = z/markerRoots.length;
+                if (this.debug) {
+                    console.log(count + " markers seen");
+                    console.log("x = " + arGroup.position.x + ", y = " + arGroup.position.y + ", z = " + arGroup.position.z);
+                }
+                //arGroup.rotation.x = markerRoot1.rotation.x;
+                //arGroup.rotation.y = markerRoot1.rotation.y;
+                //arGroup.rotation.z = markerRoot1.rotation.z;
+    
+                arGroup.rotation.x = 0;
+                arGroup.rotation.y = 0;
+                arGroup.rotation.z = 0;
             }
             else {
-                console.log("No markers found");
+                if (this.debug) {
+                    console.log("No markers found");
+                }
             }
-
-
-            //arGroup.rotation.x = markerRoot1.rotation.x;
-            //arGroup.rotation.y = markerRoot1.rotation.y;
-            //arGroup.rotation.z = markerRoot1.rotation.z;
-
-            arGroup.rotation.x = 0;
-            arGroup.rotation.y = 0;
-            arGroup.rotation.z = 0;
         }
         // Update VR headset position and apply to camera.
         //controls.update();
@@ -236,8 +266,6 @@ class PositionalVR {
 
         // Keep looping.
         this.vrDisplay.requestAnimationFrame(this.animate.bind(this));
-        
-        //console.log(markerRoot1.position);
     }
 
 }
