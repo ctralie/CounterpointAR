@@ -8,6 +8,25 @@
  * Chromium: https://webvr.info/get-chrome
  */
 
+// https://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
+var eye_factor = findGetParameter("eyefac");
+if (eye_factor === null) {
+	eye_factor = 1.0;
+}
+
 THREE.VREffect = function ( renderer, onError ) {
 
 	var vrDisplay, vrDisplays;
@@ -446,7 +465,9 @@ THREE.VREffect = function ( renderer, onError ) {
 		// The headMatrix that we've calculated above is the model matrix of the head in sitting space, which is the inverse of sittingToHeadMatrix.
 		// So when we multiply the view matrix with headMatrix, we're left with headToEyeMatrix:
 		// viewMatrix * headMatrix = headToEyeMatrix * sittingToHeadMatrix * headMatrix = headToEyeMatrix
-
+		frameData.leftViewMatrix[12] *= eye_factor;
+		frameData.rightViewMatrix[12] *= eye_factor;
+		
 		eyeMatrixL.fromArray( frameData.leftViewMatrix );
 		eyeMatrixL.multiply( headMatrix );
 		eyeMatrixR.fromArray( frameData.rightViewMatrix );
