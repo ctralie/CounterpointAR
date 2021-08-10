@@ -67,6 +67,7 @@ class BasicScene {
     animate(delta) {
         // Apply a small rotation to one of the cubes
         this.cube.rotation.y += delta * 0.0006;
+        this.sphere.position.z += delta*0.0003;
 
         this.frameNum += 1;
     }
