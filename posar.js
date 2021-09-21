@@ -43,10 +43,10 @@ class PositionalAR {
 
 
     onResize() {
-        this.arToolkitSource.onResize();
-        this.arToolkitSource.copySizeTo(this.renderer.domElement);
+        this.arToolkitSource.onResizeElement();
+        this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
         if (this.arToolkitContext.arController !== null) {
-            this.arToolkitSource.copySizeTo(this.arToolkitContext.arController.canvas);
+            this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
         }
     }
 
