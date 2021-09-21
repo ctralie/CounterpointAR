@@ -43,18 +43,11 @@ class PositionalAR {
 
 
     onResize() {
-        if (!(this.renderer === undefined)) {
-            this.arToolkitSource.onResize();
-            this.arToolkitSource.copySizeTo(this.renderer.domElement);
-            if (this.arToolkitContext.arController !== null) {
-                this.arToolkitSource.copySizeTo(this.arToolkitContext.arController.canvas);
-            }
+        this.arToolkitSource.onResize();
+        this.arToolkitSource.copySizeTo(this.renderer.domElement);
+        if (this.arToolkitContext.arController !== null) {
+            this.arToolkitSource.copySizeTo(this.arToolkitContext.arController.canvas);
         }
-        if (!(this.effect === undefined)) {
-            this.effect.setSize(window.innerWidth, window.innerHeight);
-        }
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
     }
 
     enterFullscreen (el) {
@@ -95,16 +88,26 @@ class PositionalAR {
 
         // copy projection matrix to camera when initialization complete
         arToolkitContext.init(function onCompleted(){
-            console.log(arToolkitContext);
             that.camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
         });
 
         const markerRoot = new THREE.Group();
         this.markerRoot = markerRoot;
         this.scene.add(markerRoot);
-        const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-            type: 'pattern', patternUrl: "data/letterA.patt",
-        });
+
+        let markerParameters = {
+            type: "pattern",
+            patternUrl: "data/letterB.patt",
+            // turn on/off camera smoothing
+            smooth: true,
+            // number of matrices to smooth tracking over, more = smoother but slower follow
+            smoothCount: 5,
+            // distance tolerance for smoothing, if smoothThreshold # of matrices are under tolerance, tracking will stay still
+            smoothTolerance: 0.01,
+            // threshold for smoothing, will keep still unless enough matrices are over tolerance
+            smoothThreshold: 2
+        };
+        const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
         markerControl.addEventListener("markerFound", (e)=>{
             // TODO: We can do stuff once a marker is found
         });

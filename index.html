@@ -4,39 +4,9 @@
 <head>
 <title>Counterpoint Augmented Reality Viewer</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<style>
-html, body {
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  color: #fff;
-  margin: 0px;
-  padding: 0;
-  overflow: hidden;
-}
-
-#container {
-  width: 400px;
-  height: 225px;
-  margin: 100px auto;
-}
-
-#buttons {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 1;
-  background: white;
-}
-</style>
 </head>
 
-<body>
-</body>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
 
 <script>
 document.addEventListener('touchmove', function(e) {
@@ -47,13 +17,7 @@ document.addEventListener('touchmove', function(e) {
 <!-- three.js library -->
 <script src="jslibs/three.js"></script>
 <!-- include jsartookit -->
-<script src="jslibs/artoolkit.min.js"></script>
-<script src="jslibs/artoolkit.api.js"></script>
-<!-- include threex.artoolkit -->
-<script src="jslibs/threex-artoolkitsource.js"></script>
-<script src="jslibs/threex-artoolkitcontext.js"></script>
-<script src="jslibs/threex-arbasecontrols.js"></script>
-<script src="jslibs/threex-armarkercontrols.js"></script>
+<script src="jslibs/ar.js"></script>
 
 <!-- Our Scripts -->
 <script src="keyboardhandler.js"></script>
@@ -62,7 +26,8 @@ document.addEventListener('touchmove', function(e) {
 
 <script>
     let scene = new BasicScene();
-    let posVR = new PositionalAR(scene, false);
+    let posVR = new PositionalAR(scene);
 </script>
 
+</body>
 </html>

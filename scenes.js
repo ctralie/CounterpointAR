@@ -1,16 +1,14 @@
 
 /**
  * Setup a basic scene with two cubes and a sphere
- * @param {boolean} useFog
- *      Whether to use fog 
  */
 
 class BasicScene {
-    constructor(useFog) {
+    constructor() {
         // Step 1: Create a three.js scene and camera
         let scene = new THREE.Scene();
         this.scene = scene;
-        let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+        let camera = new THREE.Camera();
         this.camera = camera;
 
         // Step 2: Setup lighting
@@ -20,29 +18,16 @@ class BasicScene {
         const light = new THREE.DirectionalLight(color, intensity);
         light.position.set(-1, 2, 4);
         scene.add(light);
-        if (useFog) {
-            const near = 0;
-            const far = 2;
-            const color = 'lightblue';
-            scene.fog = new THREE.Fog(color, near, far);
-            scene.background = new THREE.Color(color);
-        }
 
         // Step 3: Setup geometry
-        let cubeGeometry = new THREE.BoxGeometry(5, 5, 5); // three.js line 29094
-        let sphereGeometry = new THREE.SphereGeometry(4, 32, 32); //three.js line 29075
+        let cubeGeometry = new THREE.BoxGeometry(1, 1, 1); 
+        let sphereGeometry = new THREE.SphereGeometry(4, 32, 32);
         let material = new THREE.MeshPhongMaterial({ color: 0xCD853F });
         let cube = new THREE.Mesh(cubeGeometry, material);
         this.cube = cube;
-        let cube2 = new THREE.Mesh(cubeGeometry, material);
-        this.cube2 = cube2;
         let sphere = new THREE.Mesh(sphereGeometry, material);
         this.sphere = sphere;
-        cube.position.y -= 1;
-        cube.position.z = -10;
-        cube2.position.x = -5;
-        cube2.position.y -= 1;
-        cube2.position.z = -10;
+        cube.position.y = 0.5;
 
         sphere.position.z = -10;
         sphere.position.y = 5;
@@ -50,11 +35,7 @@ class BasicScene {
         let sceneRoot = new THREE.Group();
         this.sceneRoot = sceneRoot;
         sceneRoot.add(cube);
-        sceneRoot.add(cube2);
         sceneRoot.add(sphere);
-        sceneRoot.position.z = 0;
-        sceneRoot.position.x = -0.3;
-        sceneRoot.position.y = 0.5;
         this.sceneRoot = sceneRoot;
 
         this.frameNum = 0;
@@ -66,9 +47,7 @@ class BasicScene {
      */
     animate(delta) {
         // Apply a small rotation to one of the cubes
-        this.cube.rotation.y += delta * 0.0006;
-        // Move the sphere forward slightly
-        this.sphere.position.z += delta*0.0003;
+        this.cube.rotation.y += delta * 0.1;
         // Not doing anything with this variable right now, but it could be useful
         this.frameNum += 1;
     }
