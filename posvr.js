@@ -33,12 +33,12 @@ class PositionalVR {
      * 
      * @param {object} sceneObj An object that contains the fields scene, camera, and sceneRoot,
      *                     as well as a method animate(dt)
-     * @param {*boolean} antialias Whether or not to do antialiasing (false by default, since it causes
+     * @param {boolean} antialias Whether or not to do antialiasing (false by default, since it causes
      *                      a performance hit)
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
     constructor(sceneObj, antialias, debug) {
-        let that = this;
+        const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
         this.camera = sceneObj.camera;
