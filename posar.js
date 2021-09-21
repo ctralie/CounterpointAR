@@ -23,14 +23,22 @@ class PositionalAR {
             debug = false;
         }
         this.debug = debug;
-        let canvas = document.querySelector('canvas');
-        this.canvas = canvas;
-        // Setup three.js WebGL renderer
-        this.renderer = new THREE.WebGLRenderer({antialias: antialias, canvas: this.canvas});
-        this.renderer.setPixelRatio(Math.floor(window.devicePixelRatio));
         this.clock = new THREE.Clock();
+
+
+        // Setup three.js WebGL renderer
+        const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
+        this.renderer = renderer;
+        renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+        renderer.setSize( 640, 480 );
+        renderer.domElement.style.position = 'absolute'
+        renderer.domElement.style.top = '0px'
+        renderer.domElement.style.left = '0px'
+        document.body.appendChild( renderer.domElement );
+
         // Finally, setup the AR tracker
         this.setupTracker();
+        this.repaint();
     }
 
 
@@ -87,6 +95,7 @@ class PositionalAR {
 
         // copy projection matrix to camera when initialization complete
         arToolkitContext.init(function onCompleted(){
+            console.log(arToolkitContext);
             that.camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
         });
 
@@ -111,27 +120,24 @@ class PositionalAR {
     /**
      * Perform an animation step, which consists of tracking the AR targets and updating
      * the global AR positions, as well as animating the scene forward in time
-     * @param {float} timestamp The current time
      */
-    animate(timestamp) {
-        if ( this.arToolkitSource.ready !== false ) {
+    repaint() {
+        if ( this.arToolkitSource.initialized !== false ) {
             this.arToolkitContext.update( this.arToolkitSource.domElement );
         }
         let deltaTime = this.clock.getDelta();
         this.sceneObj.animate(deltaTime);
 
-        const arGroup = this.arGroup;
         if (this.keyboardDebugging) {
             const K = this.keyboard;
             if (K.movelr != 0 || K.moveud != 0 || K.movefb != 0) {
-                arGroup.position.x -= K.movelr*K.walkspeed*delta/1000;
-                arGroup.position.y -= K.moveud*K.walkspeed*delta/1000;
-                arGroup.position.z += K.movefb*K.walkspeed*delta/1000;
+                this.markerRoot.position.x -= K.movelr*K.walkspeed*delta/1000;
+                this.markerRoot.position.y -= K.moveud*K.walkspeed*delta/1000;
+                this.markerRoot.position.z += K.movefb*K.walkspeed*delta/1000;
             }
         }
-        else {
-            
-        }
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.repaint.bind(this));
     }
 
 }
