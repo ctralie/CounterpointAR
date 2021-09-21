@@ -24,6 +24,7 @@ class PositionalAR {
         }
         this.debug = debug;
         this.clock = new THREE.Clock();
+        this.totalTime = 0;
 
 
         // Setup three.js WebGL renderer
@@ -96,6 +97,8 @@ class PositionalAR {
         this.scene.add(markerRoot);
 
         let markerParameters = {
+            // size of the marker in meters 
+            size: 0.183, //(TODO: Measure this exactly)
             type: "pattern",
             patternUrl: "data/letterB.patt",
             // turn on/off camera smoothing
@@ -129,6 +132,12 @@ class PositionalAR {
             this.arToolkitContext.update( this.arToolkitSource.domElement );
         }
         let deltaTime = this.clock.getDelta();
+        if (this.totalTime < 6 && (this.totalTime+deltaTime)%1 < this.totalTime%1) {
+            // A hack to trigger resizing every second for the first 5 seconds
+            // TODO: Try something more elegant?
+            this.onResize();
+        }
+        this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
 
         if (this.keyboardDebugging) {
