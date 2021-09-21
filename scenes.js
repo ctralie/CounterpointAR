@@ -20,15 +20,15 @@ class BasicScene {
         scene.add(light);
 
         // Step 3: Setup geometry
-        let cubeGeometry = new THREE.BoxGeometry(0.25, 0.25, 0.25); 
-        let sphereGeometry = new THREE.SphereGeometry(0.125, 32, 32);
+        let cubeGeometry = new THREE.BoxGeometry(1, 1, 1); 
+        let sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
         let material = new THREE.MeshPhongMaterial({ color: 0xCD853F });
         let cube = new THREE.Mesh(cubeGeometry, material);
         this.cube = cube;
         let sphere = new THREE.Mesh(sphereGeometry, material);
         this.sphere = sphere;
-        cube.position.y = 0.125;
-        sphere.position.y = 0.125;
+        cube.position.y = 0.5;
+        sphere.position.y = 0.5;
         sphere.position.x = 0.5;
 
         let sceneRoot = new THREE.Group();

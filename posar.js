@@ -97,8 +97,6 @@ class PositionalAR {
         this.scene.add(markerRoot);
 
         let markerParameters = {
-            // size of the marker in meters 
-            size: 0.183, //(TODO: Measure this exactly)
             type: "pattern",
             patternUrl: "data/letterB.patt",
             // turn on/off camera smoothing
