@@ -29,7 +29,7 @@ class BasicScene {
         this.sphere = sphere;
         cube.position.y = 0.5;
         sphere.position.y = 0.5;
-        sphere.position.x = 0.5;
+        sphere.position.x = 2;
 
         let sceneRoot = new THREE.Group();
         this.sceneRoot = sceneRoot;
@@ -47,6 +47,8 @@ class BasicScene {
     animate(delta) {
         // Apply a small rotation to one of the cubes
         this.cube.rotation.y += delta * 0.1;
+        // Move the sphere up from the ground slowly
+        this.sphere.position.y += delta * 0.05;
         // Not doing anything with this variable right now, but it could be useful
         this.frameNum += 1;
     }
