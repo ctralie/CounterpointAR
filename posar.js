@@ -111,6 +111,7 @@ class PositionalAR {
         const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
         markerControl.addEventListener("markerFound", (e)=>{
             // TODO: We can do stuff once a marker is found
+            console.log("Found");
         });
         markerControl.addEventListener("markerLost", (e)=>{
             // TODO: We can do stuff once a marker is lost
