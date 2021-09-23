@@ -38,6 +38,7 @@ class PositionalAR {
         document.body.appendChild( renderer.domElement );
 
         // Finally, setup the AR tracker
+        console.log("prior to tracker");
         this.setupTracker();
         this.repaint();
     }
