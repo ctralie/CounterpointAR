@@ -108,6 +108,7 @@ class PositionalAR {
             // threshold for smoothing, will keep still unless enough matrices are over tolerance
             smoothThreshold: 2
         };
+        console.log("here?");
         const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
         markerControl.addEventListener("markerFound", (e)=>{
             // TODO: We can do stuff once a marker is found
