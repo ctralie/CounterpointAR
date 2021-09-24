@@ -99,7 +99,7 @@ class PositionalAR {
 
         let markerParameters = {
             type: "pattern",
-            patternUrl: "data/kanji.patt",
+            patternUrl: "data/letterA.patt",
             // turn on/off camera smoothing
             smooth: true,
             // number of matrices to smooth tracking over, more = smoother but slower follow
