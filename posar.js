@@ -93,75 +93,39 @@ class PositionalAR {
             that.camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
         });
 
-        const markerRoot = new THREE.Group();
-        this.markerRoot = markerRoot;
-        this.scene.add(markerRoot);
-
-        let markerParameters = {
-            type: "pattern",
-            patternUrl: "data/letterA.patt",
-            // turn on/off camera smoothing
-            smooth: true,
-            // number of matrices to smooth tracking over, more = smoother but slower follow
-            smoothCount: 5,
-            // distance tolerance for smoothing, if smoothThreshold # of matrices are under tolerance, tracking will stay still
-            smoothTolerance: 0.01,
-            // threshold for smoothing, will keep still unless enough matrices are over tolerance
-            smoothThreshold: 2
-        };
-
-        
-
-        const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
-        markerControl.addEventListener("markerFound", (e)=>{
-            // TODO: We can do stuff once a marker is found
-            console.log("Found");
-        });
-        markerControl.addEventListener("markerLost", (e)=>{
-            // TODO: We can do stuff once a marker is lost
-            console.log("lost");
-        });
-
-        
-        
-        // Tether the scene to this marker
-        // TODO: We will want to involve multiple markers somehow
-        //markerRoot.add(this.sceneRoot);
-
-        const markerRoot1 = new THREE.Group();
-        this.markerRoot1 = markerRoot1;
-        this.scene.add(markerRoot1);
-
-        let markerParameters1 = {
-            type: "pattern",
-            patternUrl: "data/kanji.patt",
-            // turn on/off camera smoothing
-            smooth: true,
-            // number of matrices to smooth tracking over, more = smoother but slower follow
-            smoothCount: 5,
-            // distance tolerance for smoothing, if smoothThreshold # of matrices are under tolerance, tracking will stay still
-            smoothTolerance: 0.01,
-            // threshold for smoothing, will keep still unless enough matrices are over tolerance
-            smoothThreshold: 2
-        };
-
-        const markerControl1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, markerParameters1);
-        markerControl1.addEventListener("markerFound", (e)=>{
-            // TODO: We can do stuff once a marker is found
-            console.log("Found");
-        });
-        markerControl1.addEventListener("markerLost", (e)=>{
-            // TODO: We can do stuff once a marker is lost
-            console.log("lost");
-        });
-
-        //markerRoot1.add(this.sceneRoot);
+        const patterns = ["data/hiro.patt", "data/kanji.patt", "data/letterA.patt", "data/letterB.patt", "data/letterC.patt", "data/letterD.patt", "data/letterF.patt", "data/letterG.patt"];
+        let markerRoots = [];
+        let markersVisible = [];
+        this.markerRoots = markerRoots;
+        this.markersVisible = markersVisible;
+        for (let i = 0; i < patterns.length; i++) {
+            const markerRoot = new THREE.Group();
+            this.scene.add(markerRoot);
+            markerRoots.push(markerRoot);
+            const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                type: 'pattern', patternUrl: patterns[i],
+            });
+            markerControl.i = i;
+            markerControl.addEventListener("markerFound", (e)=>{
+                that.markersVisible[e.target.i] = true;
+                console.log("marker found");
+            });
+            markerControl.addEventListener("markerLost", (e)=>{
+                that.markersVisible[e.target.i] = false;
+                console.log("marker lost");
+            });
+            markersVisible.push(false);
+        }
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.scene.add(this.arGroup);
-        let markerRoots = [markerRoot, markerRoot1];
-        this.markerRoots = markerRoots;
-    }
+    }   
+        
+
+        
+
+        
+        
 
     /**
      * Perform an animation step, which consists of tracking the AR targets and updating
@@ -189,14 +153,65 @@ class PositionalAR {
             }
         }else{
             const markerRoots = this.markerRoots;
-            this.arGroup.position.x = (markerRoots[1].position.x + markerRoots[0].position.x)/2;
-            this.arGroup.position.y = (markerRoots[1].position.y + markerRoots[0].position.y)/2;
-            this.arGroup.position.z = (markerRoots[1].position.z + markerRoots[0].position.z)/2;
-            console.log(markerRoots[0].position);
-            console.log(this.arGroup.position);
+            const markersVisible = this.markersVisible;
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            let count = 0;
+            for(let i = 0; i < markerRoots.length; i++){
+                if(markersVisible[i]){
+                    x += markerRoots[i].position.x;
+                    y += markerRoots[i].position.y;
+                    z += markerRoots[i].position.z;
+                    count += 1;
+                }
+                markersVisible[i]=false;
+            }
+            console.log(count);
+            console.log(markersVisible.length);
+            if(count <= 0){
+                this.arGroup.visible = false;
+            }else{
+                this.arGroup.visible = true;
+                this.arGroup.position.x = x/count;
+                this.arGroup.position.y = y/count;
+                this.arGroup.position.z = z/count;
+            }
+            //count = 0;
         }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
 
 }
+
+//TODO: incorporate lost marker feature
+
+/*
+        const markerRoot = new THREE.Group();
+        this.markerRoot = markerRoot;
+        this.scene.add(markerRoot);
+
+        let markerParameters = {
+            type: "pattern",
+            patternUrl: "data/letterA.patt",
+            // turn on/off camera smoothing
+            smooth: true,
+            // number of matrices to smooth tracking over, more = smoother but slower follow
+            smoothCount: 5,
+            // distance tolerance for smoothing, if smoothThreshold # of matrices are under tolerance, tracking will stay still
+            smoothTolerance: 0.01,
+            // threshold for smoothing, will keep still unless enough matrices are over tolerance
+            smoothThreshold: 2
+        };
+
+        const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
+        markerControl.addEventListener("markerFound", (e)=>{
+            // TODO: We can do stuff once a marker is found
+            console.log("Found");
+        });
+        markerControl.addEventListener("markerLost", (e)=>{
+            // TODO: We can do stuff once a marker is lost
+            console.log("lost");
+        });
+        */
