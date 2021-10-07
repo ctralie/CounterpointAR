@@ -165,7 +165,7 @@ class PositionalAR {
                     z += markerRoots[i].position.z;
                     count += 1;
                 }
-                markersVisible[i]=false;
+                //markersVisible[i]=false;
             }
             console.log(count);
             console.log(markersVisible.length);

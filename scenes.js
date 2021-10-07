@@ -20,21 +20,32 @@ class BasicScene {
         scene.add(light);
 
         // Step 3: Setup geometry
-        let cubeGeometry = new THREE.BoxGeometry(1, 1, 1); 
-        let sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-        let material = new THREE.MeshPhongMaterial({ color: 0xCD853F });
-        let cube = new THREE.Mesh(cubeGeometry, material);
-        this.cube = cube;
-        let sphere = new THREE.Mesh(sphereGeometry, material);
-        this.sphere = sphere;
-        cube.position.y = 0.5;
-        sphere.position.y = 0.5;
-        sphere.position.x = 2;
+
+        let staffGeometry = new THREE.BoxGeometry(0.1,0.01,15);
+        let staffMaterial = new THREE.MeshStandardMaterial({color: 16777215});
+        let staffL0 = new THREE.Mesh(staffGeometry, staffMaterial);
+        this.staffL0 = staffL0;
+        staffL0.position.x = -2;
+        let staffL1 = new THREE.Mesh(staffGeometry, staffMaterial);
+        this.staffL1 = staffL1;
+        staffL1.position.x = -1;
+        let staffL2 = new THREE.Mesh(staffGeometry, staffMaterial);
+        this.staffL2 = staffL2;
+        staffL2.position.x = 0;
+        let staffL3 = new THREE.Mesh(staffGeometry, staffMaterial);
+        this.staffL3 = staffL3;
+        staffL3.position.x = 1;
+        let staffL4 = new THREE.Mesh(staffGeometry, staffMaterial);
+        this.staffL4 = staffL4;
+        staffL4.position.x = 2;
 
         let sceneRoot = new THREE.Group();
         this.sceneRoot = sceneRoot;
-        sceneRoot.add(cube);
-        sceneRoot.add(sphere);
+        sceneRoot.add(staffL0);
+        sceneRoot.add(staffL1);
+        sceneRoot.add(staffL2);
+        sceneRoot.add(staffL3);
+        sceneRoot.add(staffL4);
         this.sceneRoot = sceneRoot;
 
         this.frameNum = 0;
@@ -46,9 +57,9 @@ class BasicScene {
      */
     animate(delta) {
         // Apply a small rotation to one of the cubes
-        this.cube.rotation.y += delta * 0.1;
+        //this.cube.rotation.y += delta * 0.1;
         // Move the sphere up from the ground slowly
-        this.sphere.position.y += delta * 0.05;
+        //this.sphere.position.y += delta * 0.05;
         // Not doing anything with this variable right now, but it could be useful
         this.frameNum += 1;
     }
