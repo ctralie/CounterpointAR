@@ -21,8 +21,9 @@ class BasicScene {
 
         // Step 3: Setup geometry
 
-        let staffGeometry = new THREE.BoxGeometry(0.1,0.01,15);
-        let staffMaterial = new THREE.MeshStandardMaterial({color: 16777215});
+        //let staffGeometry = new THREE.BoxGeometry(0.1,0.01,15);
+        let staffGeometry = new THREE.BoxGeometry(0.1,15, 0.01);
+        let staffMaterial = new THREE.MeshStandardMaterial({color: 2078520});
         let staffL0 = new THREE.Mesh(staffGeometry, staffMaterial);
         this.staffL0 = staffL0;
         staffL0.position.x = -2;
@@ -47,7 +48,6 @@ class BasicScene {
         sceneRoot.add(staffL3);
         sceneRoot.add(staffL4);
         this.sceneRoot = sceneRoot;
-
         this.frameNum = 0;
     }
 

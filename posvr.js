@@ -177,10 +177,12 @@ class PositionalVR {
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
                 that.markersVisible[e.target.i] = true;
+                console.log("marker found");
             });
-            /*markerControl.addEventListener("markerLost", (e)=>{
+            markerControl.addEventListener("markerLost", (e)=>{
                 markersVisible[e.target.i] = false;
-            });*/
+                console.log("marker lost");
+            });
             markersVisible.push(false);
             lastMarkerPos.push([0, 0, 0]);
         }
