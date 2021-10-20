@@ -185,11 +185,21 @@ class PositionalAR {
                     calCoord[0] = sBMark[0]/2;
                     
                     //Y
+                    console.log(mRL[0].position.y);
+                    console.log(mRL[1].position.y);
+                    console.log(mRR[0].position.y);
+                    console.log(mRR[1].position.y);
+                    
                     let yS0 = mRL[1].position.y - mRL[0].position.y;
                     let yS1 = mRR[1].position.y - mRR[0].position.y;
-
+                    
                     sBMark[1] = (Math.abs(yS0)+Math.abs(yS1))/2;
                     calCoord[1] = (sBMark[1]*(this.numMarkersPS-1))/2;
+
+                    console.log(yS0);
+                    console.log(yS1);
+                    //console.log(sBMark[1]);
+                    //console.log(calCoord[1]);
                     
                     //Z
                     let zS0 = mRL[1].position.z - mRL[0].position.z;
@@ -200,9 +210,9 @@ class PositionalAR {
                     
             }
         }
-        this.arGroup.position.x = this.markerRootsL[0].position.x + calCoord[0];
-        this.arGroup.position.y = this.markerRootsL[1].position.y + calCoord[1];
-        this.arGroup.position.z = this.markerRootsL[2].position.z + calCoord[2];
+        this.arGroup.position.x = this.markerRootsL[0].position.x;// + calCoord[0];
+        this.arGroup.position.y = this.markerRootsL[1].position.y;// + calCoord[1];
+        this.arGroup.position.z = this.markerRootsL[2].position.z;// + calCoord[2];
         console.log("did calibrate");
         this.calibrated = true;
     }
@@ -283,10 +293,10 @@ class PositionalAR {
             }
             */
             //count = 0;
-            this.arGroup.position.x = this.markerRootsL[0].position.x + this.calCoord[0];
-            this.arGroup.position.y = this.markerRootsL[1].position.y + this.calCoord[1];
-            this.arGroup.position.z = this.markerRootsL[2].position.z + this.calCoord[2];
-            console.log(this.arGroup.position);
+            this.arGroup.position.x = this.markerRootsL[0].position.x;// + this.calCoord[0];
+            this.arGroup.position.y = this.markerRootsL[1].position.y;// + this.calCoord[1];
+            this.arGroup.position.z = this.markerRootsL[2].position.z;// + this.calCoord[2];
+            //console.log(this.arGroup.position);
         }
         //console.log(this.markerRootsR[2].position.x);
         this.renderer.render(this.scene, this.camera);
