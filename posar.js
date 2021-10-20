@@ -210,9 +210,9 @@ class PositionalAR {
                     
             }
         }
-        this.arGroup.position.x = this.markerRootsL[0].position.x;// + calCoord[0];
-        this.arGroup.position.y = this.markerRootsL[1].position.y;// + calCoord[1];
-        this.arGroup.position.z = this.markerRootsL[2].position.z;// + calCoord[2];
+        this.arGroup.position.x = this.markerRootsL[0].position.x + calCoord[0];
+        this.arGroup.position.y = this.markerRootsL[1].position.y + calCoord[1];
+        this.arGroup.position.z = this.markerRootsL[2].position.z + calCoord[2];
         console.log("did calibrate");
         this.calibrated = true;
     }
@@ -293,9 +293,9 @@ class PositionalAR {
             }
             */
             //count = 0;
-            this.arGroup.position.x = this.markerRootsL[0].position.x;// + this.calCoord[0];
-            this.arGroup.position.y = this.markerRootsL[1].position.y;// + this.calCoord[1];
-            this.arGroup.position.z = this.markerRootsL[2].position.z;// + this.calCoord[2];
+            this.arGroup.position.x = this.markerRootsL[0].position.x + this.calCoord[0];
+            this.arGroup.position.y = this.markerRootsL[1].position.y + this.calCoord[1];
+            this.arGroup.position.z = this.markerRootsL[2].position.z + this.calCoord[2];
             //console.log(this.arGroup.position);
         }
         //console.log(this.markerRootsR[2].position.x);
