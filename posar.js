@@ -178,7 +178,7 @@ class PositionalAR {
                     let rV = mRR[1].position.sub(mRR[0].position);
                     let sLV = (lV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
                     let sRV = (rV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
-                    let sV = (sRV.add(sLV)).divideScalar(2);
+                    let sV = (sRV.sub(sLV)).divideScalar(2);
                     this.sceneOriginVector = sV;
                     console.log(mRL[0].position);
                     console.log(sV);
@@ -187,6 +187,7 @@ class PositionalAR {
                     let bV = (mRR[0].position.sub(mRL[0].position)).divideScalar(2);
                     let tV = (mRR[1].position.sub(mRL[1].position)).divideScalar(2);
                     let xV = (tV.add(bV)).divideScalar(2);
+                    this.xOriginVector = xV;
 
                     this.arGroup.position.x = sV.x;
                     this.arGroup.position.y = sV.y;
@@ -281,7 +282,9 @@ class PositionalAR {
             }
             */
             //count = 0;
-            
+            this.arGroup.position.x = this.markerRootsL[0].position.x + this.sceneOriginVector.x;
+            this.arGroup.position.y = this.markerRootsL[0].position.y + this.sceneOriginVector.y;
+            this.arGroup.position.z = this.markerRootsL[0].position.z + this.sceneOriginVector.z;
             //console.log(this.arGroup.position);
         }
         //console.log(this.markerRootsR[2].position.x);
