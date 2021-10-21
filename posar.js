@@ -182,9 +182,20 @@ class PositionalAR {
                     this.sceneOriginVector = sV;
                     console.log(mRL[0].position);
                     console.log(sV);
-                    this.arGroup.position.x = mRL[0].position.x + sV.x;
+                    
+
+                    let bV = (mRR[0].position.sub(mRL[0].position)).divideScalar(2);
+                    let tV = (mRR[1].position.sub(mRL[1].position)).divideScalar(2);
+                    let xV = (tV.add(bV)).divideScalar(2);
+
+                    this.arGroup.position.x = sV.x;
+                    this.arGroup.position.y = sV.y;
+                    this.arGroup.position.z = sV.z;
+                    /*
+                    this.arGroup.position.x = mRL[0].position.x + xV.x;
                     this.arGroup.position.y = mRL[0].position.y + sV.y;
                     this.arGroup.position.z = mRL[0].position.z + sV.z;
+                    */
                     foundMarkers = true;
             }
         }
