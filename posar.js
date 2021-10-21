@@ -171,22 +171,29 @@ class PositionalAR {
             if(this.markersVisibleL[0] && this.markersVisibleL[1] &&
                 this.markersVisibleR[0] && this.markersVisibleR[1]){
 
-                    console.log(this.markerRootsL[0].position)
 
                     let mRL = this.markerRootsL;
                     let mRR = this.markerRootsR;
-                    
+                    console.log(mRL[0].position);
+                    console.log(mRL[1].position);
+                    console.log(mRR[0].position);
+                    console.log(mRR[1].position);
                     let lV = mRL[1].position.sub(mRL[0].position);
                     let rV = mRR[1].position.sub(mRR[0].position);
+                    console.log(lV);
+                    console.log(rV);
                     let sLV = (lV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
+                    console.log(sLV);
                     let sRV = (rV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
+                    console.log(sRV);
                     sRV.x = Math.abs(sRV.x);
                     let sV = (sLV.add(sRV)).divideScalar(2);
-                    console.log(sV);
                     this.sceneOriginVector = sV;
-                    this.arGroup.position.x = mRL[0].position.x + sV.x;
-                    this.arGroup.position.y = mRL[0].position.y + sV.y;
-                    this.arGroup.position.z = mRL[0].position.z + sV.z;
+                    console.log(mRL[0].position);
+                    console.log(sV);
+                    this.arGroup.position.x = sV.x;
+                    this.arGroup.position.y = sV.y;
+                    this.arGroup.position.z = sV.z;
                     foundMarkers = true;
             }
         }
