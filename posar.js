@@ -28,7 +28,7 @@ class PositionalAR {
         this.debug = debug;
         this.clock = new THREE.Clock();
         this.totalTime = 0;
-        const numMarkersPS = 3;
+        const numMarkersPS = 2;
         this.numMarkersPS = numMarkersPS;
 
 
@@ -167,52 +167,31 @@ class PositionalAR {
     calibratePlacement(){
         let foundMarkers = false;
 
-        let sBMark = [0,0,0];
-        let calCoord = [0,0,0];
-        this.calCoord = calCoord;
-        this.sBMark = sBMark;
-
         while(!foundMarkers){
             if(this.markersVisibleL[0] && this.markersVisibleL[1] &&
                 this.markersVisibleR[0] && this.markersVisibleR[1]){
+
+                    console.log(this.markerRootsL[0].position)
+
                     let mRL = this.markerRootsL;
                     let mRR = this.markerRootsR;
                     
-                    //X
-                    let xS0 = mRR[0].position.x - mRL[0].position.x;
-                    let xS1 = mRR[1].position.x - mRL[1].position.x;
-                    sBMark[0] = (xS0+xS1)/2;
-                    calCoord[0] = sBMark[0]/2;
-                    
-                    //Y
-                    console.log(mRL[0].position.y);
-                    console.log(mRL[1].position.y);
-                    console.log(mRR[0].position.y);
-                    console.log(mRR[1].position.y);
-                    
-                    let yS0 = mRL[1].position.y - mRL[0].position.y;
-                    let yS1 = mRR[1].position.y - mRR[0].position.y;
-                    
-                    sBMark[1] = (Math.abs(yS0)+Math.abs(yS1))/2;
-                    calCoord[1] = (sBMark[1]*(this.numMarkersPS-1))/2;
-
-                    console.log(yS0);
-                    console.log(yS1);
-                    //console.log(sBMark[1]);
-                    //console.log(calCoord[1]);
-                    
-                    //Z
-                    let zS0 = mRL[1].position.z - mRL[0].position.z;
-                    let zS1 = mRR[1].position.z - mRR[0].position.z;
-                    sBMark[2] = (Math.abs(zS0)+Math.abs(zS1))/2;
-                    calCoord[2] = (sBMark[2]*(this.numMarkersPS-1))/2;
+                    let lV = mRL[1].position.sub(mRL[0].position);
+                    let rV = mRR[1].position.sub(mRR[0].position);
+                    let sLV = (lV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
+                    let sRV = (rV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
+                    sRV.x = Math.abs(sRV.x);
+                    let sV = (sLV.add(sRV)).divideScalar(2);
+                    console.log(sV);
+                    this.sceneOriginVector = sV;
+                    this.arGroup.position.x = mRL[0].position.x + sV.x;
+                    this.arGroup.position.y = mRL[0].position.y + sV.y;
+                    this.arGroup.position.z = mRL[0].position.z + sV.z;
                     foundMarkers = true;
-                    
             }
         }
-        this.arGroup.position.x = this.markerRootsL[0].position.x + calCoord[0];
-        this.arGroup.position.y = this.markerRootsL[1].position.y + calCoord[1];
-        this.arGroup.position.z = this.markerRootsL[2].position.z + calCoord[2];
+        //this.arGroup.position = (this.markerRootsL[0].position).add(this.sceneOriginVector);
+        console.log(this.arGroup.position);
         console.log("did calibrate");
         this.calibrated = true;
     }
@@ -293,9 +272,7 @@ class PositionalAR {
             }
             */
             //count = 0;
-            this.arGroup.position.x = this.markerRootsL[0].position.x + this.calCoord[0];
-            this.arGroup.position.y = this.markerRootsL[1].position.y + this.calCoord[1];
-            this.arGroup.position.z = this.markerRootsL[2].position.z + this.calCoord[2];
+            
             //console.log(this.arGroup.position);
         }
         //console.log(this.markerRootsR[2].position.x);
