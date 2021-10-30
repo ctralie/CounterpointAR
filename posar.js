@@ -154,20 +154,22 @@ class PositionalAR {
                         const pos2 = marker2.markerPos;
                         let dx = Math.abs(pos1[0] - pos2[0]);
                         let dy = Math.abs(pos1[1] - pos2[1]);
-                        // Check to see if it's possible to update horizontal interval
-                        if (dx > 0 && dy == 0) {
-                            this.horizNumer += marker1.position.distanceTo(marker2.position)/dx;
-                            this.horizCount++;
-                        }
-                        else if (dx == 0 && dy > 0) {
-                            this.vertNumer += marker1.position.distanceTo(marker2.position)/dy;
-                            this.vertCount++;
+                        let d = marker1.position.distanceTo(marker2.position);
+                        if (d < 100) { // TODO: Figure out why the distance sometimes spikes
+                            // Check to see if it's possible to update horizontal interval
+                            if (dx > 0 && dy == 0) {
+                                this.horizNumer += d/dx;
+                                this.horizCount++;
+                            }
+                            else if (dx == 0 && dy > 0) {
+                                this.vertNumer += d/dy;
+                                this.vertCount++;
+                            }
                         }
                     }
                 }
             }
         }
-        console.log("horizCount = " + this.horizCount + ", vertCount = " + this.vertCount);
     }
 
     /**
