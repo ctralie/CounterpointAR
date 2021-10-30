@@ -1,3 +1,20 @@
+/*const PATTERNS_AR = [
+    {"url":"data/letterA.patt", "pos":[-1, 1]},
+    {"url":"data/letterB.patt", "pos":[-1, 0]},
+    {"url":"data/letterC.patt", "pos":[-1, -1]},
+    {"url":"data/letterD.patt", "pos":[1, 1]},
+    {"url":"data/kanji.patt", "pos":[1, 0]},
+    {"url":"data/letterF.patt", "pos":[1, -1]}
+];*/
+
+
+const PATTERNS_AR = [
+    {"url":"data/letterA.patt", "pos":[-1, -1]},
+    {"url":"data/letterD.patt", "pos":[-1, 0]},
+    {"url":"data/letterB.patt", "pos":[1, -1]},
+    {"url":"data/letterF.patt", "pos":[1, 0]}
+];
+
 class PositionalAR {
     /**
      * 
@@ -14,9 +31,6 @@ class PositionalAR {
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
 
-        this.calibrated = false;
-        this.calArray = [false,false,false,false];
-
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
         if (antialias === undefined) {
@@ -28,24 +42,19 @@ class PositionalAR {
         this.debug = debug;
         this.clock = new THREE.Clock();
         this.totalTime = 0;
-        const numMarkersPS = 2;
-        this.numMarkersPS = numMarkersPS;
-
 
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
         this.renderer = renderer;
         renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-        renderer.setSize( 640, 480 );
+        renderer.setSize(640, 480);
         renderer.domElement.style.position = 'absolute'
         renderer.domElement.style.top = '0px'
         renderer.domElement.style.left = '0px'
         document.body.appendChild( renderer.domElement );
 
         // Finally, setup the AR tracker
-        console.log("prior to tracker");
         this.setupTracker();
-        //this.calibratePlacement();
         this.repaint();
     }
 
@@ -98,124 +107,107 @@ class PositionalAR {
         arToolkitContext.init(function onCompleted(){
             that.camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
         });
-
-        const patternsR = ["data/letterA.patt", "data/letterC.patt", "data/letterF.patt"];
-        const patternsL = ["data/kanji.patt","data/letterB.patt", "data/letterD.patt"];
-        let markerRootsL = [];
-        let markerRootsR = [];
-        let markersVisibleL = [];
-        let markersVisibleR = [];
-        this.markerRootsL = markerRootsL;
-        this.markerRootsR = markerRootsR;
-        this.markersVisibleL = markersVisibleL;
-        this.markersVisibleR = markersVisibleR;
-
-        for (let i = 0; i < patternsL.length; i++) {
+        let markerRoots = [];
+        this.markerRoots = markerRoots;
+        // Variables for running averages of intervals
+        this.horizNumer = 0;
+        this.horizCount = 0;
+        this.vertNumer = 0;
+        this.vertCount = 0;
+        for (let i = 0; i < PATTERNS_AR.length; i++) {
             const markerRoot = new THREE.Group();
+            markerRoot.markerPos = PATTERNS_AR[i].pos;
+            markerRoot.visible = false;
             this.scene.add(markerRoot);
-            markerRootsL.push(markerRoot);
+            markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                type: 'pattern', patternUrl: patternsL[i]
+                type: 'pattern', patternUrl: PATTERNS_AR[i].url
             });
             markerControl.i = i;
-            markersVisibleL.push(false);
             markerControl.addEventListener("markerFound", (e)=>{
-                this.markersVisibleL[e.target.i] = true;
-                console.log("Left marker "+i+" found");
-                if(markerControl.i < 2){
-                    this.calArray[i] = true;
-                }
+                that.markerRoots[e.target.i].visible = true;
+                console.log("Marker "+i+" found");
             });
             markerControl.addEventListener("markerLost", (e)=>{
-                this.markersVisibleL[e.target.i] = false;
-                console.log("Left marker "+i+" lost");
+                this.markerRoots[e.target.i].visible = false;
+                //console.log("Marker "+i+" lost");
             });
-            //markersVisible.push(false);
         }
-
-        for (let i = 0; i < patternsR.length; i++) {
-            const markerRoot = new THREE.Group();
-            this.scene.add(markerRoot);
-            markerRootsR.push(markerRoot);
-            const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                type: 'pattern', patternUrl: patternsR[i]
-            });
-            markerControl.i = i;
-            markersVisibleR.push(false);
-            markerControl.addEventListener("markerFound", (e)=>{
-                this.markersVisibleR[e.target.i] = true;
-                //markersVisibleR[i] = true;
-                console.log("Right marker "+i+" found");
-                if(markerControl.i < 2){
-                    this.calArray[e.target.i+2] = true;
-                }
-            });
-            markerControl.addEventListener("markerLost", (e)=>{
-                this.markersVisibleR[e.target.i] = false;
-                //markersVisibleR[i] = false;
-                console.log("Right marker "+i+" lost");
-            });
-            //markersVisible.push(false);
-        }
-
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.scene.add(this.arGroup);
     }   
         
-
-    calibratePlacement(){
-        let foundMarkers = false;
-
-        while(!foundMarkers){
-            if(this.markersVisibleL[0] && this.markersVisibleL[1] &&
-                this.markersVisibleR[0] && this.markersVisibleR[1]){
-
-
-                    let mRL = this.markerRootsL;
-                    let mRR = this.markerRootsR;
-                    let lV = mRL[1].position.sub(mRL[0].position);
-                    let rV = mRR[1].position.sub(mRR[0].position);
-                    let sLV = (lV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
-                    let sRV = (rV.multiplyScalar(this.numMarkersPS-1)).divideScalar(2);
-                    let sV = (sRV.sub(sLV)).divideScalar(2);
-                    this.sceneOriginVector = sV;
-                    console.log(mRL[0].position);
-                    console.log(sV);
-                    
-
-                    let bV = (mRR[0].position.sub(mRL[0].position)).divideScalar(2);
-                    let tV = (mRR[1].position.sub(mRL[1].position)).divideScalar(2);
-                    let xV = (tV.add(bV)).divideScalar(2);
-                    this.xOriginVector = xV;
-
-                    this.arGroup.position.x = sV.x;
-                    this.arGroup.position.y = sV.y;
-                    this.arGroup.position.z = sV.z;
-                    /*
-                    this.arGroup.position.x = mRL[0].position.x + xV.x;
-                    this.arGroup.position.y = mRL[0].position.y + sV.y;
-                    this.arGroup.position.z = mRL[0].position.z + sV.z;
-                    */
-                    foundMarkers = true;
+    /**
+     * Update a running average of the horizontal interval and vertical
+     * interval between adjacent markers based on which markers are visible
+     */
+    updateCalibration(){
+        // Check all pairs of markers against each other
+        for (let i = 0; i < this.markerRoots.length; i++) {
+            const marker1 = this.markerRoots[i];
+            if (marker1.visible) {
+                const pos1 = marker1.markerPos;
+                for (let j = i+1; j < this.markerRoots.length; j++) {
+                    const marker2 = this.markerRoots[j];
+                    if (marker2.visible) {
+                        const pos2 = marker2.markerPos;
+                        let dx = Math.abs(pos1[0] - pos2[0]);
+                        let dy = Math.abs(pos1[1] - pos2[1]);
+                        // Check to see if it's possible to update horizontal interval
+                        if (dx > 0 && dy == 0) {
+                            this.horizNumer += marker1.position.distanceTo(marker2.position)/dx;
+                            this.horizCount++;
+                        }
+                        else if (dx == 0 && dy > 0) {
+                            this.vertNumer += marker1.position.distanceTo(marker2.position)/dy;
+                            this.vertCount++;
+                        }
+                    }
+                }
             }
         }
-        //this.arGroup.position = (this.markerRootsL[0].position).add(this.sceneOriginVector);
-        console.log(this.arGroup.position);
-        console.log("did calibrate");
-        this.calibrated = true;
+        console.log("horizCount = " + this.horizCount + ", vertCount = " + this.vertCount);
     }
 
-    isCalibratable(){
-        let count = 0;
-        for(let i = 0; i < 4; i++){
-            if(this.calArray[i]){
-                count++;
+    /**
+     * Come up with the position of the root of the scene based on
+     * which markers are visible 
+     */
+    placeSceneRoot() {
+        // Make sure we have enough calibration info to place things
+        if (this.horizCount > 0 && this.vertCount > 0) {
+            let h = this.horizNumer/this.horizCount; // Horizontal interval
+            let v = this.vertNumer/this.vertCount; // Vertical interval
+            console.log("h = " + h + ", v = " + v);
+            let numVisible = 0;
+            let avgPos = new THREE.Vector3();
+            let avgQuat = null;
+            for (let i = 0; i < this.markerRoots.length; i++) {
+                const marker = this.markerRoots[i];
+                if (marker.visible) {
+                    numVisible++;
+                    // Devise vector from this marker to the center in 
+                    // world coordinates.  This is the negative of the 
+                    // relative position of the marker since it points towards
+                    // the center
+                    let pos = new THREE.Vector3(-marker.markerPos[0]*h, 0, -marker.markerPos[1]*v);
+                    pos = marker.localToWorld(pos);
+                    avgPos.add(pos);
+
+                    // For now just make the orientation be the orientation of the last
+                    // marker seen
+                    avgQuat = marker.quaternion;
+                    marker.visible = false; // Set to be not visible again so it will be properly updated on the next frame
+                }
             }
-        }
-        console.log(count);
-        if(count == 4){
-            this.calibratePlacement();
+            if (numVisible > 0) {
+                avgPos.divideScalar(numVisible);
+                this.arGroup.position.x = avgPos.x;
+                this.arGroup.position.y = avgPos.y;
+                this.arGroup.position.z = avgPos.z;
+                this.arGroup.setRotationFromQuaternion(avgQuat);
+            }
         }
     }
         
@@ -236,97 +228,11 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
+        this.updateCalibration();
+        this.placeSceneRoot();
 
-        if (this.keyboardDebugging) {
-            const K = this.keyboard;
-            if (K.movelr != 0 || K.moveud != 0 || K.movefb != 0) {
-                this.markerRoot.position.x -= K.movelr*K.walkspeed*delta/1000;
-                this.markerRoot.position.y -= K.moveud*K.walkspeed*delta/1000;
-                this.markerRoot.position.z += K.movefb*K.walkspeed*delta/1000;
-            }
-        }else if(!this.calibrated){
-            this.isCalibratable();
-        }else{
-            /*
-            let markerRootsL = this.markerRootsL;
-            let markerRootsR = this.markerRootsR;
-            let markersVisibleL = this.markersVisibleL;
-            let markersVisibleR = this.markersVisibleR;
-            let x = 0;
-            let y = 0;
-            let z = 0;
-            let count = 0;
-            for(let i = 0; i < markerRootsL.length; i++){
-                if(markersVisibleL[i]){
-                    x += markerRootsL[i].position.x;
-                    y += markerRootsL[i].position.y;
-                    z += markerRootsL[i].position.z;
-                    count += 1;
-                }
-                if(markersVisibleR[i]){
-                    x += markerRootsR[i].position.x;
-                    y += markerRootsR[i].position.y;
-                    z += markerRootsR[i].position.z;
-                    count += 1;
-                }
-                //markersVisible[i]=false;
-            }
-            
-            if(count <= 0){
-                this.arGroup.visible = false;
-            }else{
-                this.arGroup.visible = true;
-                this.arGroup.position.x = x/count;
-                this.arGroup.position.y = y/count;
-                this.arGroup.position.z = z/count;
-            }
-            */
-            //count = 0;
-            this.arGroup.position.x = this.markerRootsL[0].position.x + this.sceneOriginVector.x;
-            this.arGroup.position.y = this.markerRootsL[0].position.y + this.sceneOriginVector.y;
-            this.arGroup.position.z = this.markerRootsL[0].position.z + this.sceneOriginVector.z;
-            //console.log(this.arGroup.position);
-        }
-        //console.log(this.markerRootsR[2].position.x);
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
-
-        /*
-        x -1.68 1.8
-        y -1.37 1.45
-        z 
-        */
     }
 
 }
-
-//TODO: incorporate lost marker feature
-
-/*
-        const markerRoot = new THREE.Group();
-        this.markerRoot = markerRoot;
-        this.scene.add(markerRoot);
-
-        let markerParameters = {
-            type: "pattern",
-            patternUrl: "data/letterA.patt",
-            // turn on/off camera smoothing
-            smooth: true,
-            // number of matrices to smooth tracking over, more = smoother but slower follow
-            smoothCount: 5,
-            // distance tolerance for smoothing, if smoothThreshold # of matrices are under tolerance, tracking will stay still
-            smoothTolerance: 0.01,
-            // threshold for smoothing, will keep still unless enough matrices are over tolerance
-            smoothThreshold: 2
-        };
-
-        const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, markerParameters);
-        markerControl.addEventListener("markerFound", (e)=>{
-            // TODO: We can do stuff once a marker is found
-            console.log("Found");
-        });
-        markerControl.addEventListener("markerLost", (e)=>{
-            // TODO: We can do stuff once a marker is lost
-            console.log("lost");
-        });
-        */
