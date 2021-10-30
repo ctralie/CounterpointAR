@@ -1,19 +1,21 @@
-/*const PATTERNS_AR = [
+const PATTERNS_AR = [
     {"url":"data/letterA.patt", "pos":[-1, 1]},
     {"url":"data/letterB.patt", "pos":[-1, 0]},
     {"url":"data/letterC.patt", "pos":[-1, -1]},
     {"url":"data/letterD.patt", "pos":[1, 1]},
     {"url":"data/kanji.patt", "pos":[1, 0]},
     {"url":"data/letterF.patt", "pos":[1, -1]}
-];*/
+];
 
 
+/*
+// For debugging on PC
 const PATTERNS_AR = [
     {"url":"data/letterA.patt", "pos":[-1, -1]},
     {"url":"data/letterD.patt", "pos":[-1, 0]},
     {"url":"data/letterB.patt", "pos":[1, -1]},
     {"url":"data/letterF.patt", "pos":[1, 0]}
-];
+];*/
 
 class PositionalAR {
     /**
@@ -126,7 +128,7 @@ class PositionalAR {
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
                 that.markerRoots[e.target.i].visible = true;
-                console.log("Marker "+i+" found");
+                //console.log("Marker "+i+" found");
             });
             markerControl.addEventListener("markerLost", (e)=>{
                 this.markerRoots[e.target.i].visible = false;
@@ -181,10 +183,9 @@ class PositionalAR {
         if (this.horizCount > 0 && this.vertCount > 0) {
             let h = this.horizNumer/this.horizCount; // Horizontal interval
             let v = this.vertNumer/this.vertCount; // Vertical interval
-            console.log("h = " + h + ", v = " + v);
             let numVisible = 0;
             let avgPos = new THREE.Vector3();
-            let avgQuat = null;
+            let quats = [];
             for (let i = 0; i < this.markerRoots.length; i++) {
                 const marker = this.markerRoots[i];
                 if (marker.visible) {
@@ -197,17 +198,22 @@ class PositionalAR {
                     pos = marker.localToWorld(pos);
                     avgPos.add(pos);
 
-                    // For now just make the orientation be the orientation of the last
-                    // marker seen
-                    avgQuat = marker.quaternion;
+                    quats.push(marker.quaternion);
                     marker.visible = false; // Set to be not visible again so it will be properly updated on the next frame
                 }
             }
             if (numVisible > 0) {
+                // Set marker root position to be average marker position
                 avgPos.divideScalar(numVisible);
                 this.arGroup.position.x = avgPos.x;
                 this.arGroup.position.y = avgPos.y;
                 this.arGroup.position.z = avgPos.z;
+                // Set marker root orientation to be the SLERP averaged
+                // quaternions of each marker
+                const avgQuat = quats[0].clone();
+                for (let i = 1; i < quats.length; i++) {
+                    avgQuat.slerp(quats[i], 1/(1+i));
+                }
                 this.arGroup.setRotationFromQuaternion(avgQuat);
             }
         }
