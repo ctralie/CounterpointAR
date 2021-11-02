@@ -1,21 +1,21 @@
-const PATTERNS_AR = [
+/*const PATTERNS_AR = [
     {"url":"data/letterA.patt", "pos":[-1, 1]},
     {"url":"data/letterB.patt", "pos":[-1, 0]},
     {"url":"data/letterC.patt", "pos":[-1, -1]},
     {"url":"data/letterD.patt", "pos":[1, 1]},
     {"url":"data/kanji.patt", "pos":[1, 0]},
     {"url":"data/letterF.patt", "pos":[1, -1]}
-];
+];*/
 
 
-/*
+
 // For debugging on PC
 const PATTERNS_AR = [
     {"url":"data/letterA.patt", "pos":[-1, -1]},
     {"url":"data/letterD.patt", "pos":[-1, 0]},
     {"url":"data/letterB.patt", "pos":[1, -1]},
     {"url":"data/letterF.patt", "pos":[1, 0]}
-];*/
+];
 
 class PositionalAR {
     /**
@@ -24,9 +24,10 @@ class PositionalAR {
      *                     as well as a method animate(dt)
      * @param {boolean} antialias Whether or not to do antialiasing (true by default, but can be turned off
      *                            for performance)
+     * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, antialias, debug) {
+    constructor(sceneObj, antialias, medWin, debug) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
@@ -38,9 +39,13 @@ class PositionalAR {
         if (antialias === undefined) {
             antialias = true;
         }
+        if (medWin === undefined) {
+            medWin = 3;
+        }
         if (debug === undefined) {
             debug = false;
         }
+        this.medWin = medWin;
         this.debug = debug;
         this.clock = new THREE.Clock();
         this.totalTime = 0;
@@ -118,8 +123,9 @@ class PositionalAR {
         this.vertCount = 0;
         for (let i = 0; i < PATTERNS_AR.length; i++) {
             const markerRoot = new THREE.Group();
-            markerRoot.markerPos = PATTERNS_AR[i].pos;
             markerRoot.visible = false;
+            markerRoot.markerPos = PATTERNS_AR[i].pos;
+            markerRoot.posHistory = [];
             this.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
@@ -139,7 +145,56 @@ class PositionalAR {
         this.arGroup.add(this.sceneRoot);
         this.scene.add(this.arGroup);
     }   
-        
+    
+    /**
+     * Do a median filter on the last "medWin" marker positions.
+     * If there aren't enough of these positions available, then 
+     * wait until there are
+     */
+    medianFilterMarkers() {
+        for (let i = 0; i < this.markerRoots.length; i++) {
+            const marker = this.markerRoots[i];
+            if (marker.visible) {
+                marker.posHistory.push(marker.position.clone());
+            }
+            else {
+                marker.posHistory.push(null);
+            }
+            if (marker.visible && marker.posHistory.length > this.medWin) {
+                // Setup an array of the last medWin positions
+                let pos = [[], [], []];
+                let enough = true;
+                let k = marker.posHistory.length-this.medWin;
+                while (k < marker.posHistory.length && enough) {
+                    if (marker.posHistory[k] === null) {
+                        enough = false;
+                    }
+                    else {
+                        pos[0].push(marker.posHistory[k].x);
+                        pos[1].push(marker.posHistory[k].y);
+                        pos[2].push(marker.posHistory[k].z);
+                    }
+                    k++;
+                }
+                // Perform a median of the last medWin positions
+                // if there were enough of them
+                if (enough) {
+                    for (let k = 0; k < 3; k++) {
+                        pos[k].sort((a, b) => a-b);
+                        pos[k] = pos[k][Math.floor(pos[k].length/2)];
+                    }
+                    marker.position.x = pos[0];
+                    marker.position.y = pos[1];
+                    marker.position.z = pos[2];
+                }
+                else {
+                    marker.visible = false; // Don't use this marker this time
+                }
+            }
+        }
+    }
+    
+
     /**
      * Update a running average of the horizontal interval and vertical
      * interval between adjacent markers based on which markers are visible
@@ -236,6 +291,7 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
+        this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
 
