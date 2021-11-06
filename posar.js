@@ -1,10 +1,11 @@
 const PATTERNS_AR = [
-    {"url":"data/letterA.patt", "pos":[-1, 1]},
-    {"url":"data/letterB.patt", "pos":[-1, 0]},
-    {"url":"data/letterC.patt", "pos":[-1, -1]},
-    {"url":"data/letterD.patt", "pos":[1, 1]},
-    {"url":"data/kanji.patt", "pos":[1, 0]},
-    {"url":"data/letterF.patt", "pos":[1, -1]}
+    {"url":"data/pattern-0.patt", "pos":[-1, 1]},
+    {"url":"data/pattern-1.patt", "pos":[-1, 0]},
+    {"url":"data/pattern-2.patt", "pos":[-1, -1]},
+    {"url":"data/pattern-9.patt", "pos":[1, 1]},
+    {"url":"data/pattern-10.patt", "pos":[1, 0]},
+    {"url":"data/pattern-11.patt", "pos":[1, -1]}
+    //{"url":"data/pattern-.patt", }
 ];
 
 
