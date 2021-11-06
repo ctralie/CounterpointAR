@@ -2,9 +2,9 @@ const PATTERNS_AR = [
     {"url":"data/pattern-0.patt", "pos":[-1, 1]},
     {"url":"data/pattern-1.patt", "pos":[-1, 0]},
     {"url":"data/pattern-2.patt", "pos":[-1, -1]},
-    {"url":"data/pattern-9.patt", "pos":[1, 1]},
-    {"url":"data/pattern-10.patt", "pos":[1, 0]},
-    {"url":"data/pattern-11.patt", "pos":[1, -1]}
+    {"url":"data/pattern-5.patt", "pos":[1, 1]},
+    {"url":"data/pattern-4.patt", "pos":[1, 0]},
+    {"url":"data/pattern-3.patt", "pos":[1, -1]}
     //{"url":"data/pattern-.patt", }
 ];
 
@@ -108,7 +108,7 @@ class PositionalAR {
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
             detectionMode: 'mono_and_matrix',
-            matrixCodeType: '5x5'
+            matrixCodeType: '4x4'
         });
         this.arToolkitContext = arToolkitContext;
 
