@@ -107,8 +107,8 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            detectionMode: 'mono_and_matrix',
-            matrixCodeType: '4x4_BCH_13_9_3'
+            detectionMode: 'mono'
+            //matrixCodeType: '4x4_BCH_13_9_3'
         });
         this.arToolkitContext = arToolkitContext;
 
@@ -136,7 +136,7 @@ class PositionalAR {
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
                 that.markerRoots[e.target.i].visible = true;
-                //console.log("Marker "+i+" found");
+                console.log("Marker "+i+" found");
             });
             markerControl.addEventListener("markerLost", (e)=>{
                 this.markerRoots[e.target.i].visible = false;
