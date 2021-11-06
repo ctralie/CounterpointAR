@@ -107,8 +107,8 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            detectionMode: 'mono_and_matrix',
-            matrixCodeType: '4x4'
+            detectionMode: 'mono',
+            matrixCodeType: '4x4_BCH_13_5_5'
         });
         this.arToolkitContext = arToolkitContext;
 
