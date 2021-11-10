@@ -40,7 +40,7 @@ class BasicScene {
 
         let fullStaff = new THREE.Group();
         for(let i = 0; i < staffPieces.length; i++){
-            staffPieces[i].position.x = -2;
+            staffPieces[i].position.x = 0;
             staffPieces[i].position.z = i*2;
             fullStaff.add(staffPieces[i]);
         }
