@@ -29,28 +29,29 @@ class BasicScene {
         let bMat = new THREE.MeshStandardMaterial({color: 0x0000ff});
         let pMat = new THREE.MeshStandardMaterial({color: 0x080080});
 
-        let staffPieces = [];
-        this.staffPieces = staffPieces;
-        staffPieces.push(new THREE.Mesh(partialStaff, rMat));
-        staffPieces.push(new THREE.Mesh(partialStaff, oMat));
-        staffPieces.push(new THREE.Mesh(partialStaff, yMat))
-        staffPieces.push(new THREE.Mesh(partialStaff, gMat));
-        staffPieces.push(new THREE.Mesh(partialStaff, bMat));
-        staffPieces.push(new THREE.Mesh(partialStaff, pMat));
-
-        let fullStaff = new THREE.Group();
-        for(let i = 0; i < staffPieces.length; i++){
-            staffPieces[i].position.x = 0;
-            staffPieces[i].position.z = i*2;
-            fullStaff.add(staffPieces[i]);
-        }
         let sceneRoot = new THREE.Group();
         this.sceneRoot = sceneRoot;
-        for(let i = 0; i < 5; i++){
-            let fS = fullStaff;
-            fS.position.x = fS.position.x + (1*i);
-            sceneRoot.add(fS);
+
+        for (let column = 0; column < 5; column++) {
+            let staffPieces = [];
+            this.staffPieces = staffPieces;
+            staffPieces.push(new THREE.Mesh(partialStaff, rMat));
+            staffPieces.push(new THREE.Mesh(partialStaff, oMat));
+            staffPieces.push(new THREE.Mesh(partialStaff, yMat))
+            staffPieces.push(new THREE.Mesh(partialStaff, gMat));
+            staffPieces.push(new THREE.Mesh(partialStaff, bMat));
+            staffPieces.push(new THREE.Mesh(partialStaff, pMat));
+    
+            let fullStaff = new THREE.Group();
+            for(let i = 0; i < staffPieces.length; i++){
+                staffPieces[i].position.x = 0;
+                staffPieces[i].position.z = i*2;
+                fullStaff.add(staffPieces[i]);
+            }
+            fullStaff.position.x += (1*column);
+            sceneRoot.add(fullStaff);
         }
+        
         this.sceneRoot = sceneRoot;
         this.frameNum = 0;
     }
