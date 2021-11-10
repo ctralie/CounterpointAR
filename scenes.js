@@ -21,32 +21,34 @@ class BasicScene {
 
         // Step 3: Setup geometry
 
-        let staffGeometry = new THREE.BoxGeometry(0.1,0.01,15);
-        //let staffGeometry = new THREE.BoxGeometry(0.1,15, 0.01);
-        let staffMaterial = new THREE.MeshStandardMaterial({color: 0x00ff00});
-        let staffL0 = new THREE.Mesh(staffGeometry, staffMaterial);
-        this.staffL0 = staffL0;
-        staffL0.position.x = -2;
-        let staffL1 = new THREE.Mesh(staffGeometry, staffMaterial);
-        this.staffL1 = staffL1;
-        staffL1.position.x = -1;
-        let staffL2 = new THREE.Mesh(staffGeometry, staffMaterial);
-        this.staffL2 = staffL2;
-        staffL2.position.x = 0;
-        let staffL3 = new THREE.Mesh(staffGeometry, staffMaterial);
-        this.staffL3 = staffL3;
-        staffL3.position.x = 1;
-        let staffL4 = new THREE.Mesh(staffGeometry, staffMaterial);
-        this.staffL4 = staffL4;
-        staffL4.position.x = 2;
+        let partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
+        let rMat = new THREE.MeshStandardMaterial({color: 0xff0000});
+        let oMat = new THREE.MeshStandardMaterial({color: 0xffA500});
+        let yMat = new THREE.MeshStandardMaterial({color: 0xffff00});
+        let gMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
+        let bMat = new THREE.MeshStandardMaterial({color: 0x0000ff});
+        let pMat = new THREE.MeshStandardMaterial({color: 0x080080});
 
+        let staffPieces = [];
+        staffPieces.push(new THREE.Mesh(partialStaff, rMat));
+        staffPieces.push(new THREE.Mesh(partialStaff, oMat));
+        staffPieces.push(new THREE.Mesh(partialStaff, yMat))
+        staffPieces.push(new THREE.Mesh(partialStaff, gMat));
+        staffPieces.push(new THREE.Mesh(partialStaff, bMat));
+        staffPieces.push(new THREE.Mesh(partialStaff, pMat));
+
+        let fullStaff = new THREE.Group();
+        for(let i = 0; i < staffPieces.length; i++){
+            staffPieces[i].position.z = i*2;
+            fullStaff.add(staffPieces[i]);
+        }
+        fullStaff.position.x = -2;
         let sceneRoot = new THREE.Group();
-        this.sceneRoot = sceneRoot;
-        sceneRoot.add(staffL0);
-        sceneRoot.add(staffL1);
-        sceneRoot.add(staffL2);
-        sceneRoot.add(staffL3);
-        sceneRoot.add(staffL4);
+        for(let i = 0; i < 5; i++){
+            let fS = fullStaff;
+            fS.position.x = fS.position.x + (1*i);
+            sceneRoot.add(fS);
+        }
         this.sceneRoot = sceneRoot;
         this.frameNum = 0;
     }

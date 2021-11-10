@@ -308,7 +308,6 @@ class PositionalAR {
         this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
-
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
