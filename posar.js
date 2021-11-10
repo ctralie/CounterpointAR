@@ -4,19 +4,19 @@ https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/gen
 The image size set to 2500px, pattern ratio set to .9
 */
 const PATTERNS_AR = [
-    {"url":"data/pattern-0.patt", "pos":[-1, 0]},
-    {"url":"data/pattern-1.patt", "pos":[-1, 1]},
-    {"url":"data/pattern-2.patt", "pos":[-1, 2]},
-    {"url":"data/pattern-3.patt", "pos":[-1, 3]},
-    {"url":"data/pattern-4.patt", "pos":[-1, 4]},
-    {"url":"data/pattern-5.patt", "pos":[-1, 5]},
+    {"url":"data/pattern-0.patt", "pos":[-1, -1]},
+    {"url":"data/pattern-1.patt", "pos":[-1, 0]},
+    {"url":"data/pattern-2.patt", "pos":[-1, 1]},
+    {"url":"data/pattern-3.patt", "pos":[-1, 2]},
+    {"url":"data/pattern-4.patt", "pos":[-1, 3]},
+    {"url":"data/pattern-5.patt", "pos":[-1, 4]},
 
-    {"url":"data/pattern-6.patt", "pos":[1, 0]},
-    {"url":"data/pattern-7.patt", "pos":[1, 1]},
-    {"url":"data/pattern-8.patt", "pos":[1, 2]},
-    {"url":"data/pattern-9.patt", "pos":[1, 3]},
-    {"url":"data/pattern-10.patt", "pos":[1, 4]},
-    {"url":"data/pattern-11.patt", "pos":[1, 5]},
+    {"url":"data/pattern-6.patt", "pos":[1, -1]},
+    {"url":"data/pattern-7.patt", "pos":[1, 0]},
+    {"url":"data/pattern-8.patt", "pos":[1, 1]},
+    {"url":"data/pattern-9.patt", "pos":[1, 2]},
+    {"url":"data/pattern-10.patt", "pos":[1, 3]},
+    {"url":"data/pattern-11.patt", "pos":[1, 4]},
 ];
 
 
