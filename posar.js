@@ -305,9 +305,12 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
-        this.medianFilterMarkers();
-        this.updateCalibration();
-        this.placeSceneRoot();
+        this.arGroup.position.x = 0;
+        this.arGroup.position.y = 0;
+        this.arGroup.position.z = 0;
+        //this.medianFilterMarkers();
+        //this.updateCalibration();
+        //this.placeSceneRoot();
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
