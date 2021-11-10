@@ -30,6 +30,7 @@ class BasicScene {
         let pMat = new THREE.MeshStandardMaterial({color: 0x080080});
 
         let staffPieces = [];
+        this.staffPieces = staffPieces;
         staffPieces.push(new THREE.Mesh(partialStaff, rMat));
         staffPieces.push(new THREE.Mesh(partialStaff, oMat));
         staffPieces.push(new THREE.Mesh(partialStaff, yMat))
@@ -44,6 +45,7 @@ class BasicScene {
         }
         fullStaff.position.x = -2;
         let sceneRoot = new THREE.Group();
+        this.sceneRoot = sceneRoot;
         for(let i = 0; i < 5; i++){
             let fS = fullStaff;
             fS.position.x = fS.position.x + (1*i);
