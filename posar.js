@@ -3,6 +3,7 @@ Markers were made using this:
 https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/generator.html
 The image size set to 2500px, pattern ratio set to .9
 */
+/*
 const PATTERNS_AR = [
     {"url":"data/pattern-0.patt", "pos":[-1, -1]},
     {"url":"data/pattern-1.patt", "pos":[-1, 0]},
@@ -18,16 +19,18 @@ const PATTERNS_AR = [
     {"url":"data/pattern-10.patt", "pos":[1, 3]},
     {"url":"data/pattern-11.patt", "pos":[1, 4]},
 ];
-
+*/
 
 
 // For debugging on PC
-/*const PATTERNS_AR = [
-    {"url":"data/letterA.patt", "pos":[-1, -1]},
-    {"url":"data/letterD.patt", "pos":[-1, 0]},
-    {"url":"data/letterB.patt", "pos":[1, -1]},
-    {"url":"data/letterF.patt", "pos":[1, 0]}
-];*/
+const PATTERNS_AR = [
+    {"url":"data/kanji.patt", "pos":[-1, 0]},
+    {"url":"data/letterA.patt", "pos":[-1, 1]},
+    {"url":"data/letterB.patt", "pos":[-1, 2]},
+    {"url":"data/letterC.patt", "pos":[1, 0]},
+    {"url":"data/letterD.patt", "pos":[1, 1]},
+    {"url":"data/letterF.patt", "pos":[-1, 2]},
+];
 
 class PositionalAR {
     /**
@@ -118,9 +121,10 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            detectionMode: 'mono_and_matrix',
-            matrixCodeType: '4x4_BCH_13_9_3',
-            patternRatio: 0.9
+            detectionMode: 'mono'
+            //detectionMode: 'mono_and_matrix',
+            //matrixCodeType: '4x4_BCH_13_9_3',
+            //patternRatio: 0.9
         });
         this.arToolkitContext = arToolkitContext;
 
@@ -305,9 +309,6 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
-        //this.arGroup.position.x = 0;
-        //this.arGroup.position.y = 0;
-        //this.arGroup.position.z = 0;
         this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
