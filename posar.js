@@ -24,12 +24,12 @@ const PATTERNS_AR = [
 
 // For debugging on PC
 const PATTERNS_AR = [
-    {"url":"data/kanji.patt", "pos":[-1, 0]},
-    {"url":"data/letterA.patt", "pos":[-1, 1]},
-    {"url":"data/letterB.patt", "pos":[-1, 2]},
-    {"url":"data/letterC.patt", "pos":[1, 0]},
-    {"url":"data/letterD.patt", "pos":[1, 1]},
-    {"url":"data/letterF.patt", "pos":[-1, 2]},
+    {"url":"data/kanji.patt", "pos":[-1, -1]},
+    {"url":"data/letterA.patt", "pos":[-1, 0]},
+    {"url":"data/letterB.patt", "pos":[-1, 1]},
+    {"url":"data/letterC.patt", "pos":[1, -1]},
+    {"url":"data/letterD.patt", "pos":[1, 0]},
+    {"url":"data/letterF.patt", "pos":[-1, 1]},
 ];
 
 class PositionalAR {
