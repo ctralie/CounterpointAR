@@ -149,7 +149,7 @@ class PositionalAR {
             this.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.6,
+                type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.3,
                 smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
             });
             markerControl.i = i;
