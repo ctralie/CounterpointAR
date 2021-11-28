@@ -3,6 +3,8 @@ Markers were made using this:
 https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/generator.html
 The image size set to 2500px, pattern ratio set to .9
 */
+
+
 /*
 const PATTERNS_AR = [
     {"url":"data/pattern-0.patt", "pos":[-1, -1]},
@@ -147,7 +149,8 @@ class PositionalAR {
             this.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                type: 'pattern', patternUrl: PATTERNS_AR[i].url
+                type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.6,
+                smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
             });
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
@@ -309,7 +312,7 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
-        this.medianFilterMarkers();
+        //this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
         this.renderer.render(this.scene, this.camera);
