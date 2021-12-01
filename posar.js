@@ -123,7 +123,8 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            detectionMode: 'mono'
+            detectionMode: 'mono',
+            patternRatio: 0.35
             //detectionMode: 'mono_and_matrix',
             //matrixCodeType: '4x4_BCH_13_9_3',
             //patternRatio: 0.9
@@ -149,7 +150,7 @@ class PositionalAR {
             this.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.3,
+                size: 0.16, type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.3,
                 smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
             });
             markerControl.i = i;
