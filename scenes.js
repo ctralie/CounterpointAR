@@ -21,7 +21,7 @@ class BasicScene {
 
         // Step 3: Setup geometry
 
-        let partialStaff = new THREE.BoxGeometry(0.5,0.01,10);
+        let partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
         let rMat = new THREE.MeshStandardMaterial({color: 0xff0000});
         let oMat = new THREE.MeshStandardMaterial({color: 0xffA500});
         let yMat = new THREE.MeshStandardMaterial({color: 0xffff00});
@@ -44,11 +44,11 @@ class BasicScene {
     
             let fullStaff = new THREE.Group();
             for(let i = 0; i < staffPieces.length; i++){
-                staffPieces[i].position.x = -10;
-                staffPieces[i].position.z = i*10;
+                staffPieces[i].position.x = -2;
+                staffPieces[i].position.z = i*2;
                 fullStaff.add(staffPieces[i]);
             }
-            fullStaff.position.x += (5*column);
+            fullStaff.position.x += (1*column);
             sceneRoot.add(fullStaff);
         }
         
