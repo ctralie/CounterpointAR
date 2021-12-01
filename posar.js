@@ -149,8 +149,9 @@ class PositionalAR {
             this.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                size: 0.16, type: 'pattern', patternUrl: PATTERNS_AR[i].url, minConfidence: 0.3,
-                smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
+                size: 0.16, type: 'pattern', patternUrl: PATTERNS_AR[i].url, smooth: true
+                //minConfidence: 0.3,
+                //smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
             });
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
