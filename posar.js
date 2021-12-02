@@ -26,12 +26,12 @@ const PATTERNS_AR = [
 
 // For debugging on PC
 const PATTERNS_AR = [
-    {"url":"data/kanji.patt", "pos":[-1, 0]},
-    {"url":"data/letterA.patt", "pos":[-1, 1]},
-    {"url":"data/letterB.patt", "pos":[-1, 2]},
-    {"url":"data/letterC.patt", "pos":[1, 0]},
-    {"url":"data/letterD.patt", "pos":[1, 1]},
-    {"url":"data/letterF.patt", "pos":[1, 2]},
+    {"url":"data/kanji.patt", "pos":[1, 0]},
+    {"url":"data/letterA.patt", "pos":[1, 1]},
+    {"url":"data/letterB.patt", "pos":[1, 2]},
+    {"url":"data/letterC.patt", "pos":[-1, 0]},
+    {"url":"data/letterD.patt", "pos":[-1, 1]},
+    {"url":"data/letterF.patt", "pos":[-1, 2]},
 ];
 
 class PositionalAR {
@@ -267,6 +267,8 @@ class PositionalAR {
         if (this.horizCount > 0 && this.vertCount > 0) {
             let h = this.horizNumer/this.horizCount; // Horizontal interval
             let v = this.vertNumer/this.vertCount; // Vertical interval
+            console.log(h);
+            console.log(v);
             let numVisible = 0;
             let avgPos = new THREE.Vector3();
             let quats = [];
