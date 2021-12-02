@@ -26,12 +26,12 @@ const PATTERNS_AR = [
 
 // For debugging on PC
 const PATTERNS_AR = [
-    {"url":"data/kanji.patt", "pos":[-1, -1]},
-    {"url":"data/letterA.patt", "pos":[-1, 0]},
-    {"url":"data/letterB.patt", "pos":[-1, 1]},
-    {"url":"data/letterC.patt", "pos":[1, -1]},
-    {"url":"data/letterD.patt", "pos":[1, 0]},
-    {"url":"data/letterF.patt", "pos":[-1, 1]},
+    {"url":"data/kanji.patt", "pos":[-1, 0]},
+    {"url":"data/letterA.patt", "pos":[-1, 1]},
+    {"url":"data/letterB.patt", "pos":[-1, 2]},
+    {"url":"data/letterC.patt", "pos":[1, 0]},
+    {"url":"data/letterD.patt", "pos":[1, 1]},
+    {"url":"data/letterF.patt", "pos":[1, 2]},
 ];
 
 class PositionalAR {
@@ -51,6 +51,8 @@ class PositionalAR {
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
 
+        this.runTime = 1;
+
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
         if (antialias === undefined) {
@@ -67,6 +69,11 @@ class PositionalAR {
         this.clock = new THREE.Clock();
         this.totalTime = 0;
 
+        //setup ghost note
+        let gns = new THREE.CircleGeometry(0.5, 10);
+        let gnm = new THREE.MeshStandardMaterial({color: 0xffffff});
+        let note = new THREE.Group();
+        note.add(new THREE.Mesh(gns,gnm));
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
         this.renderer = renderer;
@@ -160,7 +167,7 @@ class PositionalAR {
             });
             markerControl.addEventListener("markerLost", (e)=>{
                 this.markerRoots[e.target.i].visible = false;
-                //console.log("Marker "+i+" lost");
+                console.log("Marker "+i+" lost");
             });
         }
         this.arGroup = new THREE.Group();
@@ -271,7 +278,7 @@ class PositionalAR {
                     // world coordinates.  This is the negative of the 
                     // relative position of the marker since it points towards
                     // the center
-                    let pos = new THREE.Vector3(-marker.markerPos[0]*h, 0, -marker.markerPos[1]*v);
+                    let pos = new THREE.Vector3(marker.markerPos[0]*h, 0, marker.markerPos[1]*v);
                     pos = marker.localToWorld(pos);
                     avgPos.add(pos);
 
@@ -295,7 +302,14 @@ class PositionalAR {
             }
         }
     }
-        
+    
+    placeGhostNote(){
+        if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
+            this.runTime += 1;
+            let camPos = this.camera.position;
+            console.log(camPos);
+        }
+    }
 
     /**
      * Perform an animation step, which consists of tracking the AR targets and updating
@@ -312,6 +326,7 @@ class PositionalAR {
             this.onResize();
         }
         this.totalTime += deltaTime;
+        this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
         //this.medianFilterMarkers();
         this.updateCalibration();
