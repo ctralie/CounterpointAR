@@ -69,11 +69,14 @@ class PositionalAR {
         this.clock = new THREE.Clock();
         this.totalTime = 0;
 
+        this.gotPlacement = false;
+
         //setup ghost note
-        let gns = new THREE.CircleGeometry(0.5, 10);
+        let gns = new THREE.SphereGeometry(0.5, 32, 16);
         let gnm = new THREE.MeshStandardMaterial({color: 0xffffff});
-        let note = new THREE.Group();
-        note.add(new THREE.Mesh(gns,gnm));
+        this.note = new THREE.Group();
+        this.note.add(new THREE.Mesh(gns,gnm));
+        
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
         this.renderer = renderer;
@@ -163,7 +166,7 @@ class PositionalAR {
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
                 that.markerRoots[e.target.i].visible = true;
-                console.log("Marker "+i+" found");
+                //console.log("Marker "+i+" found");
             });
             markerControl.addEventListener("markerLost", (e)=>{
                 this.markerRoots[e.target.i].visible = false;
@@ -267,8 +270,6 @@ class PositionalAR {
         if (this.horizCount > 0 && this.vertCount > 0) {
             let h = this.horizNumer/this.horizCount; // Horizontal interval
             let v = this.vertNumer/this.vertCount; // Vertical interval
-            console.log(h);
-            console.log(v);
             let numVisible = 0;
             let avgPos = new THREE.Vector3();
             let quats = [];
@@ -300,16 +301,32 @@ class PositionalAR {
                 for (let i = 1; i < quats.length; i++) {
                     avgQuat.slerp(quats[i], 1/(1+i));
                 }
+                //this.arGroup.setRotationFromQuaternion(avgQuat);
+                if(!this.gotPlacement){
+                    if(numVisible >= 4){
+                        this.startZ = this.arGroup.position.z;
+                        console.log(this.startZ);
+                        this.gotPlacement = true;
+                    }
+                }
+                //this.placeGhostNote();
                 this.arGroup.setRotationFromQuaternion(avgQuat);
             }
         }
     }
-    
+    /*
+    Figure out why z-axis doesnt work. arGroup position and the documented z position of arGroup vary when program is running.
+    the axises do not move in the same direction with each other, which causes the note ball to move contrary of the direction I am moving.
+    */
     placeGhostNote(){
         if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
             this.runTime += 1;
-            let camPos = this.camera.position;
-            console.log(camPos);
+            let newnote = this.note;
+            console.log(this.arGroup.position.z);
+            newnote.position.x = this.arGroup.position.x*(-1);
+            newnote.position.z = this.arGroup.position.z - this.startZ;
+            console.log(newnote.position.z);
+            this.arGroup.add(newnote);
         }
     }
 
@@ -333,6 +350,7 @@ class PositionalAR {
         //this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
+        
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
