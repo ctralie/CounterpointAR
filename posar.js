@@ -319,13 +319,23 @@ class PositionalAR {
     the axises do not move in the same direction with each other, which causes the note ball to move contrary of the direction I am moving.
     */
     placeGhostNote(){
+        let mw = this.arGroup.matrixWorld;
+        let AGV = mw.getInverse(mw);
+        let nNP = new THREE.Vector4(0,0,0,1);
+        let some = nNP.applyMatrix4(AGV);
+
         if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
-            this.runTime += 1;
+            this.runTime += .5;
             let newnote = this.note;
-            console.log(this.arGroup.position.z);
-            newnote.position.x = this.arGroup.position.x*(-1);
-            newnote.position.z = this.arGroup.position.z - this.startZ;
-            console.log(newnote.position.z);
+            /*
+            In particular, we want to see where the camera is relative to the floor.  
+            The camera is at position (0, 0, 0) in camera coordinates.  
+            To get the camera's position in floor coordinates, we multiply matrixWorld^{-1} * (0, 0, 0, 1).  
+            This will give us a vector (tx, ty, tz, 1).  We will put the vector (tx, 0, tz) into arGroup.
+            */
+            newnote.position.x = some.x;
+            newnote.position.y = 0;
+            newnote.position.z = some.z + .2;
             this.arGroup.add(newnote);
         }
     }
