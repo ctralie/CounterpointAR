@@ -4,12 +4,15 @@
  */
 
 class BasicScene {
+
     constructor() {
         // Step 1: Create a three.js scene and camera
         let scene = new THREE.Scene();
         this.scene = scene;
         let camera = new THREE.Camera();
         this.camera = camera;
+
+        
 
         // Step 2: Setup lighting
         //this allows for phong to occur
@@ -19,9 +22,10 @@ class BasicScene {
         light.position.set(-1, 2, 4);
         scene.add(light);
 
-        // Step 3: Setup geometry
-
+        // Step 3: Initiate Mesh and Geometry
         let partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
+        let sceneRoot = new THREE.Group();
+
         let rMat = new THREE.MeshStandardMaterial({color: 0xff0000});
         let oMat = new THREE.MeshStandardMaterial({color: 0xffA500});
         let yMat = new THREE.MeshStandardMaterial({color: 0xffff00});
@@ -29,19 +33,30 @@ class BasicScene {
         let bMat = new THREE.MeshStandardMaterial({color: 0x0000ff});
         let pMat = new THREE.MeshStandardMaterial({color: 0x080080});
 
-        let sceneRoot = new THREE.Group();
+        this.partialStaff = partialStaff;
         this.sceneRoot = sceneRoot;
 
+        this.rMat = rMat;
+        this.oMat = oMat;
+        this.yMat = yMat;
+        this.gMat = gMat;
+        this.bMat = bMat;
+        this.pMat = pMat;
+
+        this.makeStaff();
+        this.frameNum = 0;
+    }
+    
+    
+    makeStaff(){    
         for (let column = 0; column < 5; column++) {
             let staffPieces = [];
-            this.staffPieces = staffPieces;
-            staffPieces.push(new THREE.Mesh(partialStaff, rMat));
-            staffPieces.push(new THREE.Mesh(partialStaff, oMat));
-            staffPieces.push(new THREE.Mesh(partialStaff, yMat))
-            staffPieces.push(new THREE.Mesh(partialStaff, gMat));
-            staffPieces.push(new THREE.Mesh(partialStaff, bMat));
-            staffPieces.push(new THREE.Mesh(partialStaff, pMat));
-    
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.rMat));
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.oMat));
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.yMat))
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.gMat));
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.bMat));
+            staffPieces.push(new THREE.Mesh(this.partialStaff, this.pMat));
             let fullStaff = new THREE.Group();
             for(let i = 0; i < staffPieces.length; i++){
                 staffPieces[i].position.x = -2;
@@ -49,11 +64,8 @@ class BasicScene {
                 fullStaff.add(staffPieces[i]);
             }
             fullStaff.position.x += (1*column);
-            sceneRoot.add(fullStaff);
+            this.sceneRoot.add(fullStaff);
         }
-        
-        this.sceneRoot = sceneRoot;
-        this.frameNum = 0;
     }
 
     /**

@@ -53,6 +53,8 @@ class PositionalAR {
 
         this.runTime = 1;
 
+        this.noteCount = 0;
+
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
         if (antialias === undefined) {
@@ -71,11 +73,8 @@ class PositionalAR {
 
         this.gotPlacement = false;
 
-        //setup ghost note
-        let gns = new THREE.SphereGeometry(0.5, 32, 16);
-        let gnm = new THREE.MeshStandardMaterial({color: 0xffffff});
-        this.note = new THREE.Group();
-        this.note.add(new THREE.Mesh(gns,gnm));
+        this.notePositions = [];
+        this.noteGroup = new THREE.Group();
         
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
@@ -88,10 +87,48 @@ class PositionalAR {
         document.body.appendChild( renderer.domElement );
 
         // Finally, setup the AR tracker
+        
         this.setupTracker();
+
+        this.arGroup.position.x = 0;
+        this.arGroup.position.y = -5;
+        this.arGroup.position.z = -20;
+
+
         this.repaint();
     }
 
+    setupGhostNote(){
+        //setup ghost note
+        this.noteG = new THREE.SphereGeometry(0.45, 32, 16);
+        let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
+        this.note = new THREE.Group();
+        this.note.add(new THREE.Mesh(this.noteG,gNM));
+        this.note.position.x = 0;
+        this.note.position.y = -6;
+        this.note.position.z = -20;
+        this.scene.add(this.note);
+    }
+
+    setupMusicalNotes(){
+
+        let nMat = new THREE.MeshStandardMaterial({color: 0xFFC1F4});
+
+        let nZ = 1;
+        for(let interval = -2.5; interval < 3; interval += .5){
+            let newNote = new THREE.Mesh(this.noteG, nMat);
+            newNote.position.x = interval;
+            newNote.position.y = 0;
+            newNote.position.z = nZ - 1;
+            nZ = newNote.position.z;
+            this.noteCount++;
+            this.noteGroup.add(newNote);
+        }
+        this.noteGroup.position.x = 0;
+        this.noteGroup.position.y = 0;
+        this.noteGroup.position.z = 0;
+        this.arGroup.add(this.noteGroup);
+    }
 
     onResize() {
         this.arToolkitSource.onResizeElement();
@@ -175,7 +212,12 @@ class PositionalAR {
         }
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
+        this.arGroup.rotateX(1.57);
+        this.setupGhostNote();
+        this.setupMusicalNotes();
         this.scene.add(this.arGroup);
+        console.log(this.arGroup);
+
     }   
     
     /**
@@ -314,10 +356,7 @@ class PositionalAR {
             }
         }
     }
-    /*
-    Figure out why z-axis doesnt work. arGroup position and the documented z position of arGroup vary when program is running.
-    the axises do not move in the same direction with each other, which causes the note ball to move contrary of the direction I am moving.
-    */
+    
     placeGhostNote(){
         let mw = this.arGroup.matrixWorld;
         let AGV = mw.getInverse(mw);
@@ -327,16 +366,29 @@ class PositionalAR {
         if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
             this.runTime += .5;
             let newnote = this.note;
-            /*
-            In particular, we want to see where the camera is relative to the floor.  
-            The camera is at position (0, 0, 0) in camera coordinates.  
-            To get the camera's position in floor coordinates, we multiply matrixWorld^{-1} * (0, 0, 0, 1).  
-            This will give us a vector (tx, ty, tz, 1).  We will put the vector (tx, 0, tz) into arGroup.
-            */
             newnote.position.x = some.x;
             newnote.position.y = 0;
             newnote.position.z = some.z + .2;
             this.arGroup.add(newnote);
+        }
+    }
+
+    updateMusicNotePositions(){
+        let tempPos = [];
+        for(let n = 0; n < this.noteCount; n++){
+            let pV = new THREE.Vector3();
+            this.arGroup.children[1].children[n].getWorldPosition(pV);
+            tempPos.push(pV);
+            this.notePositions = tempPos;
+        }
+    }
+
+    checkNoteProximity(){
+        let currentPosition = this.note.position;
+        for(let i = 0; i < this.noteCount; i++){
+            if(currentPosition.distanceTo(this.notePositions[i]) < .1){
+                console.log("At Music Note " + i);
+            }
         }
     }
 
@@ -355,12 +407,35 @@ class PositionalAR {
             this.onResize();
         }
         this.totalTime += deltaTime;
+
+
+
+        ///
+        let K = this.keyboard;
+        if (K.movelr != 0 || K.moveud != 0 || K.movefb != 0) {
+            this.note.position.x += K.movelr*K.walkspeed/250;
+            this.note.position.y += K.movefb*K.walkspeed/250;
+        }
+        
+        this.updateMusicNotePositions();
+        this.checkNoteProximity();
+
+        if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
+            this.runTime++;
+            //console.log(this.notePositions);
+        }
+        ///
+
+
+
+
+
+        /*
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
-        //this.medianFilterMarkers();
         this.updateCalibration();
         this.placeSceneRoot();
-        
+        */
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
