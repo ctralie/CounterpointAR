@@ -27,7 +27,6 @@
 
     <script>
       let myWaveform = new SampledAudio();
-      let sampleFile = new SampledAudio();
       
       // Step 1: Initialize a custom waveform
       let sr = 44100;
@@ -38,27 +37,14 @@
       }
       myWaveform.setSamples(samples, sr);
 
-      // Step 2: Show how to load a file
-      let audioPromise = sampleFile.loadFile("sample.mp3");
-      let loaded = false;
-
+      let sampleFile = new Audio("sample.mp3");
 
       function playWaveform() {
         myWaveform.playAudio();
       }
 
       function playLoaded() {
-        if (!loaded) {
-          audioPromise.then(
-            function() {
-              loaded = true;
-              playLoaded();
-            }
-          );
-        }
-        else {
-          sampleFile.playAudio();
-        }
+        sampleFile.play();
       }
 
     </script>
