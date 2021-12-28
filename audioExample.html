@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Simple Audio Waveforms</title>
+    <script src="jsanov/libs/plotly.min.js"></script>
+    <script src="jsanov/libs/lame.min.js"></script>
+    <script src="jsanov/wav.js"></script>
+    <script src="jsanov/features.js"></script>
+    <script src="jsanov/audio.js"></script>
+    <script src="jsanov/libs/jquery-3.5.1.min.js"></script>
+    <link rel="stylesheet" href="assets/css/main.css" />
+  </head>
+  <body>
+    <h1>Simple Audio Examples</h1>
+    <table>
+      <tr>
+        <td>
+          <button id = "playWaveform" onclick="playWaveform()">▶️ Play Waveform</button>
+        </td>
+        <td>
+          <button id = "playLoaded" onclick="playLoaded()">▶️ Play Loaded Sound</button>
+        </td>
+      </tr>
+    </table>
+    
+
+
+    <script>
+      let myWaveform = new SampledAudio();
+      let sampleFile = new SampledAudio();
+      
+      // Step 1: Initialize a custom waveform
+      let sr = 44100;
+      let samples = new Float32Array(sr);
+      let freq = 440;
+      for (let i = 0; i < samples.length; i++) {
+          samples[i] += Math.cos(2*Math.PI*freq*i/sr);
+      }
+      myWaveform.setSamples(samples, sr);
+
+      // Step 2: Show how to load a file
+      let audioPromise = sampleFile.loadFile("sample.mp3");
+      let loaded = false;
+
+
+      function playWaveform() {
+        myWaveform.playAudio();
+      }
+
+      function playLoaded() {
+        if (!loaded) {
+          audioPromise.then(
+            function() {
+              loaded = true;
+              playLoaded();
+            }
+          );
+        }
+        else {
+          sampleFile.playAudio();
+        }
+      }
+
+    </script>
+
+    </body>
+</html>
