@@ -19,29 +19,21 @@ class BasicScene {
         const color = 0xFFFFFF;
         const intensity = 1;
         const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
+        //light.position.set(-1, 2, 4);
+        light.position.set(1,0,5);
         scene.add(light);
 
         // Step 3: Initiate Mesh and Geometry
-        let partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
-        let sceneRoot = new THREE.Group();
+        this.partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
+        this.sceneRoot = new THREE.Group();
 
-        let rMat = new THREE.MeshStandardMaterial({color: 0xff0000});
-        let oMat = new THREE.MeshStandardMaterial({color: 0xffA500});
-        let yMat = new THREE.MeshStandardMaterial({color: 0xffff00});
-        let gMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
-        let bMat = new THREE.MeshStandardMaterial({color: 0x0000ff});
-        let pMat = new THREE.MeshStandardMaterial({color: 0x080080});
+        this.rMat = new THREE.MeshStandardMaterial({color: 0xff0000});
+        this.oMat = new THREE.MeshStandardMaterial({color: 0xffA500});
+        this.yMat = new THREE.MeshStandardMaterial({color: 0xffff00});
+        this.gMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
+        this.bMat = new THREE.MeshStandardMaterial({color: 0x0000ff});
+        this.pMat = new THREE.MeshStandardMaterial({color: 0x080080});
 
-        this.partialStaff = partialStaff;
-        this.sceneRoot = sceneRoot;
-
-        this.rMat = rMat;
-        this.oMat = oMat;
-        this.yMat = yMat;
-        this.gMat = gMat;
-        this.bMat = bMat;
-        this.pMat = pMat;
 
         this.makeStaff();
         this.frameNum = 0;

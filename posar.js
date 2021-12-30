@@ -74,7 +74,11 @@ class PositionalAR {
         this.gotPlacement = false;
 
         this.notePositions = [];
+        this.arrivedAtNote = [];
+        this.filledNotePositions = false;
         this.noteGroup = new THREE.Group();
+
+        this.didPlayNoteAudio = [];
         
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
@@ -88,47 +92,18 @@ class PositionalAR {
 
         // Finally, setup the AR tracker
         
+        this.musicPlayer = new DAGenerator(0, true);
+
         this.setupTracker();
 
         this.arGroup.position.x = 0;
         this.arGroup.position.y = -5;
         this.arGroup.position.z = -20;
 
-
         this.repaint();
     }
 
-    setupGhostNote(){
-        //setup ghost note
-        this.noteG = new THREE.SphereGeometry(0.45, 32, 16);
-        let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
-        this.note = new THREE.Group();
-        this.note.add(new THREE.Mesh(this.noteG,gNM));
-        this.note.position.x = 0;
-        this.note.position.y = -6;
-        this.note.position.z = -20;
-        this.scene.add(this.note);
-    }
-
-    setupMusicalNotes(){
-
-        let nMat = new THREE.MeshStandardMaterial({color: 0xFFC1F4});
-
-        let nZ = 1;
-        for(let interval = -2.5; interval < 3; interval += .5){
-            let newNote = new THREE.Mesh(this.noteG, nMat);
-            newNote.position.x = interval;
-            newNote.position.y = 0;
-            newNote.position.z = nZ - 1;
-            nZ = newNote.position.z;
-            this.noteCount++;
-            this.noteGroup.add(newNote);
-        }
-        this.noteGroup.position.x = 0;
-        this.noteGroup.position.y = 0;
-        this.noteGroup.position.z = 0;
-        this.arGroup.add(this.noteGroup);
-    }
+    
 
     onResize() {
         this.arToolkitSource.onResizeElement();
@@ -212,60 +187,51 @@ class PositionalAR {
         }
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
-        this.arGroup.rotateX(1.57);
         this.setupGhostNote();
         this.setupMusicalNotes();
+        
+        this.arGroup.rotateX(1.57);
         this.scene.add(this.arGroup);
         console.log(this.arGroup);
 
     }   
-    
-    /**
-     * Do a median filter on the last "medWin" marker positions.
-     * If there aren't enough of these positions available, then 
-     * wait until there are
-     */
-    medianFilterMarkers() {
-        for (let i = 0; i < this.markerRoots.length; i++) {
-            const marker = this.markerRoots[i];
-            if (marker.visible) {
-                marker.posHistory.push(marker.position.clone());
-            }
-            else {
-                marker.posHistory.push(null);
-            }
-            if (marker.visible && marker.posHistory.length > this.medWin) {
-                // Setup an array of the last medWin positions
-                let pos = [[], [], []];
-                let enough = true;
-                let k = marker.posHistory.length-this.medWin;
-                while (k < marker.posHistory.length && enough) {
-                    if (marker.posHistory[k] === null) {
-                        enough = false;
-                    }
-                    else {
-                        pos[0].push(marker.posHistory[k].x);
-                        pos[1].push(marker.posHistory[k].y);
-                        pos[2].push(marker.posHistory[k].z);
-                    }
-                    k++;
-                }
-                // Perform a median of the last medWin positions
-                // if there were enough of them
-                if (enough) {
-                    for (let k = 0; k < 3; k++) {
-                        pos[k].sort((a, b) => a-b);
-                        pos[k] = pos[k][Math.floor(pos[k].length/2)];
-                    }
-                    marker.position.x = pos[0];
-                    marker.position.y = pos[1];
-                    marker.position.z = pos[2];
-                }
-                else {
-                    marker.visible = false; // Don't use this marker this time
-                }
-            }
+
+    setupGhostNote(){
+        //setup ghost note
+        this.noteG = new THREE.SphereGeometry(0.45, 32, 16);
+        let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
+        this.note = new THREE.Group();
+        this.note.add(new THREE.Mesh(this.noteG,gNM));
+        this.note.position.x = 0;
+        this.note.position.y = -6;
+        this.note.position.z = -20;
+        this.scene.add(this.note);
+    }
+
+    setupMusicalNotes(){
+
+        this.musicNote = new THREE.CircleGeometry(.45, 16);
+        //this.musicNote.rotateZ(.43);
+        let nMat = new THREE.MeshStandardMaterial({color: 0xFFC1F4});
+
+        let nZ = 1;
+        for(let interval = -2.5; interval < 3; interval += .5){
+            let newNote = new THREE.Mesh(this.noteG, nMat);
+            
+            newNote.position.x = interval;
+            newNote.position.y = 0;
+            newNote.position.z = nZ - 1;
+            nZ = newNote.position.z;
+            //newNote.rotateZ(1.57);
+            this.noteCount++;
+            this.noteGroup.add(newNote);
+            this.didPlayNoteAudio.push(false);
         }
+        this.noteGroup.position.x = 0;
+        this.noteGroup.position.y = 0;
+        this.noteGroup.position.z = 0;
+        //this.noteGroup.rotateZ(1.57);
+        this.arGroup.add(this.noteGroup);
     }
     
 
@@ -375,6 +341,12 @@ class PositionalAR {
 
     updateMusicNotePositions(){
         let tempPos = [];
+        if(!this.filledNotePositions){
+            for(let n = 0; n < this.noteCount; n++){
+                this.arrivedAtNote.push(false);
+            }
+            this.filledNotePositions = true;
+        }
         for(let n = 0; n < this.noteCount; n++){
             let pV = new THREE.Vector3();
             this.arGroup.children[1].children[n].getWorldPosition(pV);
@@ -386,10 +358,19 @@ class PositionalAR {
     checkNoteProximity(){
         let currentPosition = this.note.position;
         for(let i = 0; i < this.noteCount; i++){
-            if(currentPosition.distanceTo(this.notePositions[i]) < .1){
+            if(currentPosition.distanceTo(this.notePositions[i]) < .1 && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
+                this.arrivedAtNote[i] = true;
+                if(!this.didPlayNoteAudio[i]){
+                    this.playMusicNote(i);
+                }
             }
         }
+    }
+
+    playMusicNote(i){
+        this.musicPlayer.playNoteTone(i);
+        this.didPlayNoteAudio[i] = true;
     }
 
     /**
