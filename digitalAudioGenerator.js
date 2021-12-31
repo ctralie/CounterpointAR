@@ -44,10 +44,7 @@ const MP3_DICTIONARY = [
     "G#2":"notes/G#2.mp3","A2":"notes/A2.mp3"}
 ];
 
-const NOTE_ARRAY = ["C1","C#1","D1",
-"D#1","E1","F1","F#1","G1","G#1",
-"A1","A#1","B1","C2","C#2","D2",
-"D#2","E2","F2","F#2","G2","G#2","A2"];
+
 
 
 class DAGenerator{
@@ -63,6 +60,11 @@ class DAGenerator{
         this.songnumber = songNumber;
         this.mp3Notes = [];
         this.mp3Arrays = [];
+        this.noteDic = ["C1","C#1","D1",
+        "D#1","E1","F1","F#1","G1","G#1",
+        "A1","A#1","B1","C2","C#2","D2",
+        "D#2","E2","F2","F#2","G2","G#2","A2"];
+
 
         this.inputSongChoice();
         if(isSampleAudio){
@@ -137,10 +139,10 @@ class DAGenerator{
             this.mp3Notes.push(songChoice[i].note);
         }
         let breakCount = 0;
-        for(let i = 0; i < NOTE_ARRAY.length; i++){
+        for(let i = 0; i < this.noteDic.length; i++){
             if(breakCount != this.noteCount){
                 for(let j = 0; j < this.noteCount; j++){
-                    if(this.mp3Notes[j] == NOTE_ARRAY[i]){
+                    if(this.mp3Notes[j] == this.noteDic[i]){
                         this.noteArray[j] = i-9;
                         breakCount++;
                     }

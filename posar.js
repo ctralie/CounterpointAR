@@ -34,6 +34,9 @@ const PATTERNS_AR = [
     {"url":"data/letterF.patt", "pos":[-1, 2]},
 ];
 
+const XCOORDS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
+    .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
+
 class PositionalAR {
     /**
      * 
@@ -78,6 +81,7 @@ class PositionalAR {
         this.filledNotePositions = false;
         this.noteGroup = new THREE.Group();
 
+        this.notePossibilityCount = 22;
         this.didPlayNoteAudio = [];
         
         // Setup three.js WebGL renderer
@@ -214,19 +218,31 @@ class PositionalAR {
         //this.musicNote.rotateZ(.43);
         let nMat = new THREE.MeshStandardMaterial({color: 0xFFC1F4});
 
-        let nZ = 1;
-        for(let interval = -2.5; interval < 3; interval += .5){
-            let newNote = new THREE.Mesh(this.noteG, nMat);
+        let noteDic = this.musicPlayer.noteDic;
+        let songNotes = this.musicPlayer.mp3Notes;
+        let nZ = 1.5;
+
+        for(let i = 0; i < songNotes.length; i++){
+            let foundNote = false;
+            let iter = 0;
+            while(!foundNote || iter == noteDic.length){
+                if(noteDic[iter] == songNotes[i]){
+                    foundNote = true;
+                    let newNote = new THREE.Mesh(this.noteG, nMat);
+                    newNote.position.x = XCOORDS[iter];
+                    newNote.position.y = 0;
+                    newNote.position.z = nZ - 1.5;
+                    nZ = newNote.position.z;
+                    //newNote.rotateZ(1.57);
+                    this.noteCount++;
+                    this.noteGroup.add(newNote);
+                    this.didPlayNoteAudio.push(false);
+                }
+                iter++;
+            }
             
-            newNote.position.x = interval;
-            newNote.position.y = 0;
-            newNote.position.z = nZ - 1;
-            nZ = newNote.position.z;
-            //newNote.rotateZ(1.57);
-            this.noteCount++;
-            this.noteGroup.add(newNote);
-            this.didPlayNoteAudio.push(false);
         }
+
         this.noteGroup.position.x = 0;
         this.noteGroup.position.y = 0;
         this.noteGroup.position.z = 0;
