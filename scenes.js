@@ -13,7 +13,7 @@ class BasicScene {
         this.camera = camera;
 
         this.matColor = [{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},{color: 0xffff00},
-            {color: 0x00ff00},{color: 0x0000ff},{color: 0x080080}];
+            {color: 0x00ff00},{color: 0x0000ff},{color: 0x080080},{color: 0x33F3FF}];
 
         // Step 2: Setup lighting
         //this allows for phong to occur

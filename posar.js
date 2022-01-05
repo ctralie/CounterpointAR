@@ -156,10 +156,10 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            //detectionMode: 'mono'
-            detectionMode: 'mono_and_matrix',
-            matrixCodeType: '4x4_BCH_13_9_3',
-            patternRatio: 0.9
+            detectionMode: 'mono'
+            //detectionMode: 'mono_and_matrix',
+            //matrixCodeType: '4x4_BCH_13_9_3',
+            //patternRatio: 0.9
         });
         this.arToolkitContext = arToolkitContext;
 
@@ -205,7 +205,7 @@ class PositionalAR {
         //this.arGroup.rotateX(1.57);
 
         this.scene.add(this.arGroup);
-
+        console.log(this.arGroup.children);
     }   
 
     setupGhostNote(){
@@ -214,9 +214,6 @@ class PositionalAR {
         let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
         this.note = new THREE.Group();
         this.note.add(new THREE.Mesh(this.noteG,gNM));
-
-
-        
         this.arGroup.add(this.note);
     }
 
@@ -347,7 +344,7 @@ class PositionalAR {
         let some = nNP.applyMatrix4(AGV);
         this.arGroup.children[1].position.x = some.x;
         this.arGroup.children[1].position.y = 0;
-        this.arGroup.children[1].position.z = some.z - 4;
+        this.arGroup.children[1].position.z = some.z;
     }
 
     updateMusicNotePositions(){
@@ -369,7 +366,7 @@ class PositionalAR {
     checkNoteProximity(){
         let currentPosition = this.arGroup.children[1].position;
         for(let i = 0; i < this.noteCount; i++){
-            if(currentPosition.distanceTo(this.notePositions[i]) < .2 && !this.arrivedAtNote[i]){
+            if(currentPosition.distanceTo(this.notePositions[i]) < .5 && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
                 if(!this.didPlayNoteAudio[i]){
