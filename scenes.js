@@ -19,8 +19,8 @@ class BasicScene {
         //this allows for phong to occur
         const intensity = 1;
         const light = new THREE.DirectionalLight(this.matColor[0].color, intensity);
-        //light.position.set(-1, 2, 4);
-        light.position.set(1,0,5);
+        light.position.set(-1, 10, 4);
+        //light.position.set(1,0,5);
         scene.add(light);
 
         // Step 3: Initiate Mesh and Geometry
