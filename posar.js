@@ -206,7 +206,9 @@ class PositionalAR {
     setupGhostNote(){
         //setup ghost note
         //this.noteG = new THREE.SphereGeometry(0.45, 32, 16);
-        this.noteG = new THREE.CylinderGeometry(.45, .45, .01, 16);
+        this.noteG = new THREE.TorusGeometry(.35, .08, 10, 24);
+        this.noteG.scale(1,1.55,1);
+        this.noteG.rotateX(1.57);
         let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
         this.note = new THREE.Group();
         this.note.add(new THREE.Mesh(this.noteG,gNM));
@@ -214,14 +216,16 @@ class PositionalAR {
     }
 
     setupMusicalNotes(){
-        let musicNote = new THREE.CylinderGeometry(.45, .45, .01, 16);
-        //musicNote.rotateX(1.57);
-        let noteMaterial = new THREE.MeshStandardMaterial({color: 0xD02FEB});
+        //let musicNote = new THREE.CylinderGeometry(.45, .45, .01, 16);
+        let musicNote = new THREE.TorusGeometry(.35, .08, 10, 24);
+        musicNote.scale(1,1.55,1);
+        musicNote.rotateX(1.57);
+        let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
         this.noteGroup = new THREE.Group();
 
         let noteDictionary = this.musicPlayer.noteDic;
         let songNotes = this.musicPlayer.mp3Notes;
-        let noteSpacing = 1.5;
+        let noteSpacing = 1.75;
         let notePositionZ = 1.5;
 
         for(let i = 0; i < songNotes.length; i++){
@@ -398,7 +402,7 @@ class PositionalAR {
         if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
             this.runTime++;
         }
-
+        
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
         this.updateCalibration();
