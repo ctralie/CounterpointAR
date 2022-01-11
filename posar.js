@@ -57,9 +57,7 @@ class PositionalAR {
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
 
-        
-
-        
+        this.spaceAboveStaff = .1;        
 
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
@@ -103,9 +101,9 @@ class PositionalAR {
         
         // Setup Audio Engine
         this.musicPlayer = new DAGenerator(0, true);
+
         // Finally, setup the AR tracker
         this.setupTracker();
-
         this.repaint();
     }
 
@@ -200,12 +198,9 @@ class PositionalAR {
         //this.arGroup.rotateX(1.57);
 
         this.scene.add(this.arGroup);
-        console.log(this.arGroup.children);
     }   
 
     setupGhostNote(){
-        //setup ghost note
-        //this.noteG = new THREE.SphereGeometry(0.45, 32, 16);
         this.noteG = new THREE.TorusGeometry(.35, .08, 10, 24);
         this.noteG.scale(1,1.55,1);
         this.noteG.rotateX(1.57);
@@ -213,10 +208,10 @@ class PositionalAR {
         this.note = new THREE.Group();
         this.note.add(new THREE.Mesh(this.noteG,gNM));
         this.arGroup.add(this.note);
+        this.AGCGNI = this.arGroup.children.length - 1;
     }
 
     setupMusicalNotes(){
-        //let musicNote = new THREE.CylinderGeometry(.45, .45, .01, 16);
         let musicNote = new THREE.TorusGeometry(.35, .08, 10, 24);
         musicNote.scale(1,1.55,1);
         musicNote.rotateX(1.57);
@@ -234,10 +229,9 @@ class PositionalAR {
             while(!foundNote || iter == noteDictionary.length){
                 if(noteDictionary[iter] == songNotes[i]){
                     foundNote = true;
-                    //let newNote = new THREE.Mesh(this.noteG, noteMaterial);
                     let newNote = new THREE.Mesh(musicNote, noteMaterial);
                     newNote.position.x = XCOORDS[iter];
-                    newNote.position.y = .1;
+                    newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     notePositionZ = newNote.position.z;
                     this.noteCount++;
@@ -248,6 +242,7 @@ class PositionalAR {
             }
         }
         this.arGroup.add(this.noteGroup);
+        this.AGCMNI = this.arGroup.children.length - 1;
     }
     
 
@@ -340,45 +335,45 @@ class PositionalAR {
     }
     
     placeGhostNote(){
-        let mw = this.arGroup.matrixWorld;
-        let AGV = mw.getInverse(mw);
-        let nNP = new THREE.Vector4(0,0,0,1);
-        let some = nNP.applyMatrix4(AGV);
-        this.arGroup.children[1].position.x = some.x;
-        this.arGroup.children[1].position.y = .1;
-        this.arGroup.children[1].position.z = some.z-5;
+        let worldCoords = this.arGroup.matrixWorld;
+        let inverseWorldCoords = worldCoords.getInverse(worldCoords);
+        let transformVector = new THREE.Vector4(0,0,0,1);
+        let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
+        this.arGroup.children[this.AGCGNI].position.x = newPosition.x;
+        this.arGroup.children[this.AGCGNI].position.y = this.spaceAboveStaff;
+        this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 5;
     }
 
     updateMusicNotePositions(){
-        let tempPos = [];
+        let updatedPositions = [];
         if(!this.filledNotePositions){
             for(let n = 0; n < this.noteCount; n++){
                 this.arrivedAtNote.push(false);
             }
             this.filledNotePositions = true;
         }
-        for(let n = 0; n < this.noteCount; n++){
-            let pV = new THREE.Vector3();
-            this.arGroup.children[2].children[n].getWorldPosition(pV);
-            tempPos.push(pV);
-            this.notePositions = tempPos;
+        for(let i = 0; i < this.noteCount; i++){
+            let positionVector = new THREE.Vector3();
+            this.arGroup.children[this.AGCMNI].children[i].getWorldPosition(positionVector);
+            updatedPositions.push(positionVector);
+            this.notePositions = updatedPositions;
         }
     }
 
-    checkNoteProximity(){
-        let currentPosition = this.arGroup.children[1].position;
+    checkNotePositionProximity(){
+        let currentPosition = this.arGroup.children[this.AGCGNI].position;
         for(let i = 0; i < this.noteCount; i++){
             if(currentPosition.distanceTo(this.notePositions[i]) < .5 && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
                 if(!this.didPlayNoteAudio[i]){
-                    this.playMusicNote(i);
+                    this.playMusicNoteAudio(i);
                 }
             }
         }
     }
 
-    playMusicNote(i){
+    playMusicNoteAudio(i){
         this.musicPlayer.playNoteTone(i);
         this.didPlayNoteAudio[i] = true;
     }
@@ -408,7 +403,7 @@ class PositionalAR {
         this.updateCalibration();
         this.placeSceneRoot();
         this.updateMusicNotePositions();
-        this.checkNoteProximity();
+        this.checkNotePositionProximity();
         
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));

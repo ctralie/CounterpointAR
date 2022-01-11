@@ -78,8 +78,8 @@ class DAGenerator{
         for(let i = 0; i < this.mp3Notes.length; i++){
             let str = this.mp3Notes[i];
             let pDir = "notes/"+str+".mp3";
-            let sA = new Audio(pDir);
-            this.mp3Arrays.push(sA);
+            let sampAud = new Audio(pDir);
+            this.mp3Arrays.push(sampAud);
         }
     }
 
