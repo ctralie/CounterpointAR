@@ -82,6 +82,7 @@ class PositionalAR {
         this.notePositions = [];
         this.arrivedAtNote = [];
         this.filledNotePositions = false;
+        this.printProx = false;
         
 
         this.notePossibilityCount = 22;
@@ -341,7 +342,7 @@ class PositionalAR {
         let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
         this.arGroup.children[this.AGCGNI].position.x = newPosition.x;
         this.arGroup.children[this.AGCGNI].position.y = this.spaceAboveStaff;
-        this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 5;
+        this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 2;
     }
 
     updateMusicNotePositions(){
@@ -353,17 +354,23 @@ class PositionalAR {
             this.filledNotePositions = true;
         }
         for(let i = 0; i < this.noteCount; i++){
-            let positionVector = new THREE.Vector3();
-            this.arGroup.children[this.AGCMNI].children[i].getWorldPosition(positionVector);
-            updatedPositions.push(positionVector);
+            //let positionVector = new THREE.Vector3();
+            //this.arGroup.children[this.AGCMNI].children[i].getWorldPosition(positionVector);
+            //updatedPositions.push(positionVector);
+            updatedPositions.push(this.arGroup.children[this.AGCMNI].children[i].position);
             this.notePositions = updatedPositions;
         }
     }
 
     checkNotePositionProximity(){
+        //let currentPosition = new THREE.Vector3();
         let currentPosition = this.arGroup.children[this.AGCGNI].position;
         for(let i = 0; i < this.noteCount; i++){
-            if(currentPosition.distanceTo(this.notePositions[i]) < .5 && !this.arrivedAtNote[i]){
+            let dis = currentPosition.distanceTo(this.notePositions[i]);
+            if(this.printProx){
+                console.log(this.notePositions[i]);
+            }
+            if(dis < .5 && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
                 if(!this.didPlayNoteAudio[i]){
@@ -371,6 +378,10 @@ class PositionalAR {
                 }
             }
         }
+        if(this.printProx){
+            console.log(this.arGroup.children[this.AGCGNI].position);
+        }
+        this.printProx = false;
     }
 
     playMusicNoteAudio(i){
@@ -396,6 +407,9 @@ class PositionalAR {
         
         if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
             this.runTime++;
+            if(this.runTime == 5){
+                this.printProx = true;
+            }
         }
         
         this.placeGhostNote();
