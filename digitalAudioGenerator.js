@@ -35,6 +35,16 @@ const SONG_THREE = [
     {"note":"G1","degree": 2},{"note":"F1","degree": 1}
 ]; 
 
+const FREE_SONG = [
+    {"note":"C1","degree": 1},{"note":"D1","degree": 2},
+    {"note":"E1","degree": 3},{"note":"F1","degree": 4},
+    {"note":"G1","degree": 5},{"note":"A1","degree": 6},
+    {"note":"B1","degree": 7},{"note":"C2","degree": 8},
+    {"note":"D2","degree": 9},{"note":"E2","degree": 10},
+    {"note":"F2","degree": 11},{"note":"G2","degree": 12},
+    {"note":"A2","degree": 13}
+];
+
 const MP3_DICTIONARY = [
     {"C1":"notes/C1.mp3","C#1":"notes/C#1.mp3","D1":"notes/D1.mp3","D#1":"notes/D#1.mp3",
     "E1":"notes/E1.mp3","F1":"notes/F1.mp3","F#1":"notes/F#1.mp3","G1":"notes/G1.mp3",
@@ -126,6 +136,8 @@ class DAGenerator{
             case(3):
                 this.extractNoteInformation(SONG_THREE);
                 break;
+            case(4):
+                this.extractNoteInformation(FREE_SONG);
             default:
                 //you done goofed
                 break;
