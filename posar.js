@@ -4,37 +4,6 @@ https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/gen
 The image size set to 2500px, pattern ratio set to .9
 */
 
-
-/*
-const PATTERNS_AR = [
-    {"url":"data/mMarkers/pattern-0.patt", "pos":[1, 0]},
-    {"url":"data/mMarkers/pattern-1.patt", "pos":[1, 1]},
-    {"url":"data/mMarkers/pattern-2.patt", "pos":[1, 2]},
-    {"url":"data/mMarkers/pattern-3.patt", "pos":[-1, 0]},
-    {"url":"data/mMarkers/pattern-4.patt", "pos":[-1, 1]},
-    {"url":"data/mMarkers/pattern-5.patt", "pos":[-1, 2]}
-];
-    {"url":"data/pattern-6.patt", "pos":[1, -1]},
-    {"url":"data/pattern-7.patt", "pos":[1, 0]},
-    {"url":"data/pattern-8.patt", "pos":[1, 1]},
-    {"url":"data/pattern-9.patt", "pos":[1, 2]},
-    {"url":"data/pattern-10.patt", "pos":[1, 3]},
-    {"url":"data/pattern-11.patt", "pos":[1, 4]},
-];
-
-
-
-// For debugging on PC
-const PATTERNS_AR = [
-    {"url":"data/kanji.patt", "pos":[1, 0]},
-    {"url":"data/letterA.patt", "pos":[1, 1]},
-    {"url":"data/letterB.patt", "pos":[1, 2]},
-    {"url":"data/letterC.patt", "pos":[-1, 0]},
-    {"url":"data/letterD.patt", "pos":[-1, 1]},
-    {"url":"data/letterF.patt", "pos":[-1, 2]},
-];
-*/
-
 const PATTERNS_AR = [
     {"url":"data/newmarkers/pattern-A.patt", "pos":[1, 0]},
     {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 1]},
@@ -72,8 +41,6 @@ class PositionalAR {
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
 
-        this.spaceAboveStaff = .1;        
-
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
         if (antialias === undefined) {
@@ -90,22 +57,17 @@ class PositionalAR {
 
         this.clock = new THREE.Clock();
         this.totalTime = 0;
-        this.runTime = 1;
 
+        this.freeForm = false;
         this.gotPlacement = false;
 
         this.notePositions = [];
         this.arrivedAtNote = [];
-        this.filledNotePositions = false;
-        this.printProx = false;
-        
-        this.freeForm = true;
-        this.needNewNotes = true;
-        this.noteGroupPlacement = -2;
-
-        this.notePossibilityCount = 22;
-        this.noteCount = 0;
         this.didPlayNoteAudio = [];
+        
+        this.noteGroupPlacement = -2;
+        this.spaceAboveStaff = .1; 
+        this.noteCount = 0;
         
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
@@ -117,7 +79,6 @@ class PositionalAR {
         renderer.domElement.style.left = '0px'
         document.body.appendChild( renderer.domElement );
 
-        
         // Setup Audio Engine
         let songPick = 0;
         if(this.freeForm){
@@ -129,8 +90,6 @@ class PositionalAR {
         this.setupTracker();
         this.repaint();
     }
-
-    
 
     onResize() {
         this.arToolkitSource.onResizeElement();
@@ -172,10 +131,8 @@ class PositionalAR {
         // create arToolkitContext
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
-            detectionMode: 'mono'
-            //detectionMode: 'mono_and_matrix',
-            //matrixCodeType: '4x4_BCH_13_9_3',
-            ,patternRatio: 0.9
+            detectionMode: 'mono',
+            patternRatio: 0.9
         });
         this.arToolkitContext = arToolkitContext;
 
@@ -220,9 +177,6 @@ class PositionalAR {
         }else{
             this.setupMusicalNotes();
         }
-        // For Keyboard Debugging (delete when using markers)
-        //this.arGroup.rotateX(1.57);
-
         this.scene.add(this.arGroup);
     }   
 
@@ -263,6 +217,7 @@ class PositionalAR {
                     this.noteCount++;
                     this.noteGroup.add(newNote);
                     this.didPlayNoteAudio.push(false);
+                    this.arrivedAtNote.push(false);
                 }
                 iter++;
             }
@@ -280,8 +235,8 @@ class PositionalAR {
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
         this.noteGroup = new THREE.Group();
 
-        let notePositionLines = -1.5;
-        let notePositionSpaces = -2.5;
+        let notePositionLines = -.5;
+        let notePositionSpaces = -1.5;
         let xPos = 3;
 
         for(let i = 0; i < 13; i++){
@@ -296,7 +251,6 @@ class PositionalAR {
             xPos -= .5;
             this.noteCount++;
             this.noteGroup.add(newNote);
-            //this.didPlayNoteAudio.push(false);
         }
         
         this.arGroup.add(this.noteGroup);
@@ -402,22 +356,14 @@ class PositionalAR {
         this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 2;
     }
 
-    updateMusicNotePositions(){
+    updateAnalyzeNotePositions(){
         let updatedPositions = [];
-        if(!this.filledNotePositions){
-            for(let n = 0; n < this.noteCount; n++){
-                this.arrivedAtNote.push(false);
-            }
-            this.filledNotePositions = true;
-        }
         for(let i = 0; i < this.noteCount; i++){
             updatedPositions.push(this.arGroup.children[this.AGCMNI].children[i].position);
         }
         this.notePositions = updatedPositions;
-    }
-
-    checkNotePositionProximity(){
         let currentPosition = this.arGroup.children[this.AGCGNI].position;
+
         let thresh = .5;
 
         if(this.freeForm){
@@ -432,9 +378,6 @@ class PositionalAR {
         }else{
             for(let i = 0; i < this.noteCount; i++){
                 let dis = currentPosition.distanceTo(this.notePositions[i]);
-                if(this.printProx){
-                    console.log(this.notePositions[i]);
-                }
                 if(dis < thresh && !this.arrivedAtNote[i]){
                     console.log("At Music Note " + i);
                     this.arrivedAtNote[i] = true;
@@ -444,12 +387,6 @@ class PositionalAR {
                 }
             }
         }
-
-
-        if(this.printProx){
-            console.log(this.arGroup.children[this.AGCGNI].position);
-        }
-        this.printProx = false;
     }
 
     playMusicNoteAudio(i){
@@ -459,7 +396,7 @@ class PositionalAR {
 
     moveFreeFormNotes(){
         for(let i = 0; i < this.noteGroup.children.length; i++){
-            this.noteGroup.children[i].position.z -= 3;
+            this.noteGroup.children[i].position.z -= 2;
         }
     }
 
@@ -479,19 +416,11 @@ class PositionalAR {
         }
         this.totalTime += deltaTime;
         
-        if(this.totalTime >= (this.runTime - 0.02) && this.totalTime <= (this.runTime + 0.02)){
-            this.runTime++;
-            if(this.runTime == 5){
-                this.printProx = true;
-            }
-        }
-        
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
         this.updateCalibration();
         this.placeSceneRoot();
-        this.updateMusicNotePositions();
-        this.checkNotePositionProximity();
+        this.updateAnalyzeNotePositions();
         
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
