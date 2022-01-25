@@ -169,6 +169,7 @@ class PositionalAR {
                 console.log("Marker "+i+" lost");
             });
         }
+        
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.setupGhostNote();
