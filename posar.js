@@ -20,8 +20,16 @@ const PATTERNS_AR = [
 ];
 
 
+//starts at C4
+const TREBXPOS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
+    .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
 
-const XCOORDS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
+//starts at D3
+const ALTOXPOS = [3.5,3.5,3,3,2.5,2,2,1.5,1.5,
+    1,1,.5,0,0,-.5,-.5,1,-1.5,-1.5,-2,-2,-2.5];
+
+//starts at E2
+const BASSXPOS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
     .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
 
 class PositionalAR {
@@ -62,6 +70,7 @@ class PositionalAR {
         this.gotPlacement = false;
 
         this.notePositions = [];
+        this.zCFPosArray = [];
         this.arrivedAtNote = [];
         this.didPlayNoteAudio = [];
         
@@ -85,6 +94,8 @@ class PositionalAR {
             songPick = 4;
         }
         this.musicPlayer = new DAGenerator(songPick, true);
+
+        //this.nfr = new NoteReader("song.txt");
 
         // Finally, setup the AR tracker
         this.setupTracker();
@@ -176,7 +187,7 @@ class PositionalAR {
         if(this.freeForm){
             this.setupFreeFormNotes();
         }else{
-            this.setupMusicalNotes();
+            this.setupCantusFirmus();
         }
         this.scene.add(this.arGroup);
     }   
@@ -192,7 +203,7 @@ class PositionalAR {
         this.AGCGNI = this.arGroup.children.length - 1;
     }
 
-    setupMusicalNotes(){
+    setupCantusFirmus(){
         let musicNote = new THREE.TorusGeometry(.35, .08, 10, 24);
         musicNote.scale(1,1.55,1);
         musicNote.rotateX(1.57);
@@ -211,12 +222,13 @@ class PositionalAR {
                 if(noteDictionary[iter] == songNotes[i]){
                     foundNote = true;
                     let newNote = new THREE.Mesh(musicNote, noteMaterial);
-                    newNote.position.x = XCOORDS[iter];
+                    newNote.position.x = TREBXPOS[iter];
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     notePositionZ = newNote.position.z;
                     this.noteCount++;
                     this.noteGroup.add(newNote);
+                    this.zCFPosArray.push(newNote.position.z);
                     this.didPlayNoteAudio.push(false);
                     this.arrivedAtNote.push(false);
                 }

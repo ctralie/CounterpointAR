@@ -26,6 +26,7 @@ document.addEventListener('touchmove', function(e) {
 <script src="scenes.js"></script>
 <script src="posar.js"></script>
 <script src="digitalAudioGenerator.js"></script>
+<script src="notereader.js"></script>
 
 <script src="jsanov/libs/plotly.min.js"></script>
 <script src="jsanov/libs/lame.min.js"></script>
@@ -34,11 +35,25 @@ document.addEventListener('touchmove', function(e) {
 <script src="jsanov/audio.js"></script>
 <script src="jsanov/libs/jquery-3.5.1.min.js"></script>
 
+<script src="song.txt"></script>
 
 <script>
-    let scene = new BasicScene();
-    let posAR = new PositionalAR(scene,debug = true);
-    
+
+  let songFile = new XMLHttpRequest();
+  songFile.open("GET","song.txt",true);
+  songFile.onreadystatechange = function(){
+    if(songFile.readyState === 4){
+      if(songFile.status === 200){
+        let allText = songFile.responseText;
+        console.log(allText);
+        let lines = songFile.responseText.split(" ");
+      }
+    }
+  }
+  songFile.send(null);
+
+  let scene= new BasicScene();
+  let posAR= new PositionalAR(scene, debug = false);
 </script>
 
 </body>
