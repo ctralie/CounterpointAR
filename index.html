@@ -38,22 +38,14 @@ document.addEventListener('touchmove', function(e) {
 <script src="song.txt"></script>
 
 <script>
-
-  let songFile = new XMLHttpRequest();
-  songFile.open("GET","song.txt",true);
-  songFile.onreadystatechange = function(){
-    if(songFile.readyState === 4){
-      if(songFile.status === 200){
-        let allText = songFile.responseText;
-        console.log(allText);
-        let lines = songFile.responseText.split(" ");
-      }
-    }
+  
+  let notes= new NoteReader();
+  while(!notes.gotInfo){
+    //wait
   }
-  songFile.send(null);
-
   let scene= new BasicScene();
   let posAR= new PositionalAR(scene, debug = false);
+  
 </script>
 
 </body>

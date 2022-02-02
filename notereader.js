@@ -1,18 +1,35 @@
 class NoteReader {
 
-    constructor(filename){
-        let fReader = new FileReader();
-        let file = "songs/" + filename;
+    
 
-        fReader.readAsText(file);
+    constructor(){
 
-        fReader.onload = function(){
-            console.log(fReader.result);
-        };
+        let omittedIndex = 6;
 
-        fReader.onerror = function(){
-            console.log(fReader.error);
-        };
+        let usefulSegments = [];
+
+        let songFile = new XMLHttpRequest();
+        songFile.open("GET","song.txt",true);
+        songFile.onreadystatechange = function(){
+            if(songFile.readyState === 4){
+                if(songFile.status === 200){
+                    let fileText = songFile.responseText;
+                    let fileSegments = fileText.split("\n");
+                    console.log(fileSegments);
+                    for(let i = this.ommitedIndex; i < fileSegments.length; i++){
+                        usefulSegments.push(fileSegments[i]);
+                        console.log(fileSegments[i]);
+                    }
+                }
+            }
+        }
+        console.log(usefulSegments);
+        if(usefulSegments.length > 0){
+            this.gotInfo = true;
+        }
+        songFile.send(null);
+
+        
 
     }
 }
