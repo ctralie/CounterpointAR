@@ -40,9 +40,13 @@ document.addEventListener('touchmove', function(e) {
 <script>
   
   let notes= new NoteReader();
-  while(!notes.gotInfo){
-    //wait
-  }
+  notes.loadFile("song.txt").then(function() {
+    console.log("Lines after finished" + notes.lines);
+    // TODO: At this point, you can use the notes
+  });
+  console.log("Lines after constructor and loadFile call: " + notes.lines);
+
+
   let scene= new BasicScene();
   let posAR= new PositionalAR(scene, debug = false);
   

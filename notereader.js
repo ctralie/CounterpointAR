@@ -1,35 +1,32 @@
 class NoteReader {
 
-    
+    constructor() {
+        this.fileReady = false;
+        this.data = null;
+        this.lines = [];
+    }
 
-    constructor(){
-
-        let omittedIndex = 6;
-
-        let usefulSegments = [];
-
-        let songFile = new XMLHttpRequest();
-        songFile.open("GET","song.txt",true);
-        songFile.onreadystatechange = function(){
-            if(songFile.readyState === 4){
-                if(songFile.status === 200){
-                    let fileText = songFile.responseText;
-                    let fileSegments = fileText.split("\n");
-                    console.log(fileSegments);
-                    for(let i = this.ommitedIndex; i < fileSegments.length; i++){
-                        usefulSegments.push(fileSegments[i]);
-                        console.log(fileSegments[i]);
+    loadFile(filename) {
+        let that = this;
+        this.fileReady = false;
+        this.lines = [];
+        this.data = new Promise(
+            function(resolve, reject) {
+                $.get(filename, function(s) {
+                    let lines = s.split("\n");
+                    for (let i = 0; i < lines.length; i++) {
+                        if (lines[i][0] != "#") {
+                            that.lines.push(lines[i]);
+                        }
                     }
-                }
+                    that.fileReady = true;
+                    resolve();
+                }, "text")
+                .fail(() => {
+                    reject();
+                });
             }
-        }
-        console.log(usefulSegments);
-        if(usefulSegments.length > 0){
-            this.gotInfo = true;
-        }
-        songFile.send(null);
-
-        
-
+        );
+        return this.data;
     }
 }

@@ -1,11 +1,10 @@
-"For Time signature: (Beats per measure, equivalent note beat)"
-"For Clef, write either Treble, Alto, or Bass"
-"For Cantus Firmus/Counter point notes, input note letter"
-"If sharp, add an s to the end like ds"
-"If in higher register on staff, capitalize letter"
-"(ex. d and D for high D) ::: in format (d,e,D,fs,etc...)"
-
-"Time Signature: (2,2)"
-"Clef: (Treble)"
-"Cantus Firmus: (d,f,e,d,g,f,a,g,f,e,d)"
-"Counterpoint: (a,a,g,a,b,c,c,b,d,cs,d)"
+# For Time signature: (Beats per measure, equivalent note beat)
+# For Clef, write either Treble, Alto, or Bass
+# For Cantus Firmus/Counter point notes, input note letter
+# If sharp, add an s to the end like ds
+# If in higher register on staff, capitalize letter
+# (ex. d and D for high D) ::: in format (d,e,D,fs,etc...)
+Time Signature: (2,2)
+Clef: (Treble)
+Cantus Firmus: (d,f,e,d,g,f,a,g,f,e,d)
+Counterpoint: (a,a,g,a,b,c,c,b,d,cs,d)
