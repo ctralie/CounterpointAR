@@ -35,16 +35,34 @@ document.addEventListener('touchmove', function(e) {
 <script src="jsanov/audio.js"></script>
 <script src="jsanov/libs/jquery-3.5.1.min.js"></script>
 
-<script src="song.txt"></script>
-
 <script>
   
-  let notes= new NoteReader();
-  notes.loadFile("song.txt").then(function() {
-    console.log("Lines after finished" + notes.lines);
-    // TODO: At this point, you can use the notes
-  });
-  console.log("Lines after constructor and loadFile call: " + notes.lines);
+  
+  
+  class TestClass {
+    constructor() {
+      this.notes= new NoteReader();
+      this.notes.loadFile("song.txt");
+      this.doSomethingWithData();
+      console.log("Lines after constructor and loadFile call: " + this.notes.lines);
+    }
+
+    doSomethingWithData() {
+      if (!this.notes.fileReady) {
+        // "this" makes sure that when doSomethingWithData is called 
+        // it actually is called on the current object
+        this.notes.data.then(this.doSomethingWithData.bind(this));
+      }
+      else {
+        // Do some stuff now that it's ready
+        console.log("Lines after finished" + this.notes.lines);
+      }
+    }
+  }
+
+  let obj = new TestClass();
+
+
 
 
   let scene= new BasicScene();

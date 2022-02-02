@@ -2,7 +2,7 @@ class NoteReader {
 
     constructor() {
         this.fileReady = false;
-        this.data = null;
+        this.data = null; // Reference to promise
         this.lines = [];
     }
 
