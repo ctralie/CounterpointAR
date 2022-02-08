@@ -56,17 +56,15 @@ document.addEventListener('touchmove', function(e) {
       else {
         // Do some stuff now that it's ready
         console.log("Lines after finished" + this.notes.lines);
+        this.notes.parseInfo();
       }
     }
   }
 
   let obj = new TestClass();
-
-
-
-
-  let scene= new BasicScene();
-  let posAR= new PositionalAR(scene, debug = false);
+  //TODO: implement aesthetic elements to scene
+  //let scene= new BasicScene();
+  //let posAR= new PositionalAR(scene, debug = false);
   
 </script>
 
