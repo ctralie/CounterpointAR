@@ -1,4 +1,4 @@
-class NoteReader {
+class RollReader {
 
     constructor() {
         this.fileReady = false;
@@ -6,8 +6,11 @@ class NoteReader {
         this.lines = [];
         this.timeSig = [];
         this.clef = "";
+        this.alteration = "";
         this.cantusFirmusNotes = [];
+        this.cantusFirmusDurs = [];
         this.counterpointNotes = [];
+        this.counterpointDurs = [];
     }
 
     loadFile(filename) {
@@ -20,7 +23,7 @@ class NoteReader {
                     let lines = s.split("\n");
                     for (let i = 0; i < lines.length; i++) {
                         if ((lines[i][0] != "@") && (lines[i] != "")) {
-                            that.lines.push(lines[i]);
+                            that.lines.push(lines[i].replace(/\s/g,''));
                         }
                     }
                     that.fileReady = true;
@@ -37,26 +40,24 @@ class NoteReader {
     /*
     Time signature: (2,2)
     Clef: (Treble)
+    Alteration: (Sharp)
     Cantus Firmus:
-    d : 2
+    D#4 : quarter
     ...
     Counterpoint:
-    d : 2
+    Df4 : quarter
     ...
     */
+
+    //returns parsed info
     parseInfo(){
-        console.log(this.lines)
         let timeSigIndex = 0;
         let clefIndex = 1;
-        let cantFirmIndex = 3;
+        let alterationIndex = 2;
+        let cantFirmIndex = 4;
         let cPointIndex = 0;
-        for(let i = 0; i < this.lines.length; i++){
-            if(this.lines[i].includes("Counterpoint:")){
-                cPointIndex = i+1;
-                i = this.lines.length;
-            }
-        }
-        let indArr = [timeSigIndex,clefIndex];
+        
+        let indArr = [timeSigIndex,clefIndex, alterationIndex];
         for(let i = 0; i < indArr.length; i++){
             let index = this.lines[indArr[i]].indexOf(":");
             let info = this.lines[indArr[i]].substring(index);
@@ -65,16 +66,34 @@ class NoteReader {
                 info = info.substring(info.indexOf("(")+1);
                 this.timeSig.push(parseInt(info.substring(0,1)));
                 this.timeSig.push(parseInt(info.substring(2,3)));
-                console.log(this.timeSig);
-            }else{
+            }else if(i == 1){
                 //clef
                 this.clef = info.substring(info.indexOf("(")+1,info.indexOf(")"));
-                console.log(this.clef);
+            }else{
+                //alteration
+                this.alteration = info.substring(info.indexOf("(")+1,info.indexOf(")"));
             }
         }
-        //cantus firmus
-
-        //counterpoint
-        
+        for(let i = 0; i < this.lines.length; i++){
+            if(this.lines[i].includes("Counterpoint:")){
+                cPointIndex = i;
+                i = this.lines.length;
+            }
+        }
+        //cantus firmus and counter point
+        for(let i = cantFirmIndex; i < this.lines.length; i++){
+            let ind = this.lines[i].indexOf(":");
+            if(i < cPointIndex){
+                this.cantusFirmusNotes.push(this.lines[i].substring(0,ind));
+                this.cantusFirmusDurs.push(this.lines[i].substring(ind+1));
+            }
+            if(i > cPointIndex){
+                this.counterpointNotes.push(this.lines[i].substring(0,ind));
+                this.counterpointDurs.push(this.lines[i].substring(ind+1));
+            }
+        }
+        let CF = [this.cantusFirmusNotes,this.cantusFirmusDurs];
+        let CP = [this.counterpointNotes,this.counterpointDurs];
+        return [this.timeSig,this.clef,this.alteration,CF,CP];
     }
 }

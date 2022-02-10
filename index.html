@@ -41,10 +41,9 @@ document.addEventListener('touchmove', function(e) {
   
   class TestClass {
     constructor() {
-      this.notes= new NoteReader();
+      this.notes= new RollReader();
       this.notes.loadFile("song.txt");
       this.doSomethingWithData();
-      console.log("Lines after constructor and loadFile call: " + this.notes.lines);
     }
 
     doSomethingWithData() {
@@ -56,15 +55,15 @@ document.addEventListener('touchmove', function(e) {
       else {
         // Do some stuff now that it's ready
         console.log("Lines after finished" + this.notes.lines);
-        this.notes.parseInfo();
+        let ret = this.notes.parseInfo();
+        console.log(ret);
+        let scene = new BasicScene(ret[0],ret[1]);
+        let posAR = new PositionalAR(scene, ret);
       }
     }
   }
 
   let obj = new TestClass();
-  //TODO: implement aesthetic elements to scene
-  //let scene= new BasicScene();
-  //let posAR= new PositionalAR(scene, debug = false);
   
 </script>
 

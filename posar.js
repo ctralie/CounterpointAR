@@ -42,7 +42,7 @@ class PositionalAR {
      * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, antialias, medWin, debug) {
+    constructor(sceneObj, antialias, medWin, debug, ret) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;

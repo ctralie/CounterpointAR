@@ -5,7 +5,7 @@
 
 class BasicScene {
 
-    constructor() {
+    constructor(timeSig, clef) {
         // Step 1: Create a three.js scene and camera
         let scene = new THREE.Scene();
         this.scene = scene;
