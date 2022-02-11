@@ -48,7 +48,7 @@ Alteration: (Sharp)
 @ D4 : half
 
 Cantus Firmus:
-D4 : half
+Df4 : half
 F4 : half
 E4 : half
 D4 : half

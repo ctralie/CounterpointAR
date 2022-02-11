@@ -96,4 +96,6 @@ class RollReader {
         let CP = [this.counterpointNotes,this.counterpointDurs];
         return [this.timeSig,this.clef,this.alteration,CF,CP];
     }
+
+    
 }

@@ -43,28 +43,29 @@ document.addEventListener('touchmove', function(e) {
     constructor() {
       this.notes= new RollReader();
       this.notes.loadFile("song.txt");
-      this.doSomethingWithData();
+      this.doSomethingWithFile();
+      //this.digAud = new DAGenerator();
     }
 
-    doSomethingWithData() {
+    doSomethingWithFile() {
       if (!this.notes.fileReady) {
         // "this" makes sure that when doSomethingWithData is called 
         // it actually is called on the current object
-        this.notes.data.then(this.doSomethingWithData.bind(this));
+        this.notes.data.then(this.doSomethingWithFile.bind(this));
       }
       else {
         // Do some stuff now that it's ready
         console.log("Lines after finished" + this.notes.lines);
-        let ret = this.notes.parseInfo();
-        console.log(ret);
-        let scene = new BasicScene(ret[0],ret[1]);
-        let posAR = new PositionalAR(scene, ret);
+        this.digAud = new DAGenerator();
+        this.digAud.fillInfo(this.notes.parseInfo());
       }
     }
+    
   }
 
   let obj = new TestClass();
-  
+  //let scene = new BasicScene(ret[0],ret[1]);
+  //let posAR = new PositionalAR(scene, ret);
 </script>
 
 </body>

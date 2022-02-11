@@ -93,7 +93,7 @@ class PositionalAR {
         if(this.freeForm){
             songPick = 4;
         }
-        this.musicPlayer = new DAGenerator(songPick, true);
+        this.musicPlayer = new DAGenerator(ret);
 
         //this.nfr = new NoteReader("song.txt");
 

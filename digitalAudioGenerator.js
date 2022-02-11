@@ -1,118 +1,97 @@
-const MP3_DICTIONARY_TREBLE = [
-    {"C4":"notes/C4.mp3","C#4":"notes/C#4.mp3","D4":"notes/D4.mp3","D#4":"notes/D#4.mp3",
-    "E4":"notes/E4.mp3","F4":"notes/F4.mp3","F#4":"notes/F#4.mp3","G4":"notes/G4.mp3",
-    "G#4":"notes/G#4.mp3","A4":"notes/A4.mp3","A#4":"notes/A#4.mp3","B4":"notes/B4.mp3",
-    "C5":"notes/C5.mp3","C#5":"notes/C#5.mp3","D5":"notes/D5.mp3","D#5":"notes/D#5.mp3",
-    "E5":"notes/E5.mp3","F5":"notes/F5.mp3","F#5":"notes/F#5.mp3","G5":"notes/G5.mp3",
-    "G#5":"notes/G#5.mp3","A5":"notes/A5.mp3"}
-];
 
-const MP3_DICTIONARY_ALTO = [];
 
-const MP3_DICTIONARY_BASS= [];
+
 
 class DAGenerator{
 
+    //ret[0] = time sig
+    //ret[1] = clef
+    //ret[2] = alteration
+    //ret[3] = cantus firmus [notes, durations]
+    //ret[4] = counterpoint [notes, durations]
     constructor(){
-        
-        this.noteArray = [];
-        this.audioArrays = [];
-        this.noteCount = 0;
-        this.mp3Notes = [];
-        this.mp3Arrays = [];
-        this.noteDic = ["C1","C#1","D1",
-        "D#1","E1","F1","F#1","G1","G#1",
-        "A1","A#1","B1","C2","C#2","D2",
-        "D#2","E2","F2","F#2","G2","G#2","A2"];
+
+        this.ret = [];
+
+        this.clef = "";
+        this.usedArr = null;
+        this.cantusFirmusNotes = [];
+        this.cantusFirmusDurs = [];
+        this.counterpointNotes = [];
+        this.counterpointDurs = [];
+        this.cfMp3Arrs = [];
+        this.cpMp3Arrs = [];
+
+        this.bassNoteArr = ["D#2","E2","E#2","F2",
+        "F#2","G2","G#2","A2","A#2","B2","B#2",
+        "C3","C#3","D3","D#3","E3","E#3","F3",
+        "F#3","G3","G#3","A3","A#3","B3","B#3"];
+
+        this.altoNoteArr = ["C#3","D3","D#3","E3","E#3","F3",
+        "F#3","G3","G#3","A3","A#3","B3","B#3","C4","C#4","D4","D#4","E4","E#4","F4",
+        "F#4","G4","G#4","A4","A#4","B4","B#4"];
+
+        this.trebleNoteArr = ["B#3","C4","C#4","D4","D#4","E4","E#4","F4",
+        "F#4","G4","G#4","A4","A#4","B4","B#4","C5","C#5","D5","D#5","E5","E#5","F5",
+        "F#5","G5","G#5","A5","A#5"];
 
     }
 
-    setupSampleAudio(){
-        for(let i = 0; i < this.mp3Notes.length; i++){
-            let str = this.mp3Notes[i];
-            let pDir = "notes/"+str+".mp3";
-            let sampAud = new Audio(pDir);
-            this.mp3Arrays.push(sampAud);
+    fillInfo(ret){
+        console.log(ret);
+        this.clef = ret[1];
+        
+        this.cantusFirmusNotes = ret[3][0];
+        this.cantusFirmusDurs = ret[3][1];
+        this.cfLength = this.cantusFirmusNotes.length;
+
+        this.counterpointNotes = ret[4][0];
+        this.counterpointDurs = ret[4][1];
+        this.cpLength = this.counterpointNotes.length
+
+
+        switch(this.clef){
+            case "Bass":
+                this.usedArr = this.bassNoteArr;
+                break;
+            case "Alto":
+                this.usedArr = this.altoNoteArr;
+                break;
+            case "Treble":
+                this.usedArr = this.trebleNoteArr;
         }
+
+
+        this.mp3CantusFirmusSetup();
+    }
+
+    /*
+        directory path:
+        notes/(note)/duration/____.mp3
+    */
+
+    mp3CantusFirmusSetup(){
+        for(let i = 0; i < this.cfLength; i++){
+            let note = this.cantusFirmusNotes[i];
+            if(note.includes("f")){
+                note = this.changeFlatNotes(note);
+            }
+            let dur = this.cantusFirmusDurs[i];
+            let pDir = "notes/"+note+"/"+dur+".mp3";
+            console.log(pDir);
+            //let sampAud = new Audio(pDir);
+            //this.mp3Arrays.push(sampAud);
+            
+            
+        }
+    }
+
+    changeFlatNotes(note){
+        let str = note.substring(0,1) + note.substring(2);
+        return this.usedArr[this.usedArr.indexOf(str) - 1]
     }
 
     playNoteTone(noteNumber){
         this.mp3Arrays[noteNumber].play();
-    }
-
-    createAudioArrays(){
-        for(let i = 0; i < this.noteCount; i++){
-            this.audioArrays.push(new SampledAudio());
-        }
-        let sortedNoteArray = this.noteArray.sort(function(a,b){return a - b});
-        let freqVarianceList = [];
-        for(let i = 0; i < sortedNoteArray.length; i++){
-            if(!freqVarianceList.includes(sortedNoteArray[i])){
-                freqVarianceList.push(sortedNoteArray[i]);
-            }
-        }
-        //make 1 audio array per each different note (not all notes)
-        let waveformArrays = [];
-        for(let i = 0; i < freqVarianceList.length; i++){
-            let waveForm = new Float32Array(this.sr*this.noteLength);
-            let nV = freqVarianceList[i];
-            for(let j = 0; j < waveForm.length; j++){
-                waveForm[j] += Math.cos(2*Math.PI*this.freq*nV/this.sr);
-                console.log(i);
-            }
-            waveformArrays.push(waveForm);
-        }
-        console.log(waveformArrays);
-    }
-
-    inputSongChoice(){
-        switch(this.songnumber){
-            case(0):
-                this.extractNoteInformation(SONG_ZERO);
-                break;
-            case(1):
-                this.extractNoteInformation(SONG_ONE);
-                break;
-            case(2):
-                this.extractNoteInformation(SONG_TWO);
-                break;
-            case(3):
-                this.extractNoteInformation(SONG_THREE);
-                break;
-            case(4):
-                this.extractNoteInformation(FREE_SONG);
-            default:
-                //you done goofed
-                break;
-        }
-    }
-
-    extractNoteInformation(songChoice){
-        this.noteCount = songChoice.length;
-        for(let i = 0; i < this.noteCount; i++){
-            this.noteArray.push(-1);
-            this.mp3Notes.push(songChoice[i].note);
-        }
-        let breakCount = 0;
-        for(let i = 0; i < this.noteDic.length; i++){
-            if(breakCount != this.noteCount){
-                for(let j = 0; j < this.noteCount; j++){
-                    if(this.mp3Notes[j] == this.noteDic[i]){
-                        this.noteArray[j] = i-9;
-                        breakCount++;
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-
-//READ FILE INPUT AND CONVERT NOTE AND SCALE DEGREES TO ARRAYS
-class MusicReader{
-
-    constructor(){
-        
     }
 }
