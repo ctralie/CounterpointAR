@@ -73,25 +73,45 @@ class DAGenerator{
     mp3CantusFirmusSetup(){
         for(let i = 0; i < this.cfLength; i++){
             let note = this.cantusFirmusNotes[i];
-            if(note.includes("f")){
-                note = this.changeFlatNotes(note);
-            }
+            note = this.checkNoteAnomolies(note);
             let dur = this.cantusFirmusDurs[i];
             let pDir = "notes/"+note+"/"+dur+".mp3";
             console.log(pDir);
-            //let sampAud = new Audio(pDir);
-            //this.mp3Arrays.push(sampAud);
-            
-            
+            let sampAud = new Audio(pDir);
+            this.cfMp3Arrs.push(sampAud);
         }
     }
 
-    changeFlatNotes(note){
-        let str = note.substring(0,1) + note.substring(2);
-        return this.usedArr[this.usedArr.indexOf(str) - 1]
+    //finish
+    mp3CounterpointSetup(){
+        for(let i = 0; i < this.cpLength; i++){
+            let note = this.counterpointNotes[i];
+            note = this.checkNoteAnomolies(note);
+            let dur = this.counterpointDurs[i];
+            let pDir = "notes/"+dur+"/"+note+".mp3";
+            //let pDir = "notes/"+note+"/"+dur+".mp3";
+            console.log(pDir);
+            let sampAud = new Audio(pDir);
+            this.cpMp3Arrs.push(sampAud);
+        }
     }
 
-    playNoteTone(noteNumber){
-        this.mp3Arrays[noteNumber].play();
+    checkNoteAnomolies(note){
+        let updatedNote = note;
+        if(note.includes("f")){
+            let str = note.substring(0,1) + note.substring(2);
+            updatedNote = this.usedArr[this.usedArr.indexOf(str) - 1];
+        }else if(note.includes("B#")||note.includes("E#")){
+            updatedNote = this.userArr[this.usedArr.indexOf(note)+1];
+        }
+        return updatedNote;
+    }
+
+    playCantFirmNote(noteNumber){
+        this.cfMp3Arrs[noteNumber].play();
+    }
+
+    playCounterpointNote(noteNumber){
+        this.cpMp3Arrs[noteNumber].play();
     }
 }
