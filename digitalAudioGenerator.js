@@ -12,7 +12,7 @@ class DAGenerator{
     constructor(){
 
         this.ret = [];
-
+        this.loadedStuff = false;
         this.clef = "";
         this.usedArr = null;
         this.cantusFirmusNotes = [];
@@ -22,34 +22,32 @@ class DAGenerator{
         this.cfMp3Arrs = [];
         this.cpMp3Arrs = [];
 
+        //add flats
         this.bassNoteArr = ["D#2","E2","E#2","F2",
         "F#2","G2","G#2","A2","A#2","B2","B#2",
         "C3","C#3","D3","D#3","E3","E#3","F3",
         "F#3","G3","G#3","A3","A#3","B3","B#3"];
 
+        //add flats
         this.altoNoteArr = ["C#3","D3","D#3","E3","E#3","F3",
         "F#3","G3","G#3","A3","A#3","B3","B#3","C4","C#4","D4","D#4","E4","E#4","F4",
         "F#4","G4","G#4","A4","A#4","B4","B#4"];
 
-        this.trebleNoteArr = ["B#3","C4","C#4","D4","D#4","E4","E#4","F4",
-        "F#4","G4","G#4","A4","A#4","B4","B#4","C5","C#5","D5","D#5","E5","E#5","F5",
-        "F#5","G5","G#5","A5","A#5"];
+        this.trebleNoteArr = ["B#3","Cf4","C4","C#4","Df4","D4","D#4","Ef4",
+        "E4","E#4","Ff4","F4","F#4","Gf4","G4","G#4","Af4","A4","A#4","Bf4",
+        "B4","B#4","Cf5","C5","C#5","Df5","D5","D#5","Ef5","E5","E#5","Ff5",
+        "F5","F#5","Gf5","G5","G#5","Af5","A5","A#5"];
 
     }
 
     fillInfo(ret){
-        console.log(ret);
         this.clef = ret[1];
-        
         this.cantusFirmusNotes = ret[3][0];
         this.cantusFirmusDurs = ret[3][1];
         this.cfLength = this.cantusFirmusNotes.length;
-
         this.counterpointNotes = ret[4][0];
         this.counterpointDurs = ret[4][1];
         this.cpLength = this.counterpointNotes.length
-
-
         switch(this.clef){
             case "Bass":
                 this.usedArr = this.bassNoteArr;
@@ -60,55 +58,43 @@ class DAGenerator{
             case "Treble":
                 this.usedArr = this.trebleNoteArr;
         }
-
-
+        console.log(ret);
         this.mp3CantusFirmusSetup();
+        this.mp3CounterpointSetup();
     }
-
-    /*
-        directory path:
-        notes/(note)/duration/____.mp3
-    */
 
     mp3CantusFirmusSetup(){
         for(let i = 0; i < this.cfLength; i++){
             let note = this.cantusFirmusNotes[i];
-            note = this.checkNoteAnomolies(note);
             let dur = this.cantusFirmusDurs[i];
-            let pDir = "notes/"+note+"/"+dur+".mp3";
-            console.log(pDir);
+            let pDir = "notes/"+dur+"/"+note+".mp3";
             let sampAud = new Audio(pDir);
             this.cfMp3Arrs.push(sampAud);
         }
+        this.loadedStuff = true;
     }
 
-    //finish
     mp3CounterpointSetup(){
         for(let i = 0; i < this.cpLength; i++){
             let note = this.counterpointNotes[i];
-            note = this.checkNoteAnomolies(note);
             let dur = this.counterpointDurs[i];
             let pDir = "notes/"+dur+"/"+note+".mp3";
-            //let pDir = "notes/"+note+"/"+dur+".mp3";
-            console.log(pDir);
             let sampAud = new Audio(pDir);
             this.cpMp3Arrs.push(sampAud);
         }
     }
 
-    checkNoteAnomolies(note){
-        let updatedNote = note;
-        if(note.includes("f")){
-            let str = note.substring(0,1) + note.substring(2);
-            updatedNote = this.usedArr[this.usedArr.indexOf(str) - 1];
-        }else if(note.includes("B#")||note.includes("E#")){
-            updatedNote = this.userArr[this.usedArr.indexOf(note)+1];
-        }
-        return updatedNote;
-    }
-
     playCantFirmNote(noteNumber){
-        this.cfMp3Arrs[noteNumber].play();
+        let that = this;
+        if(this.cfMp3Arrs[noteNumber].readyState >= 2){
+            this.cfMp3Arrs[noteNumber].play();
+            console.log("played note");
+        }else{
+            this.cfMp3Arrs[noteNumber].addEventListener('loadeddata', function(){
+                that.cfMp3Arrs[noteNumber].play();
+                console.log("played note");
+            });
+        }
     }
 
     playCounterpointNote(noteNumber){

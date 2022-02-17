@@ -6,23 +6,28 @@ The image size set to 2500px, pattern ratio set to .9
 
 const PATTERNS_AR = [
     {"url":"data/newmarkers/pattern-A.patt", "pos":[1, 0]},
-    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 1]},
-    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 2]},
-    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 3]},
-    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 4]},
-    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 5]},
+    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 0.5]},
+    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 1]},
+    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 1.5]},
+    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 2]},
+    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 2.5]},
     {"url":"data/newmarkers/pattern-G.patt", "pos":[-1, 0]},
-    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 1]},
-    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 2]},
-    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 3]},
-    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 4]},
-    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 5]},
+    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 0.5]},
+    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 1]},
+    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 1.5]},
+    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 2]},
+    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 2.5]},
 ];
 
-
-//starts at C4
-const TREBXPOS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
-    .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
+const TREBXPOS = {"B#3":{"pos":3.5},"Cf4":{"pos":3},"C4":{"pos":3},"C#4":{"pos":3},
+"Df4":{"pos":2.5},"D4":{"pos":2.5},"D#4":{"pos":2.5},"Ef4":{"pos":2},"E4":{"pos":2},
+"E#4":{"pos":2},"Ff4":{"pos":1.5},"F4":{"pos":1.5},"F#4":{"pos":1.5},"Gf4":{"pos":1},
+"G4":{"pos":1},"G#4":{"pos":1},"Af4":{"pos":0.5},"A4":{"pos":0.5},"A#4":{"pos":0.5},
+"Bf4":{"pos":0},"B4":{"pos":0},"B#4":{"pos":0},"Cf5":{"pos":-0.5},"C5":{"pos":-0.5},
+"C#5":{"pos":-0.5},"Df5":{"pos":-1},"D5":{"pos":-1},"D#5":{"pos":-1},"Ef5":{"pos":-1.5},
+"E5":{"pos":-1.5},"E#5":{"pos":-1.5},"Ff5":{"pos":-2},"F5":{"pos":-2},"F#5":{"pos":-2},
+"Gf5":{"pos":-2.5},"G5":{"pos":-2.5},"G#5":{"pos":-2.5},"Af5":{"pos":-3},"A5":{"pos":-3},
+"A#5":{"pos":-3}};
 
 //starts at D3
 const ALTOXPOS = [3.5,3.5,3,3,2.5,2,2,1.5,1.5,
@@ -42,12 +47,13 @@ class PositionalAR {
      * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, antialias, medWin, debug, ret) {
+    constructor(sceneObj, digAudio, antialias, medWin, debug) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
+        this.digAud = digAudio;
 
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
@@ -70,13 +76,15 @@ class PositionalAR {
         this.gotPlacement = false;
 
         this.notePositions = [];
-        this.zCFPosArray = [];
         this.arrivedAtNote = [];
         this.didPlayNoteAudio = [];
         
         this.noteGroupPlacement = -2;
         this.spaceAboveStaff = .1; 
         this.noteCount = 0;
+
+        this.userNotePos = [];
+        
         
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
@@ -88,16 +96,6 @@ class PositionalAR {
         renderer.domElement.style.left = '0px'
         document.body.appendChild( renderer.domElement );
 
-        // Setup Audio Engine
-        let songPick = 0;
-        if(this.freeForm){
-            songPick = 4;
-        }
-        this.musicPlayer = new DAGenerator(ret);
-
-        //this.nfr = new NoteReader("song.txt");
-
-        // Finally, setup the AR tracker
         this.setupTracker();
         this.repaint();
     }
@@ -159,13 +157,13 @@ class PositionalAR {
         this.vertNumer = 0;
         this.vertCount = 0;
         for (let i = 0; i < PATTERNS_AR.length; i++) {
-            const markerRoot = new THREE.Group();
+            let markerRoot = new THREE.Group();
             markerRoot.visible = false;
             markerRoot.markerPos = PATTERNS_AR[i].pos;
             markerRoot.posHistory = [];
-            this.scene.add(markerRoot);
+            that.scene.add(markerRoot);
             markerRoots.push(markerRoot);
-            const markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+            let markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
                 size: 1, type: 'pattern', patternUrl: PATTERNS_AR[i].url, smooth: true
                 //minConfidence: 0.3,
                 //smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
@@ -176,7 +174,7 @@ class PositionalAR {
                 //console.log("Marker "+i+" found");
             });
             markerControl.addEventListener("markerLost", (e)=>{
-                this.markerRoots[e.target.i].visible = false;
+                that.markerRoots[e.target.i].visible = false;
                 console.log("Marker "+i+" lost");
             });
         }
@@ -184,13 +182,21 @@ class PositionalAR {
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.setupGhostNote();
-        if(this.freeForm){
-            this.setupFreeFormNotes();
-        }else{
-            this.setupCantusFirmus();
-        }
+        this.setupCantusFirmus();
         this.scene.add(this.arGroup);
-    }   
+    }
+
+    clefXChoice(clefChoice){
+        let posarr = [];
+        if(clefChoice === "Treble"){
+            posarr = TREBXPOS;
+        }else if(clefChoice === "Alto"){
+            posarr = ALTOXPOS;
+        }else{
+            posarr = BASSXPOS;
+        }
+        return posarr;
+    }
 
     setupGhostNote(){
         this.noteG = new THREE.TorusGeometry(.35, .08, 10, 24);
@@ -210,65 +216,30 @@ class PositionalAR {
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
         this.noteGroup = new THREE.Group();
 
-        let noteDictionary = this.musicPlayer.noteDic;
-        let songNotes = this.musicPlayer.mp3Notes;
+        this.xPosArr = this.clefXChoice(this.digAud.clef);
+
+        let songNotes = this.digAud.cantusFirmusNotes;
         let noteSpacing = 1.75;
-        let notePositionZ = 1.5;
+        let notePositionZ = 1;
+        let songLength = this.digAud.cfLength;
 
-        for(let i = 0; i < songNotes.length; i++){
-            let foundNote = false;
-            let iter = 0;
-            while(!foundNote || iter == noteDictionary.length){
-                if(noteDictionary[iter] == songNotes[i]){
-                    foundNote = true;
-                    let newNote = new THREE.Mesh(musicNote, noteMaterial);
-                    newNote.position.x = TREBXPOS[iter];
-                    newNote.position.y = this.spaceAboveStaff;
-                    newNote.position.z = notePositionZ - noteSpacing;
-                    notePositionZ = newNote.position.z;
-                    this.noteCount++;
-                    this.noteGroup.add(newNote);
-                    this.zCFPosArray.push(newNote.position.z);
-                    this.didPlayNoteAudio.push(false);
-                    this.arrivedAtNote.push(false);
-                }
-                iter++;
-            }
-        }
-        this.arGroup.add(this.noteGroup);
-        this.AGCMNI = this.arGroup.children.length - 1;
-    }
-
-    setupFreeFormNotes(){
-        
-        this.noteCount = 0;
-        let musicNote = new THREE.TorusGeometry(.35,.08,10,24);
-        musicNote.scale(1,1.55,1);
-        musicNote.rotateX(1.57);
-        let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
-        this.noteGroup = new THREE.Group();
-
-        let notePositionLines = -.5;
-        let notePositionSpaces = -1.5;
-        let xPos = 3;
-
-        for(let i = 0; i < 13; i++){
+        for(let i = 0; i < songLength; i++){
+            let xP = this.xPosArr[songNotes[i]].pos;
             let newNote = new THREE.Mesh(musicNote, noteMaterial);
-            newNote.position.x = xPos;
+            newNote.position.x = xP;
             newNote.position.y = this.spaceAboveStaff;
-            if(i%2 != 0){
-                newNote.position.z = notePositionLines;
-            }else{
-                newNote.position.z = notePositionSpaces;
-            }
-            xPos -= .5;
+            newNote.position.z = notePositionZ - noteSpacing;
+            notePositionZ = newNote.position.z;
             this.noteCount++;
             this.noteGroup.add(newNote);
+            this.didPlayNoteAudio.push(false);
+            this.arrivedAtNote.push(false);
+
         }
-        
         this.arGroup.add(this.noteGroup);
         this.AGCMNI = this.arGroup.children.length - 1;
     }
+
     
 
     /**
@@ -375,36 +346,25 @@ class PositionalAR {
             updatedPositions.push(this.arGroup.children[this.AGCMNI].children[i].position);
         }
         this.notePositions = updatedPositions;
+        let thresh = 0.1;
+        //do this, check distance between z of current and note, then record x position of self
         let currentPosition = this.arGroup.children[this.AGCGNI].position;
+        for(let i = 0; i < this.noteCount; i++){
+            let zdis = Math.abs(this.notePositions[i].z - currentPosition.z);
+            if((zdis < thresh) && !this.arrivedAtNote[i]){
+                console.log("At Music Note " + i);
+                this.arrivedAtNote[i] = true;
 
-        let thresh = .5;
+                this.userNotePos.push(currentPosition.x);
 
-        if(this.freeForm){
-            for(let i = 0; i < this.noteCount; i++){
-                let dis = currentPosition.distanceTo(this.notePositions[i]);
-                if(dis < thresh){
-                    this.playMusicNoteAudio(i);
-                    i = this.noteCount;
-                    this.moveFreeFormNotes();
+                if(!this.didPlayNoteAudio[i]){
+                    this.digAud.playCantFirmNote(i);
+                    this.didPlayNoteAudio[i] = true;
                 }
-            }
-        }else{
-            for(let i = 0; i < this.noteCount; i++){
-                let dis = currentPosition.distanceTo(this.notePositions[i]);
-                if(dis < thresh && !this.arrivedAtNote[i]){
-                    console.log("At Music Note " + i);
-                    this.arrivedAtNote[i] = true;
-                    if(!this.didPlayNoteAudio[i]){
-                        this.playMusicNoteAudio(i);
-                    }
-                }
+
+
             }
         }
-    }
-
-    playMusicNoteAudio(i){
-        this.musicPlayer.playNoteTone(i);
-        this.didPlayNoteAudio[i] = true;
     }
 
     moveFreeFormNotes(){
@@ -440,3 +400,35 @@ class PositionalAR {
     }
 
 }
+
+/*
+    setupFreeFormNotes(){
+        this.noteCount = 0;
+        let musicNote = new THREE.TorusGeometry(.35,.08,10,24);
+        musicNote.scale(1,1.55,1);
+        musicNote.rotateX(1.57);
+        let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
+        this.noteGroup = new THREE.Group();
+
+        let notePositionLines = -.5;
+        let notePositionSpaces = -1.5;
+        let xPos = 3;
+
+        for(let i = 0; i < 13; i++){
+            let newNote = new THREE.Mesh(musicNote, noteMaterial);
+            newNote.position.x = xPos;
+            newNote.position.y = this.spaceAboveStaff;
+            if(i%2 != 0){
+                newNote.position.z = notePositionLines;
+            }else{
+                newNote.position.z = notePositionSpaces;
+            }
+            xPos -= .5;
+            this.noteCount++;
+            this.noteGroup.add(newNote);
+        }
+        
+        this.arGroup.add(this.noteGroup);
+        this.AGCMNI = this.arGroup.children.length - 1;
+    }
+    */

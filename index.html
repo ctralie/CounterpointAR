@@ -44,7 +44,6 @@ document.addEventListener('touchmove', function(e) {
       this.notes= new RollReader();
       this.notes.loadFile("song.txt");
       this.doSomethingWithFile();
-      //this.digAud = new DAGenerator();
     }
 
     doSomethingWithFile() {
@@ -58,13 +57,15 @@ document.addEventListener('touchmove', function(e) {
         console.log("Lines after finished" + this.notes.lines);
         this.digAud = new DAGenerator();
         this.digAud.fillInfo(this.notes.parseInfo());
+        this.scene = new BasicScene();
+        this.scene.makeScene(this.notes.parseInfo());
+        this.posAR = new PositionalAR(this.scene,this.digAud);
       }
     }
     
   }
 
   let obj = new TestClass();
-  //let scene = new BasicScene(ret[0],ret[1]);
   //let posAR = new PositionalAR(scene, ret);
 </script>
 

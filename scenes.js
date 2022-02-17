@@ -7,10 +7,8 @@ class BasicScene {
 
     constructor(timeSig, clef) {
         // Step 1: Create a three.js scene and camera
-        let scene = new THREE.Scene();
-        this.scene = scene;
-        let camera = new THREE.Camera();
-        this.camera = camera;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.Camera();
 
         this.matColor = [{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},
             {color: 0xffff00},{color: 0x00ff00},{color: 0x0000ff},{color: 0x080080},
@@ -22,18 +20,22 @@ class BasicScene {
         const light = new THREE.DirectionalLight(this.matColor[0].color, intensity);
         light.position.set(-1, 10, 4);
         //light.position.set(1,0,5);
-        scene.add(light);
+        this.scene.add(light);
 
         // Step 3: Initiate Mesh and Geometry
         this.partialStaff = new THREE.BoxGeometry(0.1,0.01,2);
         this.sceneRoot = new THREE.Group();
-        
-        this.makeStaff();
+
         this.frameNum = 0;
     }
     
     
-    makeStaff(){    
+    makeScene(ret){
+        
+        //make time sig and clef scene objects
+        this.timeSig = ret[0];
+        this.clef = ret[1];
+
         for (let column = 0; column < 5; column++) {
             let staffPieces = [];
             let fullStaff = new THREE.Group();
