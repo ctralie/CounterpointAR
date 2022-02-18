@@ -291,6 +291,7 @@ class PositionalAR {
                 }
             }
         }
+        this.placeSceneRoot();
     }
 
     /**
@@ -345,6 +346,7 @@ class PositionalAR {
                 this.arGroup.setRotationFromQuaternion(avgQuat);
             }
         }
+        this.updateAnalyzeNotePositions();
     }
     
     placeGhostNote(){
@@ -355,6 +357,7 @@ class PositionalAR {
         this.arGroup.children[this.AGCGNI].position.x = newPosition.x;
         this.arGroup.children[this.AGCGNI].position.y = this.spaceAboveStaff;
         this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 2;
+        this.updateCalibration();
     }
 
     updateAnalyzeNotePositions(){
@@ -382,6 +385,7 @@ class PositionalAR {
 
             }
         }
+        this.canRerun = true;
     }
 
     moveFreeFormNotes(){
@@ -395,6 +399,7 @@ class PositionalAR {
      * the global AR positions, as well as animating the scene forward in time
      */
     repaint() {
+        this.canRerun = false;
         if ( this.arToolkitSource.initialized !== false ) {
             this.arToolkitContext.update( this.arToolkitSource.domElement );
         }
@@ -408,12 +413,13 @@ class PositionalAR {
         
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
-        this.updateCalibration();
-        this.placeSceneRoot();
-        this.updateAnalyzeNotePositions();
-        
-        this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(this.repaint.bind(this));
+        //this.updateCalibration();
+        //this.placeSceneRoot();
+        //this.updateAnalyzeNotePositions();
+        if(this.canRerun){
+            this.renderer.render(this.scene, this.camera);
+            requestAnimationFrame(this.repaint.bind(this));
+        }
     }
 
 }
