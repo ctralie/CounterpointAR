@@ -214,30 +214,47 @@ class PositionalAR {
         musicNote.scale(1,1.55,1);
         musicNote.rotateX(1.57);
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
+        
+        let measureLine = new THREE.BoxGeometry(4,.01,.12);
+        let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
+        
         this.noteGroup = new THREE.Group();
+        this.lineGroup = new THREE.Group();
 
         this.xPosArr = this.clefXChoice(this.digAud.clef);
 
         let songNotes = this.digAud.cantusFirmusNotes;
         let noteSpacing = 1.75;
+        let lineSpacing = 3.5;
         let notePositionZ = 1;
+        let linePosZ = 3.65;
         let songLength = this.digAud.cfLength;
 
         for(let i = 0; i < songLength; i++){
             let xP = this.xPosArr[songNotes[i]].pos;
+
             let newNote = new THREE.Mesh(musicNote, noteMaterial);
             newNote.position.x = xP;
             newNote.position.y = this.spaceAboveStaff;
             newNote.position.z = notePositionZ - noteSpacing;
+
+            let newMeasureLine = new THREE.Mesh(measureLine,lineMat);
+            newMeasureLine.position.x = 0;
+            newMeasureLine.position.y = this.spaceAboveStaff;
+            newMeasureLine.position.z = linePosZ - lineSpacing;
+
             notePositionZ = newNote.position.z;
+            linePosZ = newMeasureLine.position.z;
             this.noteCount++;
             this.noteGroup.add(newNote);
+            this.lineGroup.add(newMeasureLine);
             this.didPlayNoteAudio.push(false);
             this.arrivedAtNote.push(false);
 
         }
         this.arGroup.add(this.noteGroup);
         this.AGCMNI = this.arGroup.children.length - 1;
+        this.arGroup.add(this.lineGroup);
     }
 
     
