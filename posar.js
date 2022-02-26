@@ -6,17 +6,17 @@ The image size set to 2500px, pattern ratio set to .9
 
 const PATTERNS_AR = [
     {"url":"data/newmarkers/pattern-A.patt", "pos":[1, 0]},
-    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 0.5]},
-    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 1]},
-    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 1.5]},
-    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 2]},
-    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 2.5]},
+    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 2]},
+    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 4]},
+    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 6]},
+    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 8]},
+    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 10]},
     {"url":"data/newmarkers/pattern-G.patt", "pos":[-1, 0]},
-    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 0.5]},
-    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 1]},
-    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 1.5]},
-    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 2]},
-    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 2.5]},
+    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 2]},
+    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 4]},
+    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 6]},
+    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 8]},
+    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 10]},
 ];
 
 const TREBXPOS = {"B#3":{"pos":3.5},"Cf4":{"pos":3},"C4":{"pos":3},"C#4":{"pos":3},
@@ -97,8 +97,13 @@ class PositionalAR {
         document.body.appendChild( renderer.domElement );
 
         this.setupTracker();
+        let sA = new SampledAudio();
+        this.sampAud = sA;
+        
+        this.sampAud.startRecording();
         this.repaint();
     }
+
 
     onResize() {
         this.arToolkitSource.onResizeElement();
@@ -410,6 +415,13 @@ class PositionalAR {
             this.onResize();
         }
         this.totalTime += deltaTime;
+
+        if(this.totalTime > 10 && this.totalTime < 11){
+                this.sampAud.stopRecording();
+                
+        }
+              
+        
         
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
@@ -425,33 +437,15 @@ class PositionalAR {
 }
 
 /*
-    setupFreeFormNotes(){
-        this.noteCount = 0;
-        let musicNote = new THREE.TorusGeometry(.35,.08,10,24);
-        musicNote.scale(1,1.55,1);
-        musicNote.rotateX(1.57);
-        let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
-        this.noteGroup = new THREE.Group();
+TODO:
 
-        let notePositionLines = -.5;
-        let notePositionSpaces = -1.5;
-        let xPos = 3;
+Note highlighting
 
-        for(let i = 0; i < 13; i++){
-            let newNote = new THREE.Mesh(musicNote, noteMaterial);
-            newNote.position.x = xPos;
-            newNote.position.y = this.spaceAboveStaff;
-            if(i%2 != 0){
-                newNote.position.z = notePositionLines;
-            }else{
-                newNote.position.z = notePositionSpaces;
-            }
-            xPos -= .5;
-            this.noteCount++;
-            this.noteGroup.add(newNote);
-        }
-        
-        this.arGroup.add(this.noteGroup);
-        this.AGCMNI = this.arGroup.children.length - 1;
-    }
-    */
+Audio Recording
+REACH: Dynamic time warping of sung audio to match tempo
+
+Audio On/Off function for any line of music
+
+
+
+*/
