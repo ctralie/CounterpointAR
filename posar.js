@@ -6,17 +6,30 @@ The image size set to 2500px, pattern ratio set to .9
 
 const PATTERNS_AR = [
     {"url":"data/newmarkers/pattern-A.patt", "pos":[1, 0]},
-    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 2]},
-    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 4]},
-    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 6]},
-    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 8]},
-    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 10]},
+    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 1]},
+    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 2]},
+    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 3]},
+    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 4]},
+    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 5]},
+    {"url":"data/newmarkers/pattern-M.patt", "pos":[1, 6]},
+    {"url":"data/newmarkers/pattern-N.patt", "pos":[1, 7]},
+    {"url":"data/newmarkers/pattern-O.patt", "pos":[1, 8]},
+    {"url":"data/newmarkers/pattern-P.patt", "pos":[1, 9]},
+    {"url":"data/newmarkers/pattern-Q.patt", "pos":[1, 10]},
+    {"url":"data/newmarkers/pattern-R.patt", "pos":[1, 11]},
+
     {"url":"data/newmarkers/pattern-G.patt", "pos":[-1, 0]},
-    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 2]},
-    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 4]},
-    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 6]},
-    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 8]},
-    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 10]},
+    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 1]},
+    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 2]},
+    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 3]},
+    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 4]},
+    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 5]},
+    {"url":"data/newmarkers/pattern-S.patt", "pos":[-1, 6]},
+    {"url":"data/newmarkers/pattern-T.patt", "pos":[-1, 7]},
+    {"url":"data/newmarkers/pattern-U.patt", "pos":[-1, 8]},
+    {"url":"data/newmarkers/pattern-V.patt", "pos":[-1, 9]},
+    {"url":"data/newmarkers/pattern-W.patt", "pos":[-1, 10]},
+    {"url":"data/newmarkers/pattern-X.patt", "pos":[-1, 11]}
 ];
 
 const TREBXPOS = {"B#3":{"pos":3.5},"Cf4":{"pos":3},"C4":{"pos":3},"C#4":{"pos":3},
@@ -47,7 +60,7 @@ class PositionalAR {
      * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, digAudio, antialias, medWin, debug) {
+    constructor(sceneObj, digAudio, useCounterpoint,antialias, medWin, debug) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
@@ -74,6 +87,7 @@ class PositionalAR {
 
         this.freeForm = false;
         this.gotPlacement = false;
+        this.useCP = useCounterpoint;
 
         this.notePositions = [];
         this.arrivedAtNote = [];
@@ -187,7 +201,7 @@ class PositionalAR {
         this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.setupGhostNote();
-        this.setupCantusFirmus();
+        this.setupFirstSpeciesNotes();
         this.scene.add(this.arGroup);
     }
 
@@ -214,54 +228,72 @@ class PositionalAR {
         this.AGCGNI = this.arGroup.children.length - 1;
     }
 
-    setupCantusFirmus(){
+    setupFirstSpeciesNotes(){
         let musicNote = new THREE.TorusGeometry(.35, .08, 10, 24);
         musicNote.scale(1,1.55,1);
         musicNote.rotateX(1.57);
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
         
-        let measureLine = new THREE.BoxGeometry(4,.01,.12);
-        let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
-        
-        this.noteGroup = new THREE.Group();
-        this.lineGroup = new THREE.Group();
-
+        this.CFGroup = new THREE.Group();
+        this.CPGroup = new THREE.Group();
         this.xPosArr = this.clefXChoice(this.digAud.clef);
-
-        let songNotes = this.digAud.cantusFirmusNotes;
-        let noteSpacing = 1.75;
-        let lineSpacing = 3.5;
-        let notePositionZ = 1;
-        let linePosZ = 3.65;
+        let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
         let songLength = this.digAud.cfLength;
 
-        for(let i = 0; i < songLength; i++){
-            let xP = this.xPosArr[songNotes[i]].pos;
+        let numLines = 1;
+        if(this.useCP){numLines++;}
+        for(let i = 0; i < numLines; i++){
+            let songNotes = linesNotes[i];
+            let noteSpacing = 1.75;
+            let notePositionZ = 1;          
+            for(let j = 0; j < songLength; j++){
+            
+                let xP = this.xPosArr[songNotes[j]].pos;
+                let newNote = new THREE.Mesh(musicNote, noteMaterial);
+                newNote.position.x = xP;
+                newNote.position.y = this.spaceAboveStaff;
+                newNote.position.z = notePositionZ - noteSpacing;
+                notePositionZ = newNote.position.z;
 
-            let newNote = new THREE.Mesh(musicNote, noteMaterial);
-            newNote.position.x = xP;
-            newNote.position.y = this.spaceAboveStaff;
-            newNote.position.z = notePositionZ - noteSpacing;
+                if(i==0){
+                    this.CFGroup.add(newNote);
+                    this.didPlayNoteAudio.push(false);
+                    this.arrivedAtNote.push(false);
+                }else if(i==1){
+                    this.CPGroup.add(newNote);
+                }
+            }
 
+            if(i==0){
+                this.arGroup.add(this.CFGroup);
+                this.AGCFI = this.arGroup.children.length - 1;
+            }else if(i==1){
+                this.arGroup.add(this.CPGroup);
+                this.AGCPI = this.arGroup.children.length - 1;
+            }
+        }
+        this.setupFirstSpeciesMeasureLines();
+    }
+
+    setupFirstSpeciesMeasureLines(){
+        let measureLine = new THREE.BoxGeometry(4,.01,.12);
+        let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
+
+        this.lineGroup = new THREE.Group();
+        let linePosZ = 3.65;
+        let lineSpacing = 3.5;
+        let numLines = parseInt(Math.ceil(this.songLength/2));
+
+        for(let i = 0; i < numLines; i++){
             let newMeasureLine = new THREE.Mesh(measureLine,lineMat);
             newMeasureLine.position.x = 0;
             newMeasureLine.position.y = this.spaceAboveStaff;
             newMeasureLine.position.z = linePosZ - lineSpacing;
-
-            notePositionZ = newNote.position.z;
             linePosZ = newMeasureLine.position.z;
-            this.noteCount++;
-            this.noteGroup.add(newNote);
             this.lineGroup.add(newMeasureLine);
-            this.didPlayNoteAudio.push(false);
-            this.arrivedAtNote.push(false);
-
         }
-        this.arGroup.add(this.noteGroup);
-        this.AGCMNI = this.arGroup.children.length - 1;
         this.arGroup.add(this.lineGroup);
     }
-
     
 
     /**
@@ -368,12 +400,12 @@ class PositionalAR {
     updateAnalyzeNotePositions(){
         let updatedPositions = [];
         for(let i = 0; i < this.noteCount; i++){
-            updatedPositions.push(this.arGroup.children[this.AGCMNI].children[i].position);
+            updatedPositions.push(this.arGroup.children[this.AGCFI].children[i].position);
         }
         this.notePositions = updatedPositions;
         let thresh = 0.1;
-        //do this, check distance between z of current and note, then record x position of self
-        let currentPosition = this.arGroup.children[this.AGCGNI].position;
+        let currentPosition = this.arGroup.children[this.AGCFI].position;
+
         for(let i = 0; i < this.noteCount; i++){
             let zdis = Math.abs(this.notePositions[i].z - currentPosition.z);
             if((zdis < thresh) && !this.arrivedAtNote[i]){
@@ -387,16 +419,12 @@ class PositionalAR {
                     this.didPlayNoteAudio[i] = true;
                 }
 
-
             }
         }
-        this.canRerun = true;
-    }
-
-    moveFreeFormNotes(){
-        for(let i = 0; i < this.noteGroup.children.length; i++){
-            this.noteGroup.children[i].position.z -= 2;
+        if(this.arrivedAtNote[this.noteCount-1]){
+            this.sampAud.stopRecording();
         }
+        this.canRerun = true;
     }
 
     /**
@@ -415,19 +443,9 @@ class PositionalAR {
             this.onResize();
         }
         this.totalTime += deltaTime;
-
-        if(this.totalTime > 10 && this.totalTime < 11){
-                this.sampAud.stopRecording();
-                
-        }
-              
-        
         
         this.placeGhostNote();
         this.sceneObj.animate(deltaTime);
-        //this.updateCalibration();
-        //this.placeSceneRoot();
-        //this.updateAnalyzeNotePositions();
         if(this.canRerun){
             this.renderer.render(this.scene, this.camera);
             requestAnimationFrame(this.repaint.bind(this));
@@ -441,7 +459,6 @@ TODO:
 
 Note highlighting
 
-Audio Recording
 REACH: Dynamic time warping of sung audio to match tempo
 
 Audio On/Off function for any line of music

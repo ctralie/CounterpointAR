@@ -67,7 +67,7 @@ document.addEventListener('touchmove', function(e) {
         this.digAud.fillInfo(this.notes.parseInfo());
         this.scene = new BasicScene();
         this.scene.makeScene(this.notes.parseInfo());
-        this.posAR = new PositionalAR(this.scene,this.digAud);
+        this.posAR = new PositionalAR(this.scene,this.digAud, true);
       }
     }
     
