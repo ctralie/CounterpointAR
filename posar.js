@@ -60,7 +60,7 @@ class PositionalAR {
      * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, digAudio, useCounterpoint,antialias, medWin, debug) {
+    constructor(sceneObj, digAudio, useCantusFirmus, useCounterpoint,antialias, medWin, debug) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
@@ -87,15 +87,14 @@ class PositionalAR {
 
         this.freeForm = false;
         this.gotPlacement = false;
-        this.useCP = useCounterpoint;
+        this.linesToUse = [useCantusFirmus, useCounterpoint];
 
-        this.notePositions = [];
+        this.playPositions = [];
         this.arrivedAtNote = [];
         this.didPlayNoteAudio = [];
         
         this.noteGroupPlacement = -2;
-        this.spaceAboveStaff = .1; 
-        this.noteCount = 0;
+        this.spaceAboveStaff = .1;
 
         this.userNotePos = [];
         
@@ -233,44 +232,43 @@ class PositionalAR {
         musicNote.scale(1,1.55,1);
         musicNote.rotateX(1.57);
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
-        
+        this.xPosArr = this.clefXChoice(this.digAud.clef);
+        this.songLength = this.digAud.cfLength;
+
         this.CFGroup = new THREE.Group();
         this.CPGroup = new THREE.Group();
-        this.xPosArr = this.clefXChoice(this.digAud.clef);
         let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
-        let songLength = this.digAud.cfLength;
 
-        let numLines = 1;
-        if(this.useCP){numLines++;}
-        for(let i = 0; i < numLines; i++){
-            let songNotes = linesNotes[i];
-            let noteSpacing = 1.75;
-            let notePositionZ = 1;          
-            for(let j = 0; j < songLength; j++){
-            
-                let xP = this.xPosArr[songNotes[j]].pos;
-                let newNote = new THREE.Mesh(musicNote, noteMaterial);
-                newNote.position.x = xP;
-                newNote.position.y = this.spaceAboveStaff;
-                newNote.position.z = notePositionZ - noteSpacing;
-                notePositionZ = newNote.position.z;
-
+        for(let i = 0; i < this.linesToUse.length; i++){
+            if(this.linesToUse[i]){
+                let songNotes = linesNotes[i];
+                let noteSpacing = 1.75;
+                let notePositionZ = 1;          
+                for(let j = 0; j < this.songLength; j++){
+                    let newNote = new THREE.Mesh(musicNote, noteMaterial);
+                    newNote.position.x = this.xPosArr[songNotes[j]].pos;
+                    newNote.position.y = this.spaceAboveStaff;
+                    newNote.position.z = notePositionZ - noteSpacing;
+                    this.playPositions.push(newNote.position.z);
+                    notePositionZ = newNote.position.z;
+                    if(i==0){
+                        this.CFGroup.add(newNote);
+                    }else if(i==1){
+                        this.CPGroup.add(newNote);
+                    }
+                }
                 if(i==0){
-                    this.CFGroup.add(newNote);
-                    this.didPlayNoteAudio.push(false);
-                    this.arrivedAtNote.push(false);
+                    this.arGroup.add(this.CFGroup);
+                    this.AGCFI = this.arGroup.children.length - 1;
                 }else if(i==1){
-                    this.CPGroup.add(newNote);
+                    this.arGroup.add(this.CPGroup);
+                    this.AGCPI = this.arGroup.children.length - 1;
                 }
             }
-
-            if(i==0){
-                this.arGroup.add(this.CFGroup);
-                this.AGCFI = this.arGroup.children.length - 1;
-            }else if(i==1){
-                this.arGroup.add(this.CPGroup);
-                this.AGCPI = this.arGroup.children.length - 1;
-            }
+        }
+        for(let i = 0; i < this.songLength; i++){
+            this.didPlayNoteAudio.push(false);
+            this.arrivedAtNote.push(false);
         }
         this.setupFirstSpeciesMeasureLines();
     }
@@ -399,15 +397,19 @@ class PositionalAR {
 
     updateAnalyzeNotePositions(){
         let updatedPositions = [];
-        for(let i = 0; i < this.noteCount; i++){
-            updatedPositions.push(this.arGroup.children[this.AGCFI].children[i].position);
+        for(let i = 0; i < this.songLength; i++){
+            if(this.useCF){
+                updatedPositions.push(this.arGroup.children[this.AGCFI].children[i].position.z);
+            }else if(this.useCP){
+                updatedPositions.push(this.arGroup.children[this.AGCPI].children[i].position.z);
+            }
         }
-        this.notePositions = updatedPositions;
+        this.playPositions = updatedPositions;
         let thresh = 0.1;
-        let currentPosition = this.arGroup.children[this.AGCFI].position;
+        let currentPosition = this.arGroup.children[this.AGCGNI].position.z;
 
         for(let i = 0; i < this.noteCount; i++){
-            let zdis = Math.abs(this.notePositions[i].z - currentPosition.z);
+            let zdis = Math.abs(this.playPositions[i] - currentPosition);
             if((zdis < thresh) && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
