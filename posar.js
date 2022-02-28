@@ -228,9 +228,9 @@ class PositionalAR {
     }
 
     setupFirstSpeciesNotes(){
-        let musicNote = new THREE.TorusGeometry(.35, .08, 10, 24);
-        musicNote.scale(1,1.55,1);
-        musicNote.rotateX(1.57);
+        this.musicNoteShape = new THREE.TorusGeometry(.35, .08, 10, 24);
+        this.musicNoteShape.scale(1,1.55,1);
+        this.musicNoteShape.rotateX(1.57);
         let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
         this.xPosArr = this.clefXChoice(this.digAud.clef);
         this.songLength = this.digAud.cfLength;
@@ -245,7 +245,7 @@ class PositionalAR {
                 let noteSpacing = 1.75;
                 let notePositionZ = 1;          
                 for(let j = 0; j < this.songLength; j++){
-                    let newNote = new THREE.Mesh(musicNote, noteMaterial);
+                    let newNote = new THREE.Mesh(this.musicNoteShape, noteMaterial);
                     newNote.position.x = this.xPosArr[songNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
@@ -413,20 +413,39 @@ class PositionalAR {
             if((zdis < thresh) && !this.arrivedAtNote[i]){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
-
                 this.userNotePos.push(currentPosition.x);
-
+                this.changeNoteColor(i);
                 if(!this.didPlayNoteAudio[i]){
                     this.digAud.playCantFirmNote(i);
                     this.didPlayNoteAudio[i] = true;
                 }
-
             }
         }
         if(this.arrivedAtNote[this.noteCount-1]){
             this.sampAud.stopRecording();
         }
         this.canRerun = true;
+    }
+
+    changeNoteColor(i){
+        let newColorMat = new THREE.MeshStandardMaterial({color: 0xF5BB00});
+        for(let n = 0; n < 2; n++){
+            let newNote = new THREE.Mesh(this.musicNoteShape, newColorMat);
+            newNote.position.y = this.spaceAboveStaff;
+            newNote.position.z = this.playPositions[i];
+            if(n == 0){
+                newNote.position.x = this.arGroup.children[this.AGCFI].position.x;
+                this.arGroup.children[this.AGCFI] = newNote;
+            }else if(n ==1){
+                newNote.position.x = this.arGroup.children[this.AGCPI].position.x;
+                this.arGroup.children[this.AGCPI] = newNote;
+            }
+        }
+        
+        
+
+
+
     }
 
     /**
