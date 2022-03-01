@@ -87,14 +87,13 @@ class PositionalAR {
 
 
         this.linesToUse = [useCantusFirmus, useCounterpoint];
-        this.playNotePositions = [];
         this.arrivedAtNote = [];
         this.didPlayNoteAudio = [];
         
         this.noteGroupPlacement = -2;
         this.spaceAboveStaff = .1;
 
-        this.userNotePositions = [];
+        this.trackedPositions = [];
         
         
         // Setup three.js WebGL renderer
@@ -214,6 +213,10 @@ class PositionalAR {
         return posarr;
     }
 
+    /**
+     * Creates current position ghost note object
+     * Added to ARGROUP as child
+     */
     setupGhostNote(){
         this.noteG = new THREE.TorusGeometry(.35, .08, 10, 24);
         this.noteG.scale(1,1.55,1);
@@ -222,9 +225,16 @@ class PositionalAR {
         this.note = new THREE.Group();
         this.note.add(new THREE.Mesh(this.noteG,gNM));
         this.arGroup.add(this.note);
-        this.AGCGNI = this.arGroup.children.length - 1;
+        this.AGGNI = this.arGroup.children.length - 1;
+        this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
+    /**
+     * Creates a collection of note objects (for cantus firmus line and/or counterpoint line)
+     * Note Groups are added to ARGROUP as children
+     * 2 sets of notes are created, one set on staff, other set out of view
+     * Sets index number of each group as class member data
+     */
     setupFirstSpeciesNotes(){
         this.musicNoteShape = new THREE.TorusGeometry(.35, .08, 10, 24);
         this.musicNoteShape.scale(1,1.55,1);
@@ -254,7 +264,6 @@ class PositionalAR {
                     finNote.position.y = 100;
                     newNote.position.z = notePositionZ - noteSpacing;
                     finNote.position.z = notePositionZ - noteSpacing;
-                    this.playNotePositions.push(newNote.position.z);
                     notePositionZ = newNote.position.z;
                     if(i==0){
                         this.CFGroup.add(newNote);
@@ -284,6 +293,10 @@ class PositionalAR {
         this.setupFirstSpeciesMeasureLines();
     }
 
+    /**
+     * Creates measure line objects and adds them to the scene
+     * Will adjust when more species are added
+     */
     setupFirstSpeciesMeasureLines(){
         let measureLine = new THREE.BoxGeometry(4,.01,.12);
         let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
@@ -389,52 +402,62 @@ class PositionalAR {
                 this.arGroup.setRotationFromQuaternion(avgQuat);
             }
         }
-        this.updateAnalyzeNotePositions();
+        this.notePositionUpdateAnalyze();
     }
     
-    placeGhostNote(){
+    /**
+     * Updates ghost note position based on the position of the ARGROUP object in the 3D camera space
+     * Checks current position to position of notes on staff
+     * If user arrived at note's Z position, the music line to play will play audio
+     * Then tracks the X position of user to track placement of music line
+     * When the last note plays, the audio recording stops
+     */
+    notePositionUpdateAnalyze(){
+
         let worldCoords = this.arGroup.matrixWorld;
         let inverseWorldCoords = worldCoords.getInverse(worldCoords);
         let transformVector = new THREE.Vector4(0,0,0,1);
         let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
-        this.arGroup.children[this.AGCGNI].position.x = newPosition.x;
-        this.arGroup.children[this.AGCGNI].position.y = this.spaceAboveStaff;
-        this.arGroup.children[this.AGCGNI].position.z = newPosition.z - 2;
-        this.updateCalibration();
-    }
 
-    updateAnalyzeNotePositions(){
-        let updatedPositions = [];
-        for(let i = 0; i < this.songLength; i++){
-            if(this.useCF){
-                updatedPositions.push(this.arGroup.children[this.AGCFI].children[i].position.z);
-            }else if(this.useCP){
-                updatedPositions.push(this.arGroup.children[this.AGCPI].children[i].position.z);
-            }
-        }
-        this.playPositions = updatedPositions;
+        this.arGroup.children[this.AGGNI].position.x = newPosition.x;
+        this.arGroup.children[this.AGGNI].position.z = newPosition.z - 2;
+
+
         let thresh = 0.1;
-        let currentPosition = this.arGroup.children[this.AGCGNI].position.z;
+        let currentPosition = this.arGroup.children[this.AGGNI].position;
 
         for(let i = 0; i < this.songLength; i++){
-            let zdis = Math.abs(this.playNotePositions[i] - currentPosition);
-            if((zdis < thresh) && !this.arrivedAtNote[i]){
+            let checkPos = 0;
+            if(this.useCF){
+                checkPos = this.arGroup.children[this.AGCFI].children[i].position.z;
+            }else{
+                checkPos = this.arGroup.children[this.AGCPI].children[i].position.z;
+            }
+            let dist = Math.abs(currentPosition.z - checkPos);
+            if((dist <= thresh) && (!this.arrivedAtNote[i])){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
-                this.userNotePositions.push(currentPosition.x);
+                this.trackedPositions.push(currentPosition.x);
                 this.changeNoteColor(i);
                 if(!this.didPlayNoteAudio[i]){
-                    this.digAud.playCantFirmNote(i);
                     this.didPlayNoteAudio[i] = true;
+                    if((this.useCF)&&(this.useCP)){
+                        this.digAud.playCantFirmNote(i);
+                        this.digAud.playCounterpointNote(i);
+                    }
                 }
             }
-        }
-        if(this.arrivedAtNote[this.noteCount-1]){
-            this.sampAud.stopRecording();
+            if(this.arrivedAtNote[this.noteCount-1]){
+                this.sampAud.stopRecording();
+            }
         }
         this.canRerun = true;
     }
 
+    /**
+     * Position of black color note and yellow color note changes
+     * Could not implement full replacement
+    */
     changeNoteColor(index){
         if(this.linesToUse[0]){
             this.arGroup.children[this.AGCFI].children[index].position.y = 100;
@@ -462,8 +485,7 @@ class PositionalAR {
             this.onResize();
         }
         this.totalTime += deltaTime;
-        
-        this.placeGhostNote();
+        this.updateCalibration();
         this.sceneObj.animate(deltaTime);
         if(this.canRerun){
             this.renderer.render(this.scene, this.camera);

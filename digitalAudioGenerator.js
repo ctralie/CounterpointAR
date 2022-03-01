@@ -10,7 +10,8 @@ class DAGenerator{
     //ret[3] = cantus firmus [notes, durations]
     //ret[4] = counterpoint [notes, durations]
     constructor(){
-
+        
+        const that = this;
         this.ret = [];
         this.loadedStuff = false;
         this.clef = "";
@@ -85,7 +86,6 @@ class DAGenerator{
     }
 
     playCantFirmNote(noteNumber){
-        let that = this;
         if(this.cfMp3Arrs[noteNumber].readyState >= 2){
             this.cfMp3Arrs[noteNumber].play();
             console.log("played note");
@@ -98,6 +98,15 @@ class DAGenerator{
     }
 
     playCounterpointNote(noteNumber){
-        this.cpMp3Arrs[noteNumber].play();
+
+        if(this.cpMp3Arrs[noteNumber].readyState >= 2){
+            this.cpMp3Arrs[noteNumber].play();
+            console.log("played note");
+        }else{
+            this.cpMp3Arrs[noteNumber].addEventListener('loadeddata', function(){
+                that.cpMp3Arrs[noteNumber].play();
+                console.log("played note");
+            });
+        }
     }
 }
