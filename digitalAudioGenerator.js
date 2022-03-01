@@ -4,11 +4,7 @@
 
 class DAGenerator{
 
-    //ret[0] = time sig
-    //ret[1] = clef
-    //ret[2] = alteration
-    //ret[3] = cantus firmus [notes, durations]
-    //ret[4] = counterpoint [notes, durations]
+    
     constructor(){
         
         const that = this;
@@ -41,6 +37,17 @@ class DAGenerator{
 
     }
 
+    /**
+     * Fills in info for the Audio Generator to create audio with.
+     * ret  Array
+     * ret[0] = Time Signature (String)
+     * ret[1] = Clef (String)
+     * ret[2] = Alteration (sharp/natural/flat) (String)
+     * ret[3][0] = CantusFirmus Notes (String[])
+     * ret[3][1] = CantusFirmus Durations (Int[])
+     * ret[4][0] = Counterpoint Notes (String[])
+     * ret[4][1] = Counterpoint Durations (Int[])
+     */
     fillInfo(ret){
         this.clef = ret[1];
         this.cantusFirmusNotes = ret[3][0];
@@ -64,6 +71,9 @@ class DAGenerator{
         this.mp3CounterpointSetup();
     }
 
+    /**
+     * Loads Cantusfirmus audio files to be used
+     */
     mp3CantusFirmusSetup(){
         for(let i = 0; i < this.cfLength; i++){
             let note = this.cantusFirmusNotes[i];
@@ -75,6 +85,9 @@ class DAGenerator{
         this.loadedStuff = true;
     }
 
+    /**
+     * Loads Counterpoint audio files to be used
+     */
     mp3CounterpointSetup(){
         for(let i = 0; i < this.cpLength; i++){
             let note = this.counterpointNotes[i];
@@ -85,6 +98,10 @@ class DAGenerator{
         }
     }
 
+    /**
+     * Plays specific note index of cantus firmus audio WHEN the promise of loaded audio arrays is fulfilled
+     * noteNumber   Int
+     */
     playCantFirmNote(noteNumber){
         if(this.cfMp3Arrs[noteNumber].readyState >= 2){
             this.cfMp3Arrs[noteNumber].play();
@@ -97,6 +114,10 @@ class DAGenerator{
         }
     }
 
+    /**
+     * Plays specific note index of Counterpoint audio WHEN the promise of loaded audio arrays is fulfilled
+     * noteNumber   Int
+     */
     playCounterpointNote(noteNumber){
 
         if(this.cpMp3Arrs[noteNumber].readyState >= 2){

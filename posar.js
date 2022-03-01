@@ -402,7 +402,7 @@ class PositionalAR {
                 this.arGroup.setRotationFromQuaternion(avgQuat);
             }
         }
-        this.notePositionUpdateAnalyze();
+        
     }
     
     /**
@@ -414,11 +414,15 @@ class PositionalAR {
      */
     notePositionUpdateAnalyze(){
 
+        //Takes world coordinates of ARGROUP and provides the inverse
+        //Then applies the the inverse as a transformation of the identity
+        //Giving the current position of the camera, relative to the ARGROUP object
         let worldCoords = this.arGroup.matrixWorld;
         let inverseWorldCoords = worldCoords.getInverse(worldCoords);
         let transformVector = new THREE.Vector4(0,0,0,1);
         let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
 
+        //Applies new X and Z positions to the current position object based on tranformation above
         this.arGroup.children[this.AGGNI].position.x = newPosition.x;
         this.arGroup.children[this.AGGNI].position.z = newPosition.z - 2;
 
@@ -426,6 +430,8 @@ class PositionalAR {
         let thresh = 0.1;
         let currentPosition = this.arGroup.children[this.AGGNI].position;
 
+        //Checks position of currentPosition relative to notes on staff
+        //If at Z coordinate of note, the note audio(s) will play and color is changed
         for(let i = 0; i < this.songLength; i++){
             let checkPos = 0;
             if(this.useCF){
@@ -451,12 +457,14 @@ class PositionalAR {
                 this.sampAud.stopRecording();
             }
         }
+        //Allows repaint to occur, updating scene frame
         this.canRerun = true;
     }
 
     /**
      * Position of black color note and yellow color note changes
      * Could not implement full replacement
+     * index    int
     */
     changeNoteColor(index){
         if(this.linesToUse[0]){
@@ -487,10 +495,11 @@ class PositionalAR {
         this.totalTime += deltaTime;
         this.updateCalibration();
         this.sceneObj.animate(deltaTime);
-        if(this.canRerun){
-            this.renderer.render(this.scene, this.camera);
-            requestAnimationFrame(this.repaint.bind(this));
+        while(!this.canRerun){
+            this.notePositionUpdateAnalyze();
         }
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.repaint.bind(this));
     }
 
 }
