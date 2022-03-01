@@ -440,6 +440,7 @@ class PositionalAR {
                 checkPos = this.arGroup.children[this.AGCPI].children[i].position.z;
             }
             let dist = Math.abs(currentPosition.z - checkPos);
+            //If distance is leq and the note hasn't been reached, play audio
             if((dist <= thresh) && (!this.arrivedAtNote[i])){
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
@@ -447,8 +448,10 @@ class PositionalAR {
                 this.changeNoteColor(i);
                 if(!this.didPlayNoteAudio[i]){
                     this.didPlayNoteAudio[i] = true;
-                    if((this.useCF)&&(this.useCP)){
+                    if(this.linesToUse[0]){
                         this.digAud.playCantFirmNote(i);
+                    }
+                    if(this.linesToUse[1]){
                         this.digAud.playCounterpointNote(i);
                     }
                 }
