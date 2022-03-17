@@ -92,6 +92,7 @@ class PositionalAR {
         
         this.noteGroupPlacement = -2;
         this.spaceAboveStaff = .1;
+        this.moveThresh = 3.5;
 
         this.trackedPositions = [];
         
@@ -179,8 +180,8 @@ class PositionalAR {
             that.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             let markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                size: 1, type: 'pattern', patternUrl: PATTERNS_AR[i].url, smooth: true
-                //minConfidence: 0.3,
+                size: 1, type: 'pattern', patternUrl: PATTERNS_AR[i].url, smooth: true,
+                smoothCount: 10
                 //smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
             });
             markerControl.i = i;
@@ -423,9 +424,14 @@ class PositionalAR {
         let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
 
         //Applies new X and Z positions to the current position object based on tranformation above
-        this.arGroup.children[this.AGGNI].position.x = newPosition.x;
-        this.arGroup.children[this.AGGNI].position.z = newPosition.z - 2;
+        
+        let X = Math.abs(this.arGroup.children[this.AGGNI].position.x - newPosition.x);
+        let Z = Math.abs(this.arGroup.children[this.AGGNI].position.z - newPosition.z);
 
+        if(X < this.moveThresh && Z < this.moveThresh){
+            this.arGroup.children[this.AGGNI].position.x = newPosition.x;
+            this.arGroup.children[this.AGGNI].position.z = newPosition.z - 2;
+        }
 
         let thresh = 0.1;
         let currentPosition = this.arGroup.children[this.AGGNI].position;
@@ -445,7 +451,7 @@ class PositionalAR {
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
                 this.trackedPositions.push(currentPosition.x);
-                this.changeNoteColor(i);
+                //this.changeNoteColor(i);
                 if(!this.didPlayNoteAudio[i]){
                     this.didPlayNoteAudio[i] = true;
                     if(this.linesToUse[0]){
@@ -469,6 +475,7 @@ class PositionalAR {
      * Could not implement full replacement
      * index    int
     */
+    
     changeNoteColor(index){
         if(this.linesToUse[0]){
             this.arGroup.children[this.AGCFI].children[index].position.y = 100;
@@ -511,8 +518,6 @@ class PositionalAR {
 TODO:
 
 Note highlighting
-
-REACH: Dynamic time warping of sung audio to match tempo
 
 Audio On/Off function for any line of music
 
