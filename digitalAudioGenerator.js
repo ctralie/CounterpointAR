@@ -11,6 +11,8 @@ class DAGenerator{
         this.ret = [];
         this.loadedStuff = false;
         this.clef = "";
+        this.alteration = "";
+        this.alteredNotes = [];
         this.usedArr = null;
         this.cantusFirmusNotes = [];
         this.cantusFirmusDurs = [];
@@ -43,18 +45,21 @@ class DAGenerator{
      * ret[0] = Time Signature (String)
      * ret[1] = Clef (String)
      * ret[2] = Alteration (sharp/natural/flat) (String)
-     * ret[3][0] = CantusFirmus Notes (String[])
-     * ret[3][1] = CantusFirmus Durations (Int[])
-     * ret[4][0] = Counterpoint Notes (String[])
-     * ret[4][1] = Counterpoint Durations (Int[])
+     * ret[3] = Altered Notes (String[])
+     * ret[4][0] = CantusFirmus Notes (String[])
+     * ret[4][1] = CantusFirmus Durations (Int[])
+     * ret[5][0] = Counterpoint Notes (String[])
+     * ret[5][1] = Counterpoint Durations (Int[])
      */
     fillInfo(ret){
         this.clef = ret[1];
-        this.cantusFirmusNotes = ret[3][0];
-        this.cantusFirmusDurs = ret[3][1];
+        this.alteration = ret[2];
+        this.alteredNotes = ret[3];
+        this.cantusFirmusNotes = ret[4][0];
+        this.cantusFirmusDurs = ret[4][1];
         this.cfLength = this.cantusFirmusNotes.length;
-        this.counterpointNotes = ret[4][0];
-        this.counterpointDurs = ret[4][1];
+        this.counterpointNotes = ret[5][0];
+        this.counterpointDurs = ret[5][1];
         this.cpLength = this.counterpointNotes.length
         switch(this.clef){
             case "Bass":

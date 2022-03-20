@@ -241,7 +241,7 @@ class PositionalAR {
     setupFirstSpeciesNotes(){
 
         let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
-        let xPosArr = this.clefXChoice(this.digAud.clef);
+        this.xPosArr = this.clefXChoice(this.digAud.clef);
         this.songLength = this.digAud.cfLength;
 
         let CFGroup = new THREE.Group();
@@ -264,15 +264,14 @@ class PositionalAR {
                     
                     //primary note
                     let newNote = new THREE.Mesh(noteGeo, noteMat);
-                    newNote.position.x = xPosArr[songNotes[j]].pos;
+                    newNote.position.x = this.xPosArr[songNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     //replacement note (upon arrival)
                     let finNote = new THREE.Mesh(noteGeo, newNoteMat);
-                    finNote.position.x = xPosArr[songNotes[j]].pos;
+                    finNote.position.x = this.xPosArr[songNotes[j]].pos;
                     finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
-                    console.log(newNote.position.x);
                     notePositionZ = newNote.position.z;
                     if(i==0){
                         CFGroup.add(newNote);
@@ -527,7 +526,7 @@ class PositionalAR {
     }
 
     analyzeCollectedData(){
-        let acts = [];
+        let formattedPositions = [];
         for(let i = 0; i < this.trackedPositions.length; i++){
             let actual = this.trackedPositions[i];
             let low = Math.floor(actual);
@@ -537,9 +536,19 @@ class PositionalAR {
             let choice = [low,mid,high];
             let lowest = 0;
             for(let j = 1; j < ops.length; j++){if(ops[j] < ops[lowest]){lowest = j;}}
-            acts.push(choice[lowest]);
+            formattedPositions.push(choice[lowest]);
         }
-        console.log(acts);
+        let noteResults = [];
+        for(let i = 0; i < formattedPositions.length; i++){
+            for(let[key,val] of Object.entries(this.xPosArr)){
+            if(val.pos == formattedPositions[i]){
+                noteResults.push(key);
+                break;
+            }
+            }
+        }
+        console.log(noteResults);
+        this.noteResults = noteResults;
     }
 
 }

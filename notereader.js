@@ -7,6 +7,7 @@ class RollReader {
         this.timeSig = [];
         this.clef = "";
         this.alteration = "";
+        this.alteredNotes = [];
         this.cantusFirmusNotes = [];
         this.cantusFirmusDurs = [];
         this.counterpointNotes = [];
@@ -41,6 +42,8 @@ class RollReader {
     Time signature: (2,2)
     Clef: (Treble)
     Alteration: (Sharp)
+    Altered Notes:
+    C#4
     Cantus Firmus:
     D#4 : quarter
     ...
@@ -54,7 +57,8 @@ class RollReader {
         let timeSigIndex = 0;
         let clefIndex = 1;
         let alterationIndex = 2;
-        let cantFirmIndex = 4;
+        let alteredNotesIndex = 0;
+        let cantFirmIndex = 0;
         let cPointIndex = 0;
         
         let indArr = [timeSigIndex,clefIndex, alterationIndex];
@@ -75,15 +79,25 @@ class RollReader {
             }
         }
         for(let i = 0; i < this.lines.length; i++){
+            if(this.lines[i].includes("AlteredNotes:")){
+                alteredNotesIndex = i;
+            }
+            if(this.lines[i].includes("CantusFirmus:")){
+                cantFirmIndex = i;
+            }
             if(this.lines[i].includes("Counterpoint:")){
                 cPointIndex = i;
                 i = this.lines.length;
             }
         }
+
         //cantus firmus and counter point
-        for(let i = cantFirmIndex; i < this.lines.length; i++){
+        for(let i = alteredNotesIndex; i < this.lines.length; i++){
+            if(i > alteredNotesIndex && i < cantFirmIndex){
+                this.alteredNotes.push(this.lines[i]);
+            }
             let ind = this.lines[i].indexOf(":");
-            if(i < cPointIndex){
+            if(i < cPointIndex && i > cantFirmIndex){
                 this.cantusFirmusNotes.push(this.lines[i].substring(0,ind));
                 this.cantusFirmusDurs.push(this.lines[i].substring(ind+1));
             }
@@ -94,7 +108,7 @@ class RollReader {
         }
         let CF = [this.cantusFirmusNotes,this.cantusFirmusDurs];
         let CP = [this.counterpointNotes,this.counterpointDurs];
-        return [this.timeSig,this.clef,this.alteration,CF,CP];
+        return [this.timeSig,this.clef,this.alteration,this.alteredNotes,CF,CP];
     }
 
     

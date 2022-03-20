@@ -19,6 +19,15 @@ Clef: (Treble)
 
 Alteration: (Sharp)
 
+@ Also please indicate which altered notes exist in the piece
+@ Ex) 
+@ Altered Notes:
+@ C#5
+@ A#4
+
+Altered Notes: 
+C#5
+
 @ Cantus Firmus and/or Counterpoint note input, follow this format
 @ For each note, input on seperate line like -> D4 : 2
 @ For sharp notes add an # to the end of the note letter like -> D#4 : 2
@@ -48,7 +57,7 @@ Alteration: (Sharp)
 @ D4 : half
 
 Cantus Firmus:
-Df4 : half
+D4 : half
 F4 : half
 E4 : half
 D4 : half
