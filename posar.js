@@ -60,7 +60,7 @@ class PositionalAR {
      * @param {int} medWin   Length of window for median denoising of positions
      * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, digAudio, useCantusFirmus, useCounterpoint,antialias, medWin, debug) {
+    constructor(sceneObj, digAudio, useCantusFirmus, useCounterpoint, antialias, medWin, debug) {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
@@ -92,9 +92,10 @@ class PositionalAR {
         
         this.noteGroupPlacement = -2;
         this.spaceAboveStaff = .1;
-        this.moveThresh = 3.5;
+        this.moveThresh = 6;
 
         this.trackedPositions = [];
+        this.endProgram = false;
         
         
         // Setup three.js WebGL renderer
@@ -219,14 +220,15 @@ class PositionalAR {
      * Added to ARGROUP as child
      */
     setupGhostNote(){
-        this.noteG = new THREE.TorusGeometry(.35, .08, 10, 24);
-        this.noteG.scale(1,1.55,1);
-        this.noteG.rotateX(1.57);
-        let gNM = new THREE.MeshStandardMaterial({color: 0xB41697});
-        this.note = new THREE.Group();
-        this.note.add(new THREE.Mesh(this.noteG,gNM));
-        this.arGroup.add(this.note);
+        let ghostNote = new THREE.Group();
+        let ghostMat = new THREE.MeshStandardMaterial({color: 0xB41697});
+        let ghostGeo = new THREE.TorusGeometry(.35, .08, 10, 24);
+        ghostGeo.scale(1,1.55,1);
+        ghostGeo.rotateX(1.57);
+        ghostNote.add(new THREE.Mesh(ghostGeo,ghostMat));
+        this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
+        this.arGroup.children[this.AGGNI].position.z = 10;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
@@ -237,52 +239,58 @@ class PositionalAR {
      * Sets index number of each group as class member data
      */
     setupFirstSpeciesNotes(){
-        this.musicNoteShape = new THREE.TorusGeometry(.35, .08, 10, 24);
-        this.musicNoteShape.scale(1,1.55,1);
-        this.musicNoteShape.rotateX(1.57);
-        let noteMaterial = new THREE.MeshStandardMaterial({color: 0x000000});
-        let newColorMat = new THREE.MeshStandardMaterial({color: 0xF5BB00});
-        this.xPosArr = this.clefXChoice(this.digAud.clef);
+
+        let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
+        let xPosArr = this.clefXChoice(this.digAud.clef);
         this.songLength = this.digAud.cfLength;
 
-        this.CFGroup = new THREE.Group();
-        this.CPGroup = new THREE.Group();
-        this.CFGroupNew = new THREE.Group();
-        this.CPGroup = new THREE.Group();
-        let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
+        let CFGroup = new THREE.Group();
+        let CPGroup = new THREE.Group();
+        let CFGroupNew = new THREE.Group();
+        let CPGroupNew = new THREE.Group();
+        
+        let noteGeo = new THREE.TorusGeometry(.35, .08, 10, 24);
+        let noteMat = new THREE.MeshStandardMaterial({color: 0x000000});
+        let newNoteMat = new THREE.MeshStandardMaterial({color: 0xF5BB00});
+        noteGeo.scale(1,1.55,1);
+        noteGeo.rotateX(1.57);
 
         for(let i = 0; i < this.linesToUse.length; i++){
             if(this.linesToUse[i]){
                 let songNotes = linesNotes[i];
-                let noteSpacing = 1.75;
+                let noteSpacing = 1.5;
                 let notePositionZ = 1;          
                 for(let j = 0; j < this.songLength; j++){
-                    let newNote = new THREE.Mesh(this.musicNoteShape, noteMaterial);
-                    let finNote = new THREE.Mesh(this.musicNoteShape, newColorMat);
-                    newNote.position.x = this.xPosArr[songNotes[j]].pos;
-                    finNote.position.x = this.xPosArr[songNotes[j]].pos;
+                    
+                    //primary note
+                    let newNote = new THREE.Mesh(noteGeo, noteMat);
+                    newNote.position.x = xPosArr[songNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
-                    finNote.position.y = 100;
                     newNote.position.z = notePositionZ - noteSpacing;
+                    //replacement note (upon arrival)
+                    let finNote = new THREE.Mesh(noteGeo, newNoteMat);
+                    finNote.position.x = xPosArr[songNotes[j]].pos;
+                    finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
+                    console.log(newNote.position.x);
                     notePositionZ = newNote.position.z;
                     if(i==0){
-                        this.CFGroup.add(newNote);
-                        this.CFGroupNew.add(finNote);
+                        CFGroup.add(newNote);
+                        CFGroupNew.add(finNote);
                     }else if(i==1){
-                        this.CPGroup.add(newNote);
-                        this.CPGroup.add(finNote);
+                        CPGroup.add(newNote);
+                        CPGroupNew.add(finNote);
                     }
                 }
                 if(i==0){
-                    this.arGroup.add(this.CFGroup);
+                    this.arGroup.add(CFGroup);
                     this.AGCFI = this.arGroup.children.length - 1;
-                    this.arGroup.add(this.CFGroupNew);
+                    this.arGroup.add(CFGroupNew);
                     this.AGCFNI =this.arGroup.children.length - 1;
                 }else if(i==1){
-                    this.arGroup.add(this.CPGroup);
+                    this.arGroup.add(CPGroup);
                     this.AGCPI = this.arGroup.children.length - 1;
-                    this.arGroup.add(this.CPGroupNew);
+                    this.arGroup.add(CPGroupNew);
                     this.AGCPNI = this.arGroup.children.length - 1;
                 }
             }
@@ -299,23 +307,23 @@ class PositionalAR {
      * Will adjust when more species are added
      */
     setupFirstSpeciesMeasureLines(){
-        let measureLine = new THREE.BoxGeometry(4,.01,.12);
+        let lineGeo = new THREE.BoxGeometry(4,.01,.12);
         let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
+        let lineGroup = new THREE.Group();
 
-        this.lineGroup = new THREE.Group();
         let linePosZ = 3.65;
         let lineSpacing = 3.5;
         let numLines = parseInt(Math.ceil(this.songLength/2));
 
         for(let i = 0; i < numLines; i++){
-            let newMeasureLine = new THREE.Mesh(measureLine,lineMat);
-            newMeasureLine.position.x = 0;
-            newMeasureLine.position.y = this.spaceAboveStaff;
-            newMeasureLine.position.z = linePosZ - lineSpacing;
-            linePosZ = newMeasureLine.position.z;
-            this.lineGroup.add(newMeasureLine);
+            let newLine = new THREE.Mesh(lineGeo,lineMat);
+            newLine.position.x = 0;
+            newLine.position.y = this.spaceAboveStaff;
+            newLine.position.z = linePosZ - lineSpacing;
+            linePosZ = newLine.position.z;
+            lineGroup.add(newLine);
         }
-        this.arGroup.add(this.lineGroup);
+        this.arGroup.add(lineGroup);
     }
     
 
@@ -451,7 +459,7 @@ class PositionalAR {
                 console.log("At Music Note " + i);
                 this.arrivedAtNote[i] = true;
                 this.trackedPositions.push(currentPosition.x);
-                //this.changeNoteColor(i);
+                this.changeNoteColor(i);
                 if(!this.didPlayNoteAudio[i]){
                     this.didPlayNoteAudio[i] = true;
                     if(this.linesToUse[0]){
@@ -462,8 +470,10 @@ class PositionalAR {
                     }
                 }
             }
-            if(this.arrivedAtNote[this.noteCount-1]){
+            if(this.arrivedAtNote[this.songLength-1]){
+                console.log("finished");
                 this.sampAud.stopRecording();
+                this.endProgram = true;
             }
         }
         //Allows repaint to occur, updating scene frame
@@ -508,8 +518,28 @@ class PositionalAR {
         while(!this.canRerun){
             this.notePositionUpdateAnalyze();
         }
-        this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(this.repaint.bind(this));
+        if(this.endProgram){
+            this.analyzeCollectedData();
+        }else{
+            this.renderer.render(this.scene, this.camera);
+            requestAnimationFrame(this.repaint.bind(this));
+        }
+    }
+
+    analyzeCollectedData(){
+        let acts = [];
+        for(let i = 0; i < this.trackedPositions.length; i++){
+            let actual = this.trackedPositions[i];
+            let low = Math.floor(actual);
+            let high = Math.ceil(actual);
+            let mid = (high-low)/2 + low;
+            let ops = [Math.abs(low-actual),Math.abs(mid-actual),Math.abs(high-actual)];
+            let choice = [low,mid,high];
+            let lowest = 0;
+            for(let j = 1; j < ops.length; j++){if(ops[j] < ops[lowest]){lowest = j;}}
+            acts.push(choice[lowest]);
+        }
+        console.log(acts);
     }
 
 }
@@ -517,10 +547,6 @@ class PositionalAR {
 /*
 TODO:
 
-Note highlighting
-
 Audio On/Off function for any line of music
-
-
 
 */

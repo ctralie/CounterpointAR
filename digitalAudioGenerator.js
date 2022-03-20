@@ -105,11 +105,11 @@ class DAGenerator{
     playCantFirmNote(noteNumber){
         if(this.cfMp3Arrs[noteNumber].readyState >= 2){
             this.cfMp3Arrs[noteNumber].play();
-            console.log("played note");
+            //console.log("played note");
         }else{
             this.cfMp3Arrs[noteNumber].addEventListener('loadeddata', function(){
                 that.cfMp3Arrs[noteNumber].play();
-                console.log("played note");
+                //console.log("played note");
             });
         }
     }
@@ -122,11 +122,11 @@ class DAGenerator{
 
         if(this.cpMp3Arrs[noteNumber].readyState >= 2){
             this.cpMp3Arrs[noteNumber].play();
-            console.log("played note");
+            //console.log("played note");
         }else{
             this.cpMp3Arrs[noteNumber].addEventListener('loadeddata', function(){
                 that.cpMp3Arrs[noteNumber].play();
-                console.log("played note");
+                //console.log("played note");
             });
         }
     }
