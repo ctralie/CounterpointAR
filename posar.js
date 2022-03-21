@@ -94,6 +94,10 @@ class PositionalAR {
         this.spaceAboveStaff = .1;
         this.moveThresh = 6;
 
+        this.ghostColor = 0;
+        this.noteColor  = 1;
+        this.replaceColor = 2;
+
         this.trackedPositions = [];
         this.endProgram = false;
         
@@ -221,15 +225,24 @@ class PositionalAR {
      */
     setupGhostNote(){
         let ghostNote = new THREE.Group();
-        let ghostMat = new THREE.MeshStandardMaterial({color: 0xB41697});
-        let ghostGeo = new THREE.TorusGeometry(.35, .08, 10, 24);
-        ghostGeo.scale(1,1.55,1);
-        ghostGeo.rotateX(1.57);
-        ghostNote.add(new THREE.Mesh(ghostGeo,ghostMat));
+        ghostNote.add(makeNoteObject(this.ghostColor));
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
         this.arGroup.children[this.AGGNI].position.z = 10;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
+    }
+
+    makeNoteObject(ind){
+        let geo = new THREE.TorusGeometry(.35, .08, 10, 24);
+        geo.scale(1,1.55,1);
+        geo.rotateX(1.57);
+        let colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}]
+        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(colors[ind]));
+        /*
+        let mats = [new THREE.MeshStandardMaterial({color: 0xB41697}),
+        new THREE.MeshStandardMaterial({color: 0x000000}),
+        new THREE.MeshStandardMaterial({color: 0xF5BB00})];
+        */
     }
 
     /**
@@ -248,12 +261,6 @@ class PositionalAR {
         let CPGroup = new THREE.Group();
         let CFGroupNew = new THREE.Group();
         let CPGroupNew = new THREE.Group();
-        
-        let noteGeo = new THREE.TorusGeometry(.35, .08, 10, 24);
-        let noteMat = new THREE.MeshStandardMaterial({color: 0x000000});
-        let newNoteMat = new THREE.MeshStandardMaterial({color: 0xF5BB00});
-        noteGeo.scale(1,1.55,1);
-        noteGeo.rotateX(1.57);
 
         for(let i = 0; i < this.linesToUse.length; i++){
             if(this.linesToUse[i]){
@@ -263,12 +270,12 @@ class PositionalAR {
                 for(let j = 0; j < this.songLength; j++){
                     
                     //primary note
-                    let newNote = new THREE.Mesh(noteGeo, noteMat);
+                    let newNote = makeNoteObject(this.noteColor);
                     newNote.position.x = this.xPosArr[songNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     //replacement note (upon arrival)
-                    let finNote = new THREE.Mesh(noteGeo, newNoteMat);
+                    let finNote = makeNoteObject(this.replaceColor);
                     finNote.position.x = this.xPosArr[songNotes[j]].pos;
                     finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
@@ -541,10 +548,10 @@ class PositionalAR {
         let noteResults = [];
         for(let i = 0; i < formattedPositions.length; i++){
             for(let[key,val] of Object.entries(this.xPosArr)){
-            if(val.pos == formattedPositions[i]){
-                noteResults.push(key);
-                break;
-            }
+                if(val.pos == formattedPositions[i]){
+                    noteResults.push(key);
+                    break;
+                }
             }
         }
         console.log(noteResults);
