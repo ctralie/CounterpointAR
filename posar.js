@@ -225,7 +225,7 @@ class PositionalAR {
      */
     setupGhostNote(){
         let ghostNote = new THREE.Group();
-        ghostNote.add(makeNoteObject(this.ghostColor));
+        ghostNote.add(this.makeNoteObject(this.ghostColor));
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
         this.arGroup.children[this.AGGNI].position.z = 10;
@@ -270,12 +270,12 @@ class PositionalAR {
                 for(let j = 0; j < this.songLength; j++){
                     
                     //primary note
-                    let newNote = makeNoteObject(this.noteColor);
+                    let newNote = this.makeNoteObject(this.noteColor);
                     newNote.position.x = this.xPosArr[songNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     //replacement note (upon arrival)
-                    let finNote = makeNoteObject(this.replaceColor);
+                    let finNote = this.makeNoteObject(this.replaceColor);
                     finNote.position.x = this.xPosArr[songNotes[j]].pos;
                     finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
