@@ -113,10 +113,11 @@ class PositionalAR {
         document.body.appendChild( renderer.domElement );
 
         this.setupTracker();
+        
         let sA = new SampledAudio();
         this.sampAud = sA;
-        
         this.sampAud.startRecording();
+        
         this.repaint();
     }
 
@@ -205,6 +206,14 @@ class PositionalAR {
         this.setupGhostNote();
         this.setupFirstSpeciesNotes();
         this.scene.add(this.arGroup);
+        /*
+        this.arGroup.rotateX(1.57);
+        this.arGroup.rotateY(-1.57);
+        this.arGroup.rotateZ(0.35);
+        this.arGroup.position.x = -7;
+        this.arGroup.position.y = 0;
+        this.arGroup.position.z = -22.5;
+        */
     }
 
     clefXChoice(clefChoice){
@@ -228,7 +237,7 @@ class PositionalAR {
         ghostNote.add(this.makeNoteObject(this.ghostColor));
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
-        this.arGroup.children[this.AGGNI].position.z = 10;
+        this.arGroup.children[this.AGGNI].position.z = 3;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
@@ -313,12 +322,12 @@ class PositionalAR {
      * Will adjust when more species are added
      */
     setupFirstSpeciesMeasureLines(){
-        let lineGeo = new THREE.BoxGeometry(4,.01,.12);
+        let lineGeo = new THREE.BoxGeometry(4,.01,.1);
         let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
         let lineGroup = new THREE.Group();
 
-        let linePosZ = 3.65;
-        let lineSpacing = 3.5;
+        let linePosZ = .25;
+        let lineSpacing = 3;
         let numLines = parseInt(Math.ceil(this.songLength/2));
 
         for(let i = 0; i < numLines; i++){
@@ -508,6 +517,7 @@ class PositionalAR {
      * the global AR positions, as well as animating the scene forward in time
      */
     repaint() {
+        
         this.canRerun = false;
         if ( this.arToolkitSource.initialized !== false ) {
             this.arToolkitContext.update( this.arToolkitSource.domElement );
@@ -521,6 +531,10 @@ class PositionalAR {
         this.totalTime += deltaTime;
         this.updateCalibration();
         this.sceneObj.animate(deltaTime);
+
+        //this.renderer.render(this.scene, this.camera);
+        //requestAnimationFrame(this.repaint.bind(this));
+
         while(!this.canRerun){
             this.notePositionUpdateAnalyze();
         }
@@ -530,6 +544,7 @@ class PositionalAR {
             this.renderer.render(this.scene, this.camera);
             requestAnimationFrame(this.repaint.bind(this));
         }
+        
     }
 
     analyzeCollectedData(){
