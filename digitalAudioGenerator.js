@@ -32,10 +32,10 @@ class DAGenerator{
         "F#3","G3","G#3","A3","A#3","B3","B#3","C4","C#4","D4","D#4","E4","E#4","F4",
         "F#4","G4","G#4","A4","A#4","B4","B#4"];
 
-        this.trebleNoteArr = ["B#3","Cf4","C4","C#4","Df4","D4","D#4","Ef4",
-        "E4","E#4","Ff4","F4","F#4","Gf4","G4","G#4","Af4","A4","A#4","Bf4",
-        "B4","B#4","Cf5","C5","C#5","Df5","D5","D#5","Ef5","E5","E#5","Ff5",
-        "F5","F#5","Gf5","G5","G#5","Af5","A5","A#5"];
+        this.trebleNoteArr = ["Bs3","Cf4","C4","Cs4","Df4","D4","Ds4","Ef4",
+        "E4","Es4","Ff4","F4","Fs4","Gf4","G4","Gs4","Af4","A4","As4","Bf4",
+        "B4","Bs4","Cf5","C5","Cs5","Df5","D5","Ds5","Ef5","E5","Es5","Ff5",
+        "F5","Fs5","Gf5","G5","Gs5","Af5","A5","As5"];
 
     }
 
@@ -97,8 +97,10 @@ class DAGenerator{
         for(let i = 0; i < this.cpLength; i++){
             let note = this.counterpointNotes[i];
             let dur = this.counterpointDurs[i];
-            let pDir = "notes/"+dur+"/"+note+".mp3";
-            let sampAud = new Audio(pDir);
+            let pDir = "notes/";
+            let dir = pDir.concat(dur,"/",note,".mp3");
+            console.log(dir);
+            let sampAud = new Audio(dir);
             this.cpMp3Arrs.push(sampAud);
         }
     }

@@ -22,15 +22,15 @@ Alteration: (Sharp)
 @ Also please indicate which altered notes exist in the piece
 @ Ex) 
 @ Altered Notes:
-@ C#5
-@ A#4
+@ Cs5
+@ As4
 
 Altered Notes: 
-C#5
+Cs5
 
 @ Cantus Firmus and/or Counterpoint note input, follow this format
 @ For each note, input on seperate line like -> D4 : 2
-@ For sharp notes add an # to the end of the note letter like -> D#4 : 2
+@ For sharp notes add an 's' to the end of the note letter like -> Ds4 : 2
 @ For flat notes, add an f after the note letter like -> Df4 : 2
 @
 @ For duration of the note, chose from the following options:
@@ -38,9 +38,9 @@ C#5
 @ For dotted notes, indicate with a d before the duration. Example below:
 @ A dotted eighth note would be written like -> Df4 : d_eighth
 @
-@ Bass Note Range: Ef2 -> C#4
-@ Alto Note Range: Df3 -> B#4
-@ Treble Note Range: Cf4 -> A#5
+@ Bass Note Range: Ef2 -> Cs4
+@ Alto Note Range: Df3 -> Bs4
+@ Treble Note Range: Cf4 -> As5
 
 @ Ex)
 @ Cantus Firmus:
@@ -79,5 +79,5 @@ C5 : half
 C5 : half
 B4 : half
 D5 : half
-C#5 : half
+Cs5 : half
 D5 : half
