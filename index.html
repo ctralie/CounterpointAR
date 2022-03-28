@@ -66,7 +66,7 @@ document.addEventListener('touchmove', function(e) {
         this.scene = new BasicScene();
         this.scene.makeScene(this.notes.parseInfo());
         let useCF = true;
-        let useCP = false;
+        let useCP = true;
         this.posAR = new PositionalAR(this.scene,this.digAud, useCF, useCP);
       }
     }
