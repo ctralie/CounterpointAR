@@ -44,12 +44,12 @@ document.addEventListener('touchmove', function(e) {
 <script>
 
   class TestClass {
-    constructor() {
-
+    constructor(fileName, useCF, useCP) {
+      this.useCantusFirmus = useCF;
+      this.useCounterpoint = useCP;
       this.notes= new RollReader();
-      this.notes.loadFile("song.txt");
+      this.notes.loadFile(fileName);
       this.doSomethingWithFile();
-      
     }
 
     doSomethingWithFile() {
@@ -65,17 +65,15 @@ document.addEventListener('touchmove', function(e) {
         this.digAud.fillInfo(this.notes.parseInfo());
         this.scene = new BasicScene();
         this.scene.makeScene(this.notes.parseInfo());
-        let useCF = true;
-        let useCP = true;
-        this.posAR = new PositionalAR(this.scene,this.digAud, useCF, useCP);
+        this.posAR = new PositionalAR(this.scene,this.digAud, this.useCantusFirmus, this.useCounterpoint);
       }
     }
-    
   }
 
-  let obj = new TestClass();
-  //let posAR = new PositionalAR(scene, ret);
-  
+  let useCF = true;
+  let useCP = true;
+  let filename = "song1.txt";
+  let obj = new TestClass(filename, useCF, useCP);
 </script>
 
 </body>
