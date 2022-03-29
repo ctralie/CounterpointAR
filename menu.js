@@ -1,3 +1,7 @@
+let w1 = Math.round(window.innerWidth/100);
+let w2 = Math.round(window.innerWidth/60);
+let w3 = Math.round(window.innerWidth/40);
+
 
 $('.tuneTable').hide();
 $('.toggle-selection').on('click',function() {					
@@ -7,11 +11,17 @@ $('.toggle-selection').on('click',function() {
   $('.tuneTable').toggle('slow');
 });
 
+let tuneTable = document.getElementById("tuneTable");
+tuneTable.style['font'] = w3+'px';
+
 
 let tuneSelection = document.getElementById("Tunes");
+tuneSelection.style['font'] = w3+'px';
 // tuneSelection.value
 let cfCheckbox = document.getElementById("cantusFirmus");
+cfCheckbox.style['font'] = w3+'px';
 let cpCheckbox = document.getElementById("counterpoint");
+cpCheckbox.style['font'] = w3+'px';
 // cfCheckbox.checked
 
 function launch() {
