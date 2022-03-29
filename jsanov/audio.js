@@ -16,7 +16,7 @@ function downloadSamples(samples, sr) {
     const a = document.createElement('a');
     a.href = window.URL.createObjectURL(wav);
     a.style.display = 'none';
-    a.download = 'audio.wav';
+    a.download = 'Voice.wav';
     document.body.appendChild(a);
     a.click();
 }
