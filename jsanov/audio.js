@@ -55,8 +55,6 @@ class SampledAudio {
     this.mediaRecorder = null;
     this.audio = null;
     this.recorder = null;
-    //const AudioContext = window.AudioContext || window.webkitAudioContext;
-    //this.audioContext = new AudioContext();
 
     this.audioBlob = null;
     this.samples = [];
@@ -65,6 +63,7 @@ class SampledAudio {
     // Handles for stop/start buttons
     this.startButton = null;
     this.stopButton = null;
+    this.audioContext = new AudioContext();
   }
 
   /**
@@ -112,40 +111,32 @@ class SampledAudio {
    * Stop recording and set the samples
    * @returns A promise for when the samples have been set
    */
-  stopRecording() {
-  
-    let that = this;
-    this.mediaRecorder.stop();
-    return new Promise(resolve => {
-      that.recorder.then(chunks => {
-        that.audioBlob = new Blob(chunks, {type:'audio/mp3'});
-        const audioUrl = window.URL.createObjectURL(that.audioBlob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = audioUrl;
-        a.download = 'VoiceRecording.mp3';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(audioUrl);
-        }, 100);
-        //audioUrl.click();
-        /*
-        that.audio = new Audio(audioUrl);
-        that.audioBlob.arrayBuffer().then(
-          buffer => {
-            that.audioContext.decodeAudioData(buffer, function(buff) {
-              that.sr = buff.sampleRate;
-              that.samples= buff.getChannelData(0);
-              that.downloadAudio(that.samples, that.sr); 
-              resolve();
-            });
-          }
-        );*/
+    /**
+   * Stop recording and set the samples
+   * @returns A promise for when the samples have been set
+   */
+    stopRecording() {     
+      let that = this;
+      this.mediaRecorder.stop();
+      return new Promise(resolve => {
+        that.recorder.then(chunks => {
+          that.audioBlob = new Blob(chunks, {type:'audio/mp3'});
+          const audioUrl = URL.createObjectURL(that.audioBlob);
+          that.audio = new Audio(audioUrl);
+          that.audioBlob.arrayBuffer().then(
+            buffer => {
+              this.audioContext.decodeAudioData(buffer, function(buff) {
+                that.sr = buff.sampleRate;
+                that.samples= buff.getChannelData(0);
+                that.downloadAudio();
+                resolve();
+              });
+            }
+          );
+        });
       });
-    });
   }
+  
 
   /**
      * 
