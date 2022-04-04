@@ -5,31 +5,31 @@ The image size set to 2500px, pattern ratio set to .9
 */
 
 const PATTERNS_AR = [
-    {"url":"data/newmarkers/pattern-A.patt", "pos":[1, 0]},
-    {"url":"data/newmarkers/pattern-B.patt", "pos":[1, 1]},
-    {"url":"data/newmarkers/pattern-C.patt", "pos":[1, 2]},
-    {"url":"data/newmarkers/pattern-D.patt", "pos":[1, 3]},
-    {"url":"data/newmarkers/pattern-E.patt", "pos":[1, 4]},
-    {"url":"data/newmarkers/pattern-F.patt", "pos":[1, 5]},
-    {"url":"data/newmarkers/pattern-M.patt", "pos":[1, 6]},
-    {"url":"data/newmarkers/pattern-N.patt", "pos":[1, 7]},
-    {"url":"data/newmarkers/pattern-O.patt", "pos":[1, 8]},
-    {"url":"data/newmarkers/pattern-P.patt", "pos":[1, 9]},
-    {"url":"data/newmarkers/pattern-Q.patt", "pos":[1, 10]},
-    {"url":"data/newmarkers/pattern-R.patt", "pos":[1, 11]},
+    {"url":"data/pattern-A.patt", "pos":[1, 0]},
+    {"url":"data/pattern-B.patt", "pos":[1, 1]},
+    {"url":"data/pattern-C.patt", "pos":[1, 2]},
+    {"url":"data/pattern-D.patt", "pos":[1, 3]},
+    {"url":"data/pattern-E.patt", "pos":[1, 4]},
+    {"url":"data/pattern-F.patt", "pos":[1, 5]},
+    {"url":"data/pattern-M.patt", "pos":[1, 6]},
+    {"url":"data/pattern-N.patt", "pos":[1, 7]},
+    {"url":"data/pattern-O.patt", "pos":[1, 8]},
+    {"url":"data/pattern-P.patt", "pos":[1, 9]},
+    {"url":"data/pattern-Q.patt", "pos":[1, 10]},
+    {"url":"data/pattern-R.patt", "pos":[1, 11]},
 
-    {"url":"data/newmarkers/pattern-G.patt", "pos":[-1, 0]},
-    {"url":"data/newmarkers/pattern-H.patt", "pos":[-1, 1]},
-    {"url":"data/newmarkers/pattern-I.patt", "pos":[-1, 2]},
-    {"url":"data/newmarkers/pattern-J.patt", "pos":[-1, 3]},
-    {"url":"data/newmarkers/pattern-K.patt", "pos":[-1, 4]},
-    {"url":"data/newmarkers/pattern-L.patt", "pos":[-1, 5]},
-    {"url":"data/newmarkers/pattern-S.patt", "pos":[-1, 6]},
-    {"url":"data/newmarkers/pattern-T.patt", "pos":[-1, 7]},
-    {"url":"data/newmarkers/pattern-U.patt", "pos":[-1, 8]},
-    {"url":"data/newmarkers/pattern-V.patt", "pos":[-1, 9]},
-    {"url":"data/newmarkers/pattern-W.patt", "pos":[-1, 10]},
-    {"url":"data/newmarkers/pattern-X.patt", "pos":[-1, 11]}
+    {"url":"data/pattern-G.patt", "pos":[-1, 0]},
+    {"url":"data/pattern-H.patt", "pos":[-1, 1]},
+    {"url":"data/pattern-I.patt", "pos":[-1, 2]},
+    {"url":"data/pattern-J.patt", "pos":[-1, 3]},
+    {"url":"data/pattern-K.patt", "pos":[-1, 4]},
+    {"url":"data/pattern-L.patt", "pos":[-1, 5]},
+    {"url":"data/pattern-S.patt", "pos":[-1, 6]},
+    {"url":"data/pattern-T.patt", "pos":[-1, 7]},
+    {"url":"data/pattern-U.patt", "pos":[-1, 8]},
+    {"url":"data/pattern-V.patt", "pos":[-1, 9]},
+    {"url":"data/pattern-W.patt", "pos":[-1, 10]},
+    {"url":"data/pattern-X.patt", "pos":[-1, 11]}
 ];
 
 const TREBXPOS = {"Bs3":{"pos":3.5},"Cf4":{"pos":3},"C4":{"pos":3},"Cs4":{"pos":3},
@@ -100,6 +100,8 @@ class PositionalAR {
         this.noteColor  = 1;
         this.replaceColor = 2;
 
+        this.globalTimes = [];
+
         this.trackedPositions = [];
         this.endProgram = false;
         this.madeEndScene = false;
@@ -120,7 +122,6 @@ class PositionalAR {
         
         let sA = new SampledAudio();
         this.sampAud = sA;
-        this.sampAud.startRecording();
         
         this.repaint();
     }
@@ -190,9 +191,20 @@ class PositionalAR {
             that.scene.add(markerRoot);
             markerRoots.push(markerRoot);
             let markerControl = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-                size: 1, type: 'pattern', patternUrl: PATTERNS_AR[i].url, smooth: true,
+                size: 1,
+                type: 'pattern',
+                patternUrl: PATTERNS_AR[i].url,
+                // turn on/off camera smoothing
+                smooth: true,
+                // number of matrices to smooth tracking over, more = smoother but slower follow
                 smoothCount: 10
-                //smooth: true, smoothCount: 2, smoothTolerance: 0.01, smoothThreshold: 2
+                // distance tolerance for smoothing
+                //if smoothThreshold # of matrices are under tolerance, tracking will stay still
+                //smoothTolerance: 0.01,
+                // threshold for smoothing
+                //will keep still unless enough matrices are over tolerance
+                //smoothThreshold: 2
+                
             });
             markerControl.i = i;
             markerControl.addEventListener("markerFound", (e)=>{
@@ -210,14 +222,6 @@ class PositionalAR {
         this.setupGhostNote();
         this.setupFirstSpeciesNotes();
         this.scene.add(this.arGroup);
-        /*
-        this.arGroup.rotateX(1.57);
-        this.arGroup.rotateY(-1.57);
-        this.arGroup.rotateZ(0.35);
-        this.arGroup.position.x = -7;
-        this.arGroup.position.y = 0;
-        this.arGroup.position.z = -22.5;
-        */
     }
 
     clefXChoice(clefChoice){
@@ -242,7 +246,7 @@ class PositionalAR {
         this.ghostNote = ghostNote;
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
-        this.arGroup.children[this.AGGNI].position.z = 10;
+        this.arGroup.children[this.AGGNI].position.z = 7;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
@@ -252,11 +256,6 @@ class PositionalAR {
         geo.rotateX(1.57);
         let colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}]
         return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(colors[ind]));
-        /*
-        let mats = [new THREE.MeshStandardMaterial({color: 0xB41697}),
-        new THREE.MeshStandardMaterial({color: 0x000000}),
-        new THREE.MeshStandardMaterial({color: 0xF5BB00})];
-        */
     }
 
     /**
@@ -267,7 +266,7 @@ class PositionalAR {
      */
     setupFirstSpeciesNotes(){
 
-        let linesNotes = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
+        let musicLinesList = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
         this.xPosArr = this.clefXChoice(this.digAud.clef);
         this.songLength = this.digAud.cfLength;
 
@@ -276,21 +275,22 @@ class PositionalAR {
         this.CFGroupNew = new THREE.Group();
         this.CPGroupNew = new THREE.Group();
 
+        let boolListsEmpty = true;
+
         for(let i = 0; i < this.linesToUse.length; i++){
             if(this.linesToUse[i]){
-                let songNotes = linesNotes[i];
+                let lineNotes = musicLinesList[i];
                 let noteSpacing = 1.5;
                 let notePositionZ = 1;          
                 for(let j = 0; j < this.songLength; j++){
-                    
                     //primary note
                     let newNote = this.makeNoteObject(this.noteColor);
-                    newNote.position.x = this.xPosArr[songNotes[j]].pos;
+                    newNote.position.x = this.xPosArr[lineNotes[j]].pos;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     //replacement note (upon arrival)
                     let finNote = this.makeNoteObject(this.replaceColor);
-                    finNote.position.x = this.xPosArr[songNotes[j]].pos;
+                    finNote.position.x = this.xPosArr[lineNotes[j]].pos;
                     finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
                     notePositionZ = newNote.position.z;
@@ -301,7 +301,14 @@ class PositionalAR {
                         this.CPGroup.add(newNote);
                         this.CPGroupNew.add(finNote);
                     }
+                    //fills note booleans
+                    if(boolListsEmpty){
+                        this.didPlayNoteAudio.push(false);
+                        this.arrivedAtNote.push(false);
+                    }
                 }
+                //stops form overfill
+                boolListsEmpty = false;
                 if(i==0){
                     this.arGroup.add(this.CFGroup);
                     this.AGCFI = this.arGroup.children.length - 1;
@@ -314,10 +321,6 @@ class PositionalAR {
                     this.AGCPNI = this.arGroup.children.length - 1;
                 }
             }
-        }
-        for(let i = 0; i < this.songLength; i++){
-            this.didPlayNoteAudio.push(false);
-            this.arrivedAtNote.push(false);
         }
         this.setupFirstSpeciesMeasureLines();
     }
@@ -379,7 +382,6 @@ class PositionalAR {
                 }
             }
         }
-        
         this.placeSceneRoot();
     }
 
@@ -481,6 +483,7 @@ class PositionalAR {
             console.log("At Music Note " + this.currentNoteInd);
             this.arrivedAtNote[this.currentNoteInd] = true;
             this.trackedPositions.push(currentPosition.x);
+            this.globalTimes.push(Date.now());
             this.changeNoteColor(this.currentNoteInd);
             if(!this.didPlayNoteAudio[this.currentNoteInd]){
                 this.didPlayNoteAudio[this.currentNoteInd] = true;
@@ -530,46 +533,38 @@ class PositionalAR {
         if(!this.gotOGQuat){
             this.OGQuat = this.arGroup.getWorldQuaternion();
             this.gotOGQuat = true;
+            this.sampAud.startRecording();
+            this.timeOffset = Date.now();
         }
-        if(this.madeEndScene){
-            if(this.paintedEndScene){
-                //end of program?
-            }else{
-                this.paintedEndScene = true;
-                this.renderer.render(this.scene, this.camera);
-                requestAnimationFrame(this.repaint.bind(this));
-            }
+        this.canRerun = false;
+        if ( this.arToolkitSource.initialized !== false ) {
+            this.arToolkitContext.update( this.arToolkitSource.domElement );
+        }
+        this.updateCalibration();
+        let deltaTime = this.clock.getDelta();
+        if (this.totalTime < 6 && (this.totalTime+deltaTime)%1 < this.totalTime%1) {
+            // A hack to trigger resizing every second for the first 5 seconds
+            // TODO: Try something more elegant?
+            this.onResize();
         }else{
-            
-            this.canRerun = false;
-            if ( this.arToolkitSource.initialized !== false ) {
-                this.arToolkitContext.update( this.arToolkitSource.domElement );
+            while(!this.canRerun){
+                this.notePositionUpdateAnalyze();
             }
-            this.updateCalibration();
-            let deltaTime = this.clock.getDelta();
-            if (this.totalTime < 6 && (this.totalTime+deltaTime)%1 < this.totalTime%1) {
-                // A hack to trigger resizing every second for the first 5 seconds
-                // TODO: Try something more elegant?
-                this.onResize();
-            }else{
-                while(!this.canRerun){
-                    this.notePositionUpdateAnalyze();
-                }
-            }
-            this.totalTime += deltaTime;
-            this.sceneObj.animate(deltaTime);
+        }
+        this.totalTime += deltaTime;
+        this.sceneObj.animate(deltaTime);
 
-            //this.renderer.render(this.scene, this.camera);
-            //requestAnimationFrame(this.repaint.bind(this));
-
-            if(this.endProgram){
-                this.analyzeCollectedData();
-            }else{
-                this.renderer.render(this.scene, this.camera);
-                requestAnimationFrame(this.repaint.bind(this));
-            }
+        if(this.endProgram){
+            this.analyzeCollectedData();
+        }else{
+            this.renderer.render(this.scene, this.camera);
+            requestAnimationFrame(this.repaint.bind(this));
         }
     }
+
+    /**
+     * POST TRAVERSAL METHODS
+     */
 
     analyzeCollectedData(){
         let formattedPositions = [];
@@ -593,10 +588,16 @@ class PositionalAR {
                 }
             }
         }
+        let offset = this.timeOffset;
+        for(let i = 0; i < this.globalTimes.length; i++){
+            this.globalTimes[i] -= offset;
+        }
         this.formattedPositions = formattedPositions;
         console.log(noteResults);
         this.noteResults = noteResults;
         this.createEndScene();
+        this.renderer.render(this.scene, this.camera);
+        this.playUserChoice();
     }
 
     createEndScene(){
@@ -623,15 +624,23 @@ class PositionalAR {
         for(let i = 0; i < this.formattedPositions.length; i++){
             let newNote = this.makeNoteObject(this.ghostColor);
             newNote.position.x = this.formattedPositions[i];
-            newNote.position.y = this.spaceAboveStaff;
+            newNote.position.y = 1000;
             newNote.position.z = notePositionZ - noteSpacing;
             notePositionZ = newNote.position.z;
             resGroup.add(newNote);
         }
         this.arGroup.add(resGroup);
-        this.madeEndScene = true;
-        this.paintedEndScene = false;
-        this.repaint();
+        this.NNGI = this.arGroup.children.length - 1;
+    }
+
+    playUserChoice(){
+        //this.sampAud.playAudio();
+        for(let i = 0; i < this.globalTimes.length; i++){
+            setTimeout(() => {
+                this.arGroup.children[this.NNGI].children[i].position.y = this.spaceAboveStaff;
+                this.renderer.render(this.scene, this.camera);
+            }, this.globalTimes[i])
+        }
     }
 
 }

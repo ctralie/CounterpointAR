@@ -99,7 +99,6 @@ class DAGenerator{
             let dur = this.counterpointDurs[i];
             let pDir = "notes/";
             let dir = pDir.concat(dur,"/",note,".mp3");
-            console.log(dir);
             let sampAud = new Audio(dir);
             this.cpMp3Arrs.push(sampAud);
         }
