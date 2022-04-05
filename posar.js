@@ -246,7 +246,7 @@ class PositionalAR {
         this.ghostNote = ghostNote;
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
-        this.arGroup.children[this.AGGNI].position.z = 7;
+        this.arGroup.children[this.AGGNI].position.z = 5;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
