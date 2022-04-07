@@ -246,13 +246,13 @@ class PositionalAR {
         this.ghostNote = ghostNote;
         this.arGroup.add(ghostNote);
         this.AGGNI = this.arGroup.children.length - 1;
-        this.arGroup.children[this.AGGNI].position.z = 5;
+        this.arGroup.children[this.AGGNI].position.z = 6;
         this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
     }
 
     makeNoteObject(ind){
-        let geo = new THREE.TorusGeometry(.35, .08, 10, 24);
-        geo.scale(1,1.55,1);
+        let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
+        geo.scale(1.25,2,1);
         geo.rotateX(1.57);
         let colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}]
         return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(colors[ind]));
@@ -330,7 +330,7 @@ class PositionalAR {
      * Will adjust when more species are added
      */
     setupFirstSpeciesMeasureLines(){
-        let lineGeo = new THREE.BoxGeometry(4,.01,.1);
+        let lineGeo = new THREE.BoxGeometry(4,.01,.05);
         let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
         let lineGroup = new THREE.Group();
 
@@ -346,6 +346,11 @@ class PositionalAR {
             linePosZ = newLine.position.z;
             lineGroup.add(newLine);
         }
+        let newLine = new THREE.Mesh(lineGeo,lineMat);
+        newLine.position.x = 0;
+        newLine.position.y = this.spaceAboveStaff;
+        newLine.position.z = linePosZ + .25;
+        lineGroup.add(newLine);
         this.arGroup.add(lineGroup);
     }
     
