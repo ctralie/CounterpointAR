@@ -1,0 +1,43 @@
+<html>
+  <body>
+    <script src="scales.js"></script>
+    <script src="notereader.js"></script>
+    <script src="digitalAudioGenerator.js"></script>
+    <script src="keyboardhandler.js"></script>
+
+    <script src="jsanov/libs/plotly.min.js"></script>
+
+    <script src="jsanov/libs/fft.min.js"></script>
+
+    <script src="jsanov/libs/numeric-1.2.6.min.js"></script>
+    <script src="jsanov/libs/lame.min.js"></script>
+    <script src="jsanov/wav.js"></script>
+    <script src="jsanov/features.js"></script>
+    <script src="jsanov/audio.js"></script>
+    <script src="jsanov/libs/jquery-3.5.1.min.js"></script>
+    <script>
+      class TestClass{
+        constructor(fileName) {
+          this.notes= new RollReader();
+          this.notes.loadFile(fileName);
+          this.doSomethingWithFile();
+        }
+        doSomethingWithFile() {
+          if (!this.notes.fileReady) {
+            // "this" makes sure that when doSomethingWithData is called 
+            // it actually is called on the current object
+            this.notes.data.then(this.doSomethingWithFile.bind(this));
+          }else{
+            // Do some stuff now that it's ready
+            //console.log("Lines after finished" + this.notes.lines);
+            this.digAud = new DAGenerator();
+            this.digAud.fillInfo(this.notes.parseInfo());
+          }
+        }
+      }
+    </script>
+    <script>
+      let newTest = new TestClass("songs/Melody1.txt");
+    </script>
+  </body>
+</html>

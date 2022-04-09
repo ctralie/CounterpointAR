@@ -1,0 +1,96 @@
+@ For Time signature: (Beats per measure, equivalent note beat)
+@ Ex)
+@ Time Signature: (2,2) or (4,4) or (3,4) etc...
+@ Type time signature below!
+
+Time Signature: (2,2)
+
+@ For Clef, write either Treble, Alto, or Bass
+@ Ex)
+@ Clef: (Treble) or (Alto) or (Bass)
+@ Type Clef below!
+
+Clef: (Treble)
+
+@ For Key/Scale: Chose a note for which key to be used
+@ Chose which variant is to be used. (Flat/Natural/Sharp)
+@ Chose whether it is the major or minor key (Minor/Major)
+@ Ex)
+@ Key: C-Natural-Major
+@ Key: D-Flat-Minor
+
+Key: C-Natural-Major
+
+@ Starting Note (1st Scale Degree) for both Cantus Firmus and Counterpoint
+@ Type the first scale degree note from the piece, followed by octave number
+@ If flat, add an 'f' in between note letter and octave number
+@ If sharp, add an 's' in between note letter and octave number
+@ Ex)
+@ First Cantus Firmus Note: D4
+@ First Cantus Firmus Note: Af3 
+@ First Cantus Firmus Note: Gs2
+@ First Counterpoint Note: C4
+
+First Cantus Firmus Note: D4
+First Counterpoint Note: A4
+
+@ Cantus Firmus and Counterpoint note input.
+@ Format will be: scale degree/length/accidental (if different than key)
+@ Please make sure that the lowest scale degree is inputted as 1
+@ Length options: (sixteenth,eighth,quarter,half,whole)
+@ For accidentals: Indicate whether the note is augmented or diminished from its original note in key.
+@ Ex) C Sharp in the key of C Major would be Augmented
+@ Ex) A Flat in the key of F Major would be Diminished
+@
+@
+@ Ex)
+@ Cantus Firmus:
+@ 1 : half
+@ 3 : half
+@ 2 : half
+@ 1 : half
+@ 4 : half
+@ 3 : half
+@ 5 : half
+@ 4 : half
+@ 3 : half
+@ 2 : half
+@ 1 : half
+@
+@ Counterpoint:
+@ 5 : half
+@ 5 : half
+@ 4 : half
+@ 5 : half
+@ 6 : half
+@ 7 : half
+@ 7 : half
+@ 8 : half
+@ 7 : half : Augmented
+@ 8 : half
+
+Cantus Firmus:
+1 : half
+3 : half
+2 : half
+1 : half
+4 : half
+3 : half
+5 : half
+4 : half
+3 : half
+2 : half
+1 : half
+
+Counterpoint:
+5 : half
+5 : half
+4 : half
+5 : half
+6 : half
+7 : half
+7 : half
+6 : half
+8 : half
+7 : half : Augmented
+8 : half

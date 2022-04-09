@@ -28,7 +28,7 @@ class BasicScene {
         // Step 3: Initiate Mesh and Geometry
         this.partialStaff = new THREE.BoxGeometry(0.1,0.01,3);
         this.sceneRoot = new THREE.Group();
-
+        this.xSpace = 0.5;
         this.frameNum = 0;
     }
     

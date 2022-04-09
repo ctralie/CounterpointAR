@@ -5,50 +5,32 @@ The image size set to 2500px, pattern ratio set to .9
 */
 
 const PATTERNS_AR = [
-    {"url":"data/pattern-A.patt", "pos":[1, 0]},
-    {"url":"data/pattern-B.patt", "pos":[1, 1]},
-    {"url":"data/pattern-C.patt", "pos":[1, 2]},
-    {"url":"data/pattern-D.patt", "pos":[1, 3]},
-    {"url":"data/pattern-E.patt", "pos":[1, 4]},
-    {"url":"data/pattern-F.patt", "pos":[1, 5]},
-    {"url":"data/pattern-M.patt", "pos":[1, 6]},
-    {"url":"data/pattern-N.patt", "pos":[1, 7]},
-    {"url":"data/pattern-O.patt", "pos":[1, 8]},
-    {"url":"data/pattern-P.patt", "pos":[1, 9]},
-    {"url":"data/pattern-Q.patt", "pos":[1, 10]},
-    {"url":"data/pattern-R.patt", "pos":[1, 11]},
+    {"url":"data/pattern-A.patt", "pos":[5, 0]},
+    {"url":"data/pattern-B.patt", "pos":[5, 2]},
+    {"url":"data/pattern-C.patt", "pos":[5, 4]},
+    {"url":"data/pattern-D.patt", "pos":[5, 6]},
+    {"url":"data/pattern-E.patt", "pos":[5, 8]},
+    {"url":"data/pattern-F.patt", "pos":[5, 10]},
+    {"url":"data/pattern-M.patt", "pos":[5, 12]},
+    {"url":"data/pattern-N.patt", "pos":[5, 14]},
+    {"url":"data/pattern-O.patt", "pos":[5, 16]},
+    {"url":"data/pattern-P.patt", "pos":[5, 18]},
+    {"url":"data/pattern-Q.patt", "pos":[5, 20]},
+    {"url":"data/pattern-R.patt", "pos":[5, 22]},
 
-    {"url":"data/pattern-G.patt", "pos":[-1, 0]},
-    {"url":"data/pattern-H.patt", "pos":[-1, 1]},
-    {"url":"data/pattern-I.patt", "pos":[-1, 2]},
-    {"url":"data/pattern-J.patt", "pos":[-1, 3]},
-    {"url":"data/pattern-K.patt", "pos":[-1, 4]},
-    {"url":"data/pattern-L.patt", "pos":[-1, 5]},
-    {"url":"data/pattern-S.patt", "pos":[-1, 6]},
-    {"url":"data/pattern-T.patt", "pos":[-1, 7]},
-    {"url":"data/pattern-U.patt", "pos":[-1, 8]},
-    {"url":"data/pattern-V.patt", "pos":[-1, 9]},
-    {"url":"data/pattern-W.patt", "pos":[-1, 10]},
-    {"url":"data/pattern-X.patt", "pos":[-1, 11]}
+    {"url":"data/pattern-G.patt", "pos":[-5, 0]},
+    {"url":"data/pattern-H.patt", "pos":[-5, 2]},
+    {"url":"data/pattern-I.patt", "pos":[-5, 4]},
+    {"url":"data/pattern-J.patt", "pos":[-5, 6]},
+    {"url":"data/pattern-K.patt", "pos":[-5, 8]},
+    {"url":"data/pattern-L.patt", "pos":[-5, 10]},
+    {"url":"data/pattern-S.patt", "pos":[-5, 12]},
+    {"url":"data/pattern-T.patt", "pos":[-5, 14]},
+    {"url":"data/pattern-U.patt", "pos":[-5, 16]},
+    {"url":"data/pattern-V.patt", "pos":[-5, 18]},
+    {"url":"data/pattern-W.patt", "pos":[-5, 20]},
+    {"url":"data/pattern-X.patt", "pos":[-5, 22]}
 ];
-
-const TREBXPOS = {"Bs3":{"pos":3.5},"Cf4":{"pos":3},"C4":{"pos":3},"Cs4":{"pos":3},
-"Df4":{"pos":2.5},"D4":{"pos":2.5},"Ds4":{"pos":2.5},"Ef4":{"pos":2},"E4":{"pos":2},
-"Es4":{"pos":2},"Ff4":{"pos":1.5},"F4":{"pos":1.5},"Fs4":{"pos":1.5},"Gf4":{"pos":1},
-"G4":{"pos":1},"Gs4":{"pos":1},"Af4":{"pos":0.5},"A4":{"pos":0.5},"As4":{"pos":0.5},
-"Bf4":{"pos":0},"B4":{"pos":0},"Bs4":{"pos":0},"Cf5":{"pos":-0.5},"C5":{"pos":-0.5},
-"Cs5":{"pos":-0.5},"Df5":{"pos":-1},"D5":{"pos":-1},"Ds5":{"pos":-1},"Ef5":{"pos":-1.5},
-"E5":{"pos":-1.5},"Es5":{"pos":-1.5},"Ff5":{"pos":-2},"F5":{"pos":-2},"Fs5":{"pos":-2},
-"Gf5":{"pos":-2.5},"G5":{"pos":-2.5},"Gs5":{"pos":-2.5},"Af5":{"pos":-3},"A5":{"pos":-3},
-"As5":{"pos":-3}};
-
-//starts at D3
-const ALTOXPOS = [3.5,3.5,3,3,2.5,2,2,1.5,1.5,
-    1,1,.5,0,0,-.5,-.5,1,-1.5,-1.5,-2,-2,-2.5];
-
-//starts at E2
-const BASSXPOS = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
-    .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
 
 class PositionalAR {
     /**
@@ -64,9 +46,22 @@ class PositionalAR {
         const that = this;
         this.sceneObj = sceneObj;
         this.scene = sceneObj.scene;
+        this.noteXSpace = this.scene.xSpace;
         this.camera = sceneObj.camera;
         this.sceneRoot = sceneObj.sceneRoot;
+
         this.digAud = digAudio;
+        this.songLength = this.digAud.songLength;
+        this.SPL = this.digAud.SPL;
+
+        this.noteLists = [[],[]];
+        this.xPositions = [[],[]];
+        for(let i = 0; i < this.SPL.songLength; i++){
+            this.xPositions[0].push(this.SPL.cfMaster[i].pos);
+            this.noteLists[0].push(this.SPL.cfMaster[i].note);
+            this.xPositions[1].push(this.SPL.cpMaster[i].pos);
+            this.noteLists[1].push(this.SPL.cpMaster[i].note);
+        }
 
         this.keyboardDebugging = false;
         this.keyboard = new KeyboardHandler();
@@ -84,7 +79,6 @@ class PositionalAR {
         this.clock = new THREE.Clock();
         this.totalTime = 0;
         this.gotPlacement = false;
-
 
         this.linesToUse = [useCantusFirmus, useCounterpoint];
         this.arrivedAtNote = [];
@@ -224,18 +218,6 @@ class PositionalAR {
         this.scene.add(this.arGroup);
     }
 
-    clefXChoice(clefChoice){
-        let posarr = [];
-        if(clefChoice === "Treble"){
-            posarr = TREBXPOS;
-        }else if(clefChoice === "Alto"){
-            posarr = ALTOXPOS;
-        }else{
-            posarr = BASSXPOS;
-        }
-        return posarr;
-    }
-
     /**
      * Creates current position ghost note object
      * Added to ARGROUP as child
@@ -266,10 +248,6 @@ class PositionalAR {
      */
     setupFirstSpeciesNotes(){
 
-        let musicLinesList = [this.digAud.cantusFirmusNotes,this.digAud.counterpointNotes];
-        this.xPosArr = this.clefXChoice(this.digAud.clef);
-        this.songLength = this.digAud.cfLength;
-
         this.CFGroup = new THREE.Group();
         this.CPGroup = new THREE.Group();
         this.CFGroupNew = new THREE.Group();
@@ -279,18 +257,17 @@ class PositionalAR {
 
         for(let i = 0; i < this.linesToUse.length; i++){
             if(this.linesToUse[i]){
-                let lineNotes = musicLinesList[i];
                 let noteSpacing = 1.5;
                 let notePositionZ = 1;          
                 for(let j = 0; j < this.songLength; j++){
                     //primary note
                     let newNote = this.makeNoteObject(this.noteColor);
-                    newNote.position.x = this.xPosArr[lineNotes[j]].pos;
+                    newNote.position.x = this.xPositions[i][j] * 0.5;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
                     //replacement note (upon arrival)
                     let finNote = this.makeNoteObject(this.replaceColor);
-                    finNote.position.x = this.xPosArr[lineNotes[j]].pos;
+                    finNote.position.x = this.xPositions[i][j] * 0.5;
                     finNote.position.y = 100;
                     finNote.position.z = notePositionZ - noteSpacing;
                     notePositionZ = newNote.position.z;
@@ -585,11 +562,12 @@ class PositionalAR {
             formattedPositions.push(choice[lowest]);
         }
         let noteResults = [];
+        let NPL = Object.entries(this.SPL.possibilitiesDic);
         for(let i = 0; i < formattedPositions.length; i++){
-            for(let[key,val] of Object.entries(this.xPosArr)){
-                if(val.pos == formattedPositions[i]){
-                    noteResults.push(key);
-                    break;
+            for(let j = 0; j < NPL.length; j++){
+                if(formattedPositions[i] == NPL[j][1]*0.5){
+                    noteResults.push(NPL[j][0]);
+                    j = NPL.length;
                 }
             }
         }
@@ -598,11 +576,18 @@ class PositionalAR {
             this.globalTimes[i] -= offset;
         }
         this.formattedPositions = formattedPositions;
-        console.log(noteResults);
         this.noteResults = noteResults;
         this.createEndScene();
         this.renderer.render(this.scene, this.camera);
-        this.playUserChoice();
+        this.userMP3Aud = [];
+        this.mp3UserNoteSetup(noteResults);
+        let playEnd = false;
+        while(!playEnd){
+            if(this.gotMP3){
+                this.playUserChoice();
+                playEnd = true;
+            }
+        }
     }
 
     createEndScene(){
@@ -638,11 +623,40 @@ class PositionalAR {
         this.NNGI = this.arGroup.children.length - 1;
     }
 
+    mp3UserNoteSetup(noteResults){
+        for(let i = 0; i < noteResults.length; i++){
+            let note = noteResults[i];
+            let pDir = "notes/half/"+note+".mp3";
+            let sampAud = new Audio(pDir);
+            this.userMP3Aud.push(sampAud);
+        }
+        this.gotMP3 = true;
+    }
+
+    playUserNote(noteNumber){
+        if(this.userMP3Aud[noteNumber].readyState >= 2){
+            this.userMP3Aud[noteNumber].play();
+            //console.log("played note");
+        }else{
+            this.userMP3Aud[noteNumber].addEventListener('loadeddata', function(){
+                that.userMP3Aud[noteNumber].play();
+                //console.log("played note");
+            });
+        }
+    }
+    
     playUserChoice(){
         //this.sampAud.playAudio();
         for(let i = 0; i < this.globalTimes.length; i++){
             setTimeout(() => {
                 this.arGroup.children[this.NNGI].children[i].position.y = this.spaceAboveStaff;
+                if(this.linesToUse[0]){
+                    this.digAud.playCantFirmNote(i);
+                }
+                if(this.linesToUse[1]){
+                    this.digAud.playCounterpointNote(i);
+                }
+                this.playUserNote(i);
                 this.renderer.render(this.scene, this.camera);
             }, this.globalTimes[i])
         }
