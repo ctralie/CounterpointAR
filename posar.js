@@ -17,7 +17,6 @@ const PATTERNS_AR = [
     {"url":"data/pattern-P.patt", "pos":[5, 18]},
     {"url":"data/pattern-Q.patt", "pos":[5, 20]},
     {"url":"data/pattern-R.patt", "pos":[5, 22]},
-
     {"url":"data/pattern-G.patt", "pos":[-5, 0]},
     {"url":"data/pattern-H.patt", "pos":[-5, 2]},
     {"url":"data/pattern-I.patt", "pos":[-5, 4]},
@@ -39,69 +38,10 @@ class PositionalAR {
      *                     as well as a method animate(dt)
      * @param {boolean} antialias Whether or not to do antialiasing (true by default, but can be turned off
      *                            for performance)
-     * @param {int} medWin   Length of window for median denoising of positions
-     * @param {boolean} debug     Whether to print information about how many markers were seen
      */
-    constructor(sceneObj, digAudio, useCantusFirmus, useCounterpoint, antialias, medWin, debug) {
+    constructor(sceneObj, digAudio, useCantusFirmus, useCounterpoint, antialias) {
         const that = this;
-        this.sceneObj = sceneObj;
-        this.scene = sceneObj.scene;
-        this.noteXSpace = this.scene.xSpace;
-        this.camera = sceneObj.camera;
-        this.sceneRoot = sceneObj.sceneRoot;
 
-        this.digAud = digAudio;
-        this.songLength = this.digAud.songLength;
-        this.SPL = this.digAud.SPL;
-
-        this.noteLists = [[],[]];
-        this.xPositions = [[],[]];
-        for(let i = 0; i < this.SPL.songLength; i++){
-            this.xPositions[0].push(this.SPL.cfMaster[i].pos);
-            this.noteLists[0].push(this.SPL.cfMaster[i].note);
-            this.xPositions[1].push(this.SPL.cpMaster[i].pos);
-            this.noteLists[1].push(this.SPL.cpMaster[i].note);
-        }
-
-        this.keyboardDebugging = false;
-        this.keyboard = new KeyboardHandler();
-        if (antialias === undefined) {
-            antialias = true;
-        }
-        if (medWin === undefined) {
-            medWin = 3;
-        }
-        if (debug === undefined) {
-            debug = false;
-        }
-        this.medWin = medWin;
-        this.debug = debug;
-        this.clock = new THREE.Clock();
-        this.totalTime = 0;
-        this.gotPlacement = false;
-
-        this.linesToUse = [useCantusFirmus, useCounterpoint];
-        this.arrivedAtNote = [];
-        this.didPlayNoteAudio = [];
-
-        this.currentNoteInd = 0;
-        
-        this.noteGroupPlacement = -2;
-        this.spaceAboveStaff = .1;
-        this.moveThresh = 6;
-
-        this.ghostColor = 0;
-        this.noteColor  = 1;
-        this.replaceColor = 2;
-
-        this.globalTimes = [];
-
-        this.trackedPositions = [];
-        this.endProgram = false;
-        this.madeEndScene = false;
-        this.gotOGQuat = false;
-        
-        
         // Setup three.js WebGL renderer
         const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
         this.renderer = renderer;
@@ -112,11 +52,66 @@ class PositionalAR {
         renderer.domElement.style.left = '0px'
         document.body.appendChild( renderer.domElement );
 
+        //Keyboard Debugging Information
+        this.keyboardDebugging = false;
+        this.keyboard = new KeyboardHandler();
+        if (antialias === undefined) {
+            antialias = true;
+        }
+
+        //scene object information
+        this.sceneObj = sceneObj;
+        this.scene = this.sceneObj.scene;
+        this.noteXSpace = this.scene.xSpace;
+        this.camera = this.sceneObj.camera;
+        this.sceneRoot = this.sceneObj.sceneRoot;
+        
+        //Digital Audio Information
+        this.digAud = digAudio;
+        this.songLength = this.digAud.songLength;
+        this.SPL = this.digAud.SPL;
+        this.didPlayNoteAudio = [];
+
+        //Voice Recorder Information
+        this.sampAud = new SampledAudio();
+
+        //Tracking Information
+        this.trackedPositions = [];
+        this.gotOGQuat = false;
+        this.gotPlacement = false;
+        this.moveThresh = 6;
+
+        //Note Information
+        this.linesToUse = [useCantusFirmus, useCounterpoint];
+        this.arrivedAtNote = [];
+        this.currentNoteInd = 0;
+        this.noteLists = [[],[]];
+        this.xPositions = [[],[]];
+        for(let i = 0; i < this.SPL.songLength; i++){
+            this.xPositions[0].push(this.SPL.cfMaster[i].pos);
+            this.noteLists[0].push(this.SPL.cfMaster[i].note);
+            this.xPositions[1].push(this.SPL.cpMaster[i].pos);
+            this.noteLists[1].push(this.SPL.cpMaster[i].note);
+        }
+        
+        //Global Variables
+        this.ghostColor = 0;
+        this.noteColor  = 1;
+        this.replaceColor = 2;
+        this.noteGroupPlacement = -2;
+        this.spaceAboveStaff = .1;
+
+        //Clock and Time Information
+        this.clock = new THREE.Clock();
+        this.totalTime = 0;
+        this.globalTimes = [];
+
+        //End Program Information
+        this.endProgram = false;
+        this.madeEndScene = false;
+        
+        //Begin Program
         this.setupTracker();
-        
-        let sA = new SampledAudio();
-        this.sampAud = sA;
-        
         this.repaint();
     }
 
@@ -250,8 +245,6 @@ class PositionalAR {
 
         this.CFGroup = new THREE.Group();
         this.CPGroup = new THREE.Group();
-        this.CFGroupNew = new THREE.Group();
-        this.CPGroupNew = new THREE.Group();
 
         let boolListsEmpty = true;
 
@@ -265,18 +258,11 @@ class PositionalAR {
                     newNote.position.x = this.xPositions[i][j] * 0.5;
                     newNote.position.y = this.spaceAboveStaff;
                     newNote.position.z = notePositionZ - noteSpacing;
-                    //replacement note (upon arrival)
-                    let finNote = this.makeNoteObject(this.replaceColor);
-                    finNote.position.x = this.xPositions[i][j] * 0.5;
-                    finNote.position.y = 100;
-                    finNote.position.z = notePositionZ - noteSpacing;
                     notePositionZ = newNote.position.z;
                     if(i==0){
                         this.CFGroup.add(newNote);
-                        this.CFGroupNew.add(finNote);
                     }else if(i==1){
                         this.CPGroup.add(newNote);
-                        this.CPGroupNew.add(finNote);
                     }
                     //fills note booleans
                     if(boolListsEmpty){
@@ -289,13 +275,9 @@ class PositionalAR {
                 if(i==0){
                     this.arGroup.add(this.CFGroup);
                     this.AGCFI = this.arGroup.children.length - 1;
-                    this.arGroup.add(this.CFGroupNew);
-                    this.AGCFNI =this.arGroup.children.length - 1;
                 }else if(i==1){
                     this.arGroup.add(this.CPGroup);
                     this.AGCPI = this.arGroup.children.length - 1;
-                    this.arGroup.add(this.CPGroupNew);
-                    this.AGCPNI = this.arGroup.children.length - 1;
                 }
             }
         }
@@ -427,7 +409,6 @@ class PositionalAR {
      * When the last note plays, the audio recording stops
      */
     notePositionUpdateAnalyze(){
-
         //Takes world coordinates of ARGROUP and provides the inverse
         //Then applies the the inverse as a transformation of the identity
         //Giving the current position of the camera, relative to the ARGROUP object
@@ -497,13 +478,13 @@ class PositionalAR {
     */
     
     changeNoteColor(index){
+        
         if(this.linesToUse[0]){
-            this.arGroup.children[this.AGCFI].children[index].position.y = 100;
-            this.arGroup.children[this.AGCFNI].children[index].position.y = this.spaceAboveStaff;
+            this.arGroup.children[this.AGCFI].children[index].material = new THREE.MeshStandardMaterial({color: 0xF5BB00});
         }
+        
         if(this.linesToUse[1]){
-            this.arGroup.children[this.AGCPI].children[index].position.y = 100;
-            this.arGroup.children[this.AGCPNI].children[index].position.y = this.spaceAboveStaff;
+            this.arGroup.children[this.AGCPI].children[index].material = new THREE.MeshStandardMaterial({color: 0xF5BB00});
         }
     }
 
