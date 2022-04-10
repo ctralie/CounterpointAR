@@ -3,11 +3,9 @@ class ScalePositionLists{
         let clef = inputList[1];
         let key = inputList[2];
         let firstCFNote = inputList[3];
-        let firstCPNote = inputList[4];
         let cf = inputList[5];
         let cp = inputList[6];
 
-        //starts at C flat 4
         this.trebleXPositions = {
             "Cf4":6,"C4":6,"Cs4":6,"Df4":5,"D4":5,"Ds4":5,"Ef4":4,"E4":4,"Es4":4,"Ff4":3,"F4":3,
             "Fs4":3,"Gf4":2,"G4":2,"Gs4":2,"Af4":1,"A4":1,"As4":1,"Bf4":0,"B4":0,"Bs4":0,"Cf5":-1,
@@ -15,13 +13,19 @@ class ScalePositionLists{
             "Fs5":-4,"Gf5":-5,"G5":-5,"Gs5":-5,"Af5":-6,"A5":-6,"As5":-6
         };
 
-        //starts at D flat 3
-        this.altoXPositions = [3.5,3.5,3,3,2.5,2,2,1.5,1.5,
-            1,1,.5,0,0,-.5,-.5,1,-1.5,-1.5,-2,-2,-2.5];
+        this.altoXPositions = {
+            "Df3":6,"D3":6,"Ds3":6,"Ef3":5,"E3":5,"Es3":5,"Ff3":4,"F3":4,"Fs3":4,"Gf3":3,"G3":3,
+            "Gs3":3,"Af3":2,"A3":2,"As3":2,"Bf3":1,"B3":1,"Bs3":1,"Cf4":0,"C4":0,"Cs4":0,"Df4":-1,
+            "D4":-1,"Ds4":-1,"Ef4":-2,"E4":-2,"Es4":-2,"Ff4":-3,"F4":-3,"Fs4":-3,"Gf4":-4,"G4":-4,
+            "Gs4":-4,"Af4":-5,"A4":-5,"As4":-5,"Bf4":-6,"B4":-6,"Bs4":-6
+        };
 
-        //starts at E flat 2
-        this.bassXPositions = [3,3,2.5,2.5,2,1.5,1.5,1,1,.5,
-            .5,0,-.5,-.5,-1,-1,-1.5,-2,-2,-2.5,-2.5,-3];
+        this.bassXPositions = {
+            "Ef2":6,"E2":6,"Es2":6,"Ff2":5,"F2":5,"Fs2":5,"Gf2":4,"G2":4,"Gs2":4,"Af2":3,"A2":3,
+            "As2":3,"Bf2":2,"B2":2,"Bs2":2,"Cf3":1,"C3":1,"Cs3":1,"Df3":0,"D3":0,"Ds3":0,"Ef3":-1,
+            "E3":-1,"Es3":-1,"Ff3":-2,"F3":-2,"Fs3":-2,"Gf3":-3,"G3":-3,"Gs3":-3,"Af3":-4,"A3":-4,
+            "As3":-4,"Bf3":-5,"B3":-5,"Bs3":-5,"Cf4":-6,"C4":-6,"Cs4":-6
+        };
 
         //All possible notes in this program
         this.mainList = ["Ef2","E2","Es2","Ff2","F2","Fs2","Gf2","G2","Gs2","Af2","A2","As2",
@@ -95,7 +99,6 @@ class ScalePositionLists{
         }
 
         let fCFInd = this.keyList.indexOf(firstCFNote);
-        let fCPInd = this.keyList.indexOf(firstCPNote);
         this.cfMaster = {};
         this.cpMaster = {};
 
