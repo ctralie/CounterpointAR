@@ -42,6 +42,7 @@ class DAGenerator{
             let dur = this.SPL.cfMaster[i].len;
             let pDir = "notes/"+dur+"/"+note+".mp3";
             let sampAud = new Audio(pDir);
+            sampAud.autoplay = true;
             this.cfMp3Arrs.push(sampAud);
         }
         this.loadedStuff = true;
@@ -57,6 +58,7 @@ class DAGenerator{
             let dur = this.SPL.cpMaster[i].len;
             let pDir = "notes/"+dur+"/"+note+".mp3";
             let sampAud = new Audio(pDir);
+            sampAud.autoplay = true;
             this.cpMp3Arrs.push(sampAud);
         }
         this.loadedStuff = true;
