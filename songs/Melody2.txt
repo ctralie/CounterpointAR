@@ -32,7 +32,7 @@ Key: C-Natural-Major
 @ First Counterpoint Note: C4
 
 First Cantus Firmus Note: D4
-First Counterpoint Note: A4
+First Counterpoint Note: D4
 
 @ Cantus Firmus and Counterpoint note input.
 @ Format will be: scale degree/length/accidental (if different than key)
@@ -85,12 +85,12 @@ Cantus Firmus:
 Counterpoint:
 1 : half
 1 : half
-0 : half
+5 : half
+3 : half
+2 : half
 1 : half
-2 : half
 3 : half
-3 : half
-2 : half
-4 : half
-3 : half : Augmented
-4 : half
+7 : half
+8 : half
+7 : half : Augmented
+8 : half

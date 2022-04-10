@@ -3,6 +3,7 @@ class ScalePositionLists{
         let clef = inputList[1];
         let key = inputList[2];
         let firstCFNote = inputList[3];
+        let firstCPNote = inputList[4];
         let cf = inputList[5];
         let cp = inputList[6];
 
@@ -99,6 +100,7 @@ class ScalePositionLists{
         }
 
         let fCFInd = this.keyList.indexOf(firstCFNote);
+        let fCPInd = this.keyList.indexOf(firstCPNote);
         this.cfMaster = {};
         this.cpMaster = {};
 
@@ -128,7 +130,7 @@ class ScalePositionLists{
                 }
             }
             //get x pos and note string for counterpoint
-            degInd = fCFInd + cp[0][i] - 1;
+            degInd = fCPInd + cp[0][i] - 1;
             let pNote = this.keyList[degInd];
             let pPos = this.posArr[pNote];
             let pLength = cp[1][i];
