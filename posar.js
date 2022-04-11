@@ -65,6 +65,7 @@ class PositionalAR {
         this.noteXSpace = this.scene.xSpace;
         this.camera = this.sceneObj.camera;
         this.sceneRoot = this.sceneObj.sceneRoot;
+        this.colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}];
         
         //Digital Audio Information
         this.digAud = digAudio;
@@ -93,6 +94,9 @@ class PositionalAR {
             this.xPositions[1].push(this.SPL.cpMaster[i].pos);
             this.noteLists[1].push(this.SPL.cpMaster[i].note);
         }
+
+        //ar group stuff
+        this.arGroup = new THREE.Group();
         
         //Global Variables
         this.ghostColor = 0;
@@ -205,8 +209,6 @@ class PositionalAR {
                 console.log("Marker "+i+" lost");
             });
         }
-        
-        this.arGroup = new THREE.Group();
         this.arGroup.add(this.sceneRoot);
         this.setupGhostNote();
         this.setupFirstSpeciesNotes();
@@ -231,8 +233,7 @@ class PositionalAR {
         let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
         geo.scale(1.25,2,1);
         geo.rotateX(1.57);
-        let colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}]
-        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(colors[ind]));
+        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(this.colors[ind]));
     }
 
     /**
@@ -245,15 +246,11 @@ class PositionalAR {
 
         this.CFGroup = new THREE.Group();
         this.CPGroup = new THREE.Group();
-
-        let boolListsEmpty = true;
-
         for(let i = 0; i < this.linesToUse.length; i++){
-            if(this.linesToUse[i]){
-                let noteSpacing = 1.5;
-                let notePositionZ = 1;          
+            let noteSpacing = 1.5;
+            let notePositionZ = 1;
+            if(this.linesToUse[i]){              
                 for(let j = 0; j < this.songLength; j++){
-                    //primary note
                     let newNote = this.makeNoteObject(this.noteColor);
                     newNote.position.x = this.xPositions[i][j] * 0.5;
                     newNote.position.y = this.spaceAboveStaff;
@@ -265,22 +262,17 @@ class PositionalAR {
                         this.CPGroup.add(newNote);
                     }
                     //fills note booleans
-                    if(boolListsEmpty){
+                    if(this.didPlayNoteAudio.length < this.songLength){
                         this.didPlayNoteAudio.push(false);
                         this.arrivedAtNote.push(false);
                     }
                 }
-                //stops form overfill
-                boolListsEmpty = false;
-                if(i==0){
-                    this.arGroup.add(this.CFGroup);
-                    this.AGCFI = this.arGroup.children.length - 1;
-                }else if(i==1){
-                    this.arGroup.add(this.CPGroup);
-                    this.AGCPI = this.arGroup.children.length - 1;
-                }
             }
         }
+        this.arGroup.add(this.CFGroup);
+        this.AGCFI = this.arGroup.children.length - 1;
+        this.arGroup.add(this.CPGroup);
+        this.AGCPI = this.arGroup.children.length - 1;
         this.setupFirstSpeciesMeasureLines();
     }
 
@@ -471,20 +463,15 @@ class PositionalAR {
         this.canRerun = true;
     }
 
-    /**
-     * Position of black color note and yellow color note changes
-     * Could not implement full replacement
-     * index    int
-    */
     
     changeNoteColor(index){
-        
         if(this.linesToUse[0]){
-            this.arGroup.children[this.AGCFI].children[index].material = new THREE.MeshStandardMaterial({color: 0xF5BB00});
+            this.arGroup.children[this.AGCFI].children[index].material= 
+            new THREE.MeshStandardMaterial(this.colors[this.replaceColor]);
         }
-        
         if(this.linesToUse[1]){
-            this.arGroup.children[this.AGCPI].children[index].material = new THREE.MeshStandardMaterial({color: 0xF5BB00});
+            this.arGroup.children[this.AGCPI].children[index].material= 
+            new THREE.MeshStandardMaterial(this.colors[this.replaceColor]);
         }
     }
 
@@ -517,130 +504,9 @@ class PositionalAR {
         this.totalTime += deltaTime;
         this.sceneObj.animate(deltaTime);
 
-        if(this.endProgram){
-            this.analyzeCollectedData();
-        }else{
+        if(!this.endProgram){
             this.renderer.render(this.scene, this.camera);
             requestAnimationFrame(this.repaint.bind(this));
         }
     }
-
-    /**
-     * POST TRAVERSAL METHODS
-     */
-
-    analyzeCollectedData(){
-        let formattedPositions = [];
-        for(let i = 0; i < this.trackedPositions.length; i++){
-            let actual = this.trackedPositions[i];
-            let low = Math.floor(actual);
-            let high = Math.ceil(actual);
-            let mid = (high-low)/2 + low;
-            let ops = [Math.abs(low-actual),Math.abs(mid-actual),Math.abs(high-actual)];
-            let choice = [low,mid,high];
-            let lowest = 0;
-            for(let j = 1; j < ops.length; j++){if(ops[j] < ops[lowest]){lowest = j;}}
-            formattedPositions.push(choice[lowest]);
-        }
-        let noteResults = [];
-        let NPL = Object.entries(this.SPL.possibilitiesDic);
-        for(let i = 0; i < formattedPositions.length; i++){
-            for(let j = 0; j < NPL.length; j++){
-                if(formattedPositions[i] == NPL[j][1]*0.5){
-                    noteResults.push(NPL[j][0]);
-                    j = NPL.length;
-                }
-            }
-        }
-        let offset = this.timeOffset;
-        for(let i = 0; i < this.globalTimes.length; i++){
-            this.globalTimes[i] -= offset;
-        }
-        this.formattedPositions = formattedPositions;
-        this.noteResults = noteResults;
-        this.createEndScene();
-        this.renderer.render(this.scene, this.camera);
-        this.userMP3Aud = [];
-        this.mp3UserNoteSetup(noteResults);
-        let playEnd = false;
-        while(!playEnd){
-            if(this.gotMP3){
-                this.playUserChoice();
-                playEnd = true;
-            }
-        }
-    }
-
-    createEndScene(){
-        this.arGroup.setRotationFromQuaternion(this.OGQuat);
-        this.arGroup.remove(this.ghostNote);
-        this.arGroup.rotateX(1.57);
-        this.arGroup.rotateY(-1.57);
-        this.arGroup.rotateZ(0.35);
-        this.arGroup.position.x = -7;
-        this.arGroup.position.y = 0;
-        this.arGroup.position.z = -22.5;
-
-        //createbackground
-        let backG = new THREE.BoxGeometry(50,0.1,70);
-        let backM = new THREE.MeshStandardMaterial({color: 0x000000});
-        let backGround = new THREE.Mesh(backG,backM);
-        backGround.position.y = -10;
-        this.arGroup.add(backGround);
-
-        //add user positions
-        let noteSpacing = 1.5;
-        let notePositionZ = 1;
-        let resGroup = new THREE.Group();
-        for(let i = 0; i < this.formattedPositions.length; i++){
-            let newNote = this.makeNoteObject(this.ghostColor);
-            newNote.position.x = this.formattedPositions[i];
-            newNote.position.y = 1000;
-            newNote.position.z = notePositionZ - noteSpacing;
-            notePositionZ = newNote.position.z;
-            resGroup.add(newNote);
-        }
-        this.arGroup.add(resGroup);
-        this.NNGI = this.arGroup.children.length - 1;
-    }
-
-    mp3UserNoteSetup(noteResults){
-        for(let i = 0; i < noteResults.length; i++){
-            let note = noteResults[i];
-            let pDir = "notes/half/"+note+".mp3";
-            let sampAud = new Audio(pDir);
-            this.userMP3Aud.push(sampAud);
-        }
-        this.gotMP3 = true;
-    }
-
-    playUserNote(noteNumber){
-        if(this.userMP3Aud[noteNumber].readyState >= 2){
-            this.userMP3Aud[noteNumber].play();
-            //console.log("played note");
-        }else{
-            this.userMP3Aud[noteNumber].addEventListener('loadeddata', function(){
-                that.userMP3Aud[noteNumber].play();
-                //console.log("played note");
-            });
-        }
-    }
-    
-    playUserChoice(){
-        //this.sampAud.playAudio();
-        for(let i = 0; i < this.globalTimes.length; i++){
-            setTimeout(() => {
-                this.arGroup.children[this.NNGI].children[i].position.y = this.spaceAboveStaff;
-                if(this.linesToUse[0]){
-                    this.digAud.playCantFirmNote(i);
-                }
-                if(this.linesToUse[1]){
-                    this.digAud.playCounterpointNote(i);
-                }
-                this.playUserNote(i);
-                this.renderer.render(this.scene, this.camera);
-            }, this.globalTimes[i])
-        }
-    }
-
 }
