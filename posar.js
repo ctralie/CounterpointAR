@@ -31,13 +31,19 @@ const PATTERNS_AR = [
     {"url":"data/pattern-X.patt", "pos":[-5, 22]}
 ];
 
-
-function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint,antialias){
+/**
+ * @exports PositionalAR
+ * @constructor
+ * 
+ * @param {BasicScene} sceneObj
+ * @param {DAGenerator} digitalAudio
+ * @param {boolean} useCantusFirmus
+ * @param {boolean} useCounterpoint
+ * 
+ */
+function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     const that = this;
-    if(antialias === undefined){
-        antialias = true;
-    }
-    this.setupRenderer(antialias);
+    this.setupRenderer(true);
     this.setupScene(sceneObj);
     this.setupDigitalAudio(digitalAudio);
     this.setupNoteInformation(useCantusFirmus,useCounterpoint);
@@ -49,6 +55,13 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint,a
     this.repaint();
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Setup Functions
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @param {boolean} antialias
+ */
 PositionalAR.prototype.setupRenderer = function(antialias){
     // Setup three.js WebGL renderer
     const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
@@ -61,6 +74,9 @@ PositionalAR.prototype.setupRenderer = function(antialias){
     document.body.appendChild( renderer.domElement );
 };
 
+/**
+ * @param {BasicScene} sceneObj
+ */
 PositionalAR.prototype.setupScene = function(sceneObj){
     this.sceneObj = sceneObj;
     this.scene = this.sceneObj.scene;
@@ -69,12 +85,19 @@ PositionalAR.prototype.setupScene = function(sceneObj){
     this.noteXSpace = this.scene.xSpace;
 };
 
+/**
+ * @param {DAGenerator}
+ */
 PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
     this.digAud = digitalAudio;
     this.songLength = this.digAud.songLength;
     this.SPL = this.digAud.SPL;
 };
 
+/**
+ * @param {boolean} useCantusFirmus
+ * @param {boolean} useCounterpoint
+ */
 PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounterpoint){
     this.linesToUse = [useCantusFirmus, useCounterpoint];
     this.arrivedAtNote = [];
@@ -89,6 +112,9 @@ PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounte
     }
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.initializeGlobalVariables = function(){
 
     this.arGroup = new THREE.Group();
@@ -114,6 +140,9 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
     this.totalTime = 0;
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.setupTracker = function(){
     // create this.arToolkitSource
     const that = this;
@@ -183,8 +212,9 @@ PositionalAR.prototype.setupTracker = function(){
     this.scene.add(this.arGroup);
 };
 
-
-
+/**
+ * 
+ */
 PositionalAR.prototype.setupGhostNote = function(){
     let ghostNote = new THREE.Group();
     ghostNote.add(this.makeNoteObject(this.ghostColor));
@@ -195,6 +225,9 @@ PositionalAR.prototype.setupGhostNote = function(){
     this.arGroup.children[this.AGGNI].position.y = this.spaceAboveStaff;
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.setupFirstSpeciesNotes = function(){
     this.CFGroup = new THREE.Group();
     this.CPGroup = new THREE.Group();
@@ -227,6 +260,9 @@ PositionalAR.prototype.setupFirstSpeciesNotes = function(){
     this.AGCPI = this.arGroup.children.length - 1;
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
     let lineGeo = new THREE.BoxGeometry(4,.01,.05);
     let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
@@ -252,6 +288,13 @@ PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
     this.arGroup.add(lineGroup);
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Main Program Functions
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 
+ */
 PositionalAR.prototype.repaint = function(){
     if(!this.gotOGQuat){
         this.OGQuat = this.arGroup.getWorldQuaternion();
@@ -444,7 +487,13 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
     this.canRerun = true;
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// End Program Functions
+//////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * 
+ */
 PositionalAR.prototype.analyzeCollectedData = function(){
     let formattedPositions = [];
     for(let i = 0; i < this.trackedPositions.length; i++){
@@ -487,6 +536,9 @@ PositionalAR.prototype.analyzeCollectedData = function(){
     }
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.createEndScene = function(){
     this.arGroup.setRotationFromQuaternion(this.OGQuat);
     this.arGroup.remove(this.ghostNote);
@@ -520,6 +572,9 @@ PositionalAR.prototype.createEndScene = function(){
     this.NNGI = this.arGroup.children.length - 1;
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.mp3UserNoteSetup = function(){
     for(let i = 0; i < this.noteResults.length; i++){
         let note = this.noteResults[i];
@@ -530,6 +585,9 @@ PositionalAR.prototype.mp3UserNoteSetup = function(){
     this.gotMP3 = true;
 }
 
+/**
+ * @param {Int} noteNumber
+ */
 PositionalAR.prototype.playUserNote = function(noteNumber){
     if(this.userMP3Aud[noteNumber].readyState >= 2){
         this.userMP3Aud[noteNumber].play();
@@ -542,6 +600,9 @@ PositionalAR.prototype.playUserNote = function(noteNumber){
     }
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.playUserChoice = function(){
     //this.sampAud.playAudio();
     for(let i = 0; i < this.globalTimes.length; i++){
@@ -559,13 +620,23 @@ PositionalAR.prototype.playUserChoice = function(){
     }
 }
 
-PositionalAR.prototype.makeNoteObject = function(ind){
+//////////////////////////////////////////////////////////////////////////////////////////////
+//  Helper Functions
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @param {Int} index
+ */
+PositionalAR.prototype.makeNoteObject = function(index){
     let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
     geo.scale(1.25,2,1);
     geo.rotateX(1.57);
-    return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(this.colors[ind]));
+    return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(this.colors[index]));
 };
 
+/**
+ * @param {Int} index
+ */
 PositionalAR.prototype.changeNoteColor = function(index){
     if(this.linesToUse[0]){
         this.arGroup.children[this.AGCFI].children[index].material= 
@@ -577,6 +648,9 @@ PositionalAR.prototype.changeNoteColor = function(index){
     }
 };
 
+/**
+ * 
+ */
 PositionalAR.prototype.onResize = function(){
     this.arToolkitSource.onResizeElement();
     this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
@@ -585,6 +659,9 @@ PositionalAR.prototype.onResize = function(){
     }
 };
 
+/**
+ * @param {?} el
+ */
 PositionalAR.prototype.enterFullscreen = function(el){
     if (el.requestFullscreen) {
         el.requestFullscreen();
