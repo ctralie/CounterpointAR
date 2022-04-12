@@ -86,7 +86,7 @@ PositionalAR.prototype.setupScene = function(sceneObj){
 };
 
 /**
- * @param {DAGenerator}
+ * @param {DAGenerator} digitalAudio
  */
 PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
     this.digAud = digitalAudio;
@@ -138,6 +138,11 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
     this.noteGroupPlacement = -2;
     this.spaceAboveStaff = .1;
     this.totalTime = 0;
+
+    this.AGCFI = null;
+    this.AGCPI = null;
+    this.AGGNI = null;
+    this.NNGI = null;
 };
 
 /**
