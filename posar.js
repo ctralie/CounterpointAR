@@ -126,7 +126,7 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
     this.didPlayNoteAudio = [];
     this.trackedPositions = [];
     
-    this.endProgram = false;
+    this.endTracking = false;
     this.madeEndScene = false;
     this.gotOGQuat = false;
     this.gotPlacement = false;
@@ -325,16 +325,13 @@ PositionalAR.prototype.repaint = function(){
     this.totalTime += deltaTime;
     this.sceneObj.animate(deltaTime);
 
-    if(this.endProgram){
-        this.analyzeCollectedData();
+    if(this.endTracking){
+        this.endProgram();
     }else{
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
 };
-
-
-
 
 /**
  * Update a running average of the horizontal interval and vertical
@@ -437,23 +434,17 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
     let inverseWorldCoords = worldCoords.getInverse(worldCoords);
     let transformVector = new THREE.Vector4(0,0,0,1);
     let newPosition = transformVector.applyMatrix4(inverseWorldCoords);
-
     //Applies new X and Z positions to the current position object based on tranformation above
-    
     let X = Math.abs(this.arGroup.children[this.AGGNI].position.x - newPosition.x);
     let Z = Math.abs(this.arGroup.children[this.AGGNI].position.z - newPosition.z);
-
     if(X < this.moveThresh && Z < this.moveThresh){
         this.arGroup.children[this.AGGNI].position.x = newPosition.x;
         this.arGroup.children[this.AGGNI].position.z = newPosition.z - 2;
     }
-
     let thresh = 0.1;
     let currentPosition = this.arGroup.children[this.AGGNI].position;
-
     //Checks position of currentPosition relative to notes on staff
     //If at Z coordinate of note, the note audio(s) will play and color is changed
-
     let checkPos = 0;
     if(this.linesToUse[0]){
         checkPos = this.arGroup.children[this.AGCFI].children[this.currentNoteInd].position.z;
@@ -461,7 +452,6 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
         checkPos = this.arGroup.children[this.AGCPI].children[this.currentNoteInd].position.z;
     }
     let dist = Math.abs(currentPosition.z - checkPos);
-
     //If distance is leq and the note hasn't been reached, play audio
     if((dist <= thresh) && (!this.arrivedAtNote[this.currentNoteInd])){
         console.log("At Music Note " + this.currentNoteInd);
@@ -480,14 +470,11 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
         }
         this.currentNoteInd++;
     }
-
-
     if(this.currentNoteInd >= this.songLength){
         console.log("finished");
         this.sampAud.stopRecording();
-        this.endProgram = true;
+        this.endTracking = true;
     }
-
     //Allows repaint to occur, updating scene frame
     this.canRerun = true;
 };
@@ -499,8 +486,19 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
 /**
  * 
  */
-PositionalAR.prototype.analyzeCollectedData = function(){
-    let formattedPositions = [];
+PositionalAR.prototype.endProgram = function(){
+    this.formatPositions();
+    this.digAud.getNoteResults(this.formattedPositions);
+    this.createEndScene();
+    this.digAud.mp3UserNoteSetup();
+    this.playUserChoice();
+};
+
+/**
+ * 
+ */
+ PositionalAR.prototype.formatPositions = function(){
+    this.formattedPositions = [];
     for(let i = 0; i < this.trackedPositions.length; i++){
         let actual = this.trackedPositions[i];
         let low = Math.floor(actual);
@@ -510,36 +508,9 @@ PositionalAR.prototype.analyzeCollectedData = function(){
         let choice = [low,mid,high];
         let lowest = 0;
         for(let j = 1; j < ops.length; j++){if(ops[j] < ops[lowest]){lowest = j;}}
-        formattedPositions.push(choice[lowest]);
+        this.formattedPositions.push(choice[lowest]);
     }
-    let noteResults = [];
-    let NPL = Object.entries(this.SPL.possibilitiesDic);
-    for(let i = 0; i < formattedPositions.length; i++){
-        for(let j = 0; j < NPL.length; j++){
-            if(formattedPositions[i] == NPL[j][1]*0.5){
-                noteResults.push(NPL[j][0]);
-                j = NPL.length;
-            }
-        }
-    }
-    let offset = this.timeOffset;
-    for(let i = 0; i < this.globalTimes.length; i++){
-        this.globalTimes[i] -= offset;
-    }
-    this.formattedPositions = formattedPositions;
-    this.noteResults = noteResults;
-    this.createEndScene();
-    this.renderer.render(this.scene, this.camera);
-    this.userMP3Aud = [];
-    this.mp3UserNoteSetup(noteResults);
-    let playEnd = false;
-    while(!playEnd){
-        if(this.gotMP3){
-            this.playUserChoice();
-            playEnd = true;
-        }
-    }
-};
+}
 
 /**
  * 
@@ -575,34 +546,7 @@ PositionalAR.prototype.createEndScene = function(){
     }
     this.arGroup.add(resGroup);
     this.NNGI = this.arGroup.children.length - 1;
-};
-
-/**
- * 
- */
-PositionalAR.prototype.mp3UserNoteSetup = function(){
-    for(let i = 0; i < this.noteResults.length; i++){
-        let note = this.noteResults[i];
-        let pDir = "notes/half/"+note+".mp3";
-        let sampAud = new Audio(pDir);
-        this.userMP3Aud.push(sampAud);
-    }
-    this.gotMP3 = true;
-}
-
-/**
- * @param {Int} noteNumber
- */
-PositionalAR.prototype.playUserNote = function(noteNumber){
-    if(this.userMP3Aud[noteNumber].readyState >= 2){
-        this.userMP3Aud[noteNumber].play();
-        //console.log("played note");
-    }else{
-        this.userMP3Aud[noteNumber].addEventListener('loadeddata', function(){
-            that.userMP3Aud[noteNumber].play();
-            //console.log("played note");
-        });
-    }
+    this.renderer.render(this.scene, this.camera);
 };
 
 /**
@@ -610,6 +554,9 @@ PositionalAR.prototype.playUserNote = function(noteNumber){
  */
 PositionalAR.prototype.playUserChoice = function(){
     //this.sampAud.playAudio();
+    for(let i = 0; i < this.globalTimes.length; i++){
+        this.globalTimes[i] -= this.timeOffset;
+    }
     for(let i = 0; i < this.globalTimes.length; i++){
         setTimeout(() => {
             this.arGroup.children[this.NNGI].children[i].position.y = this.spaceAboveStaff;
@@ -619,7 +566,7 @@ PositionalAR.prototype.playUserChoice = function(){
             if(this.linesToUse[1]){
                 this.digAud.playCounterpointNote(i);
             }
-            this.playUserNote(i);
+            this.digAud.playUserNote(i);
             this.renderer.render(this.scene, this.camera);
         }, this.globalTimes[i])
     }
