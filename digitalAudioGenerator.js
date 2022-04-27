@@ -4,7 +4,7 @@ class DAGenerator{
      * @constructor
      * Initializes global variables 
      */
-    constructor(){
+    constructor(SPL){
         const that = this;
         this.ret = [];
         this.loadedStuff = false;
@@ -13,27 +13,8 @@ class DAGenerator{
         this.cfMp3Arrs = [];
         this.cpMp3Arrs = [];
         this.userMp3Arrs = [];
-    }
 
-    /**
-     * @param {Object[]} ret
-     * Fills in info for the Audio Generator to create audio with.
-     * ret  Array
-     * ret[0] = Time Signature (Int[])
-     * ret[1] = Clef (String)
-     * ret[2] = Key (String)
-     * ret[3] = First Cantus Firmus Note (String)
-     * ret[4] = First Counterpoint Note (String)
-     * ret[5][0] = CantusFirmus Degrees (Int[])
-     * ret[5][1] = CantusFirmus Durations (String[])
-     * ret[5][2] = CantusFirmus Accidentals (String[])
-     * ret[6][0] = Counterpoint Degrees (Int[])
-     * ret[6][1] = Counterpoint Durations (String[])
-     * ret[6][2] = Counterpoint Accidentals (String[])
-     */
-    fillInfo(ret){
-        this.ret = ret;
-        this.SPL = new ScalePositionLists(this.ret);
+        this.SPL = SPL;
         this.songLength = this.SPL.songLength;
         this.mp3CantusFirmusSetup();
         this.mp3CounterpointSetup();

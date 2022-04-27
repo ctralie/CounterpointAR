@@ -9,7 +9,8 @@ function getParameterByName(name, url) {
 }
 
 class TestClass {
-    constructor(fileName, useCF, useCP) {
+    constructor(fileName, useCF, useCP,capture) {
+        this.p5Obj = capture;
         this.useCantusFirmus = useCF;
         this.useCounterpoint = useCP;
         this.notes= new RollReader();
@@ -27,11 +28,12 @@ class TestClass {
         else {
             // Do some stuff now that it's ready
             //console.log("Lines after finished" + this.notes.lines);
-            this.digAud = new DAGenerator();
-            this.digAud.fillInfo(this.notes.parseInfo());
+            let SPL = new ScalePositionLists(this.notes.parseInfo());
+            this.digAud = new DAGenerator(SPL);
             this.scene = new BasicScene();
             this.scene.makeScene(this.notes.parseInfo());
-            const posAR = new PositionalAR(this.scene,this.digAud, this.useCantusFirmus, this.useCounterpoint);
+            const posAR = new PositionalAR(this.scene,
+            this.digAud, this.useCantusFirmus, this.useCounterpoint, this.p5Obj);
         }
     }
 }
@@ -41,3 +43,5 @@ let useCP = (getParameterByName("cp") === 'true');
 let filename = getParameterByName("tune");
 
 let obj = new TestClass(filename, useCF, useCP);
+
+

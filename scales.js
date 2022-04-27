@@ -1,4 +1,22 @@
 class ScalePositionLists{
+
+    /**
+     * @param {Object[]} inputList
+     * Fills in info for the Audio Generator to create audio with.
+     * ret  Array
+     * ret[0] = Time Signature (Int[])
+     * ret[1] = Clef (String)
+     * ret[2] = Key (String)
+     * ret[3] = First Cantus Firmus Note (String)
+     * ret[4] = First Counterpoint Note (String)
+     * ret[5][0] = CantusFirmus Degrees (Int[])
+     * ret[5][1] = CantusFirmus Durations (String[])
+     * ret[5][2] = CantusFirmus Accidentals (String[])
+     * ret[6][0] = Counterpoint Degrees (Int[])
+     * ret[6][1] = Counterpoint Durations (String[])
+     * ret[6][2] = Counterpoint Accidentals (String[])
+     */
+
     constructor(inputList){
         let clef = inputList[1];
         let key = inputList[2];

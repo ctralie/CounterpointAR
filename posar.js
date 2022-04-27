@@ -52,6 +52,7 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     this.setupGhostNote();
     this.setupFirstSpeciesNotes();
     this.setupFirstSpeciesMeasureLines();
+    setTimeout(() => {this.setupColorTracking()},2000);
     this.repaint();
 };
 
@@ -111,6 +112,32 @@ PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounte
         this.noteLists[1].push(this.SPL.cpMaster[i].note);
     }
 };
+
+/**
+ * Helper function for obtaining pixel data per frame
+ */
+
+PositionalAR.prototype.setupColorTracking = function(){
+
+    var colors = new tracking.ColorTracker(['yellow']);
+
+    colors.on('track', function(event) {
+        if (event.data.length === 0) {
+        // No colors were detected in this frame.
+        } else {
+        event.data.forEach(function(rect) {
+            console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
+        });
+        }
+    });
+
+    let hs = document.getElementById('arjs-video').style.height;
+    let ws = document.getElementById('arjs-video').style.width;
+    document.getElementById('myVideo').height = parseInt(hs.substring(0,hs.indexOf("p")));
+    document.getElementById('myVideo').width = parseInt(ws.substring(0,ws.indexOf("p")));
+    tracking.track('#myVideo', colors);
+    this.colorTracker = colors;
+}
 
 /**
  * 

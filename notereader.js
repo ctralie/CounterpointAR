@@ -1,5 +1,8 @@
 class RollReader {
-
+    /**
+     * @constructor
+     * 
+     */
     constructor() {
         this.fileReady = false;
         this.data = null; // Reference to promise
@@ -16,7 +19,6 @@ class RollReader {
         this.counterpointDurs = [];
         this.counterpointAccs = [];
     }
-
     loadFile(filename) {
         console.log(filename);
         let that = this;
@@ -64,7 +66,6 @@ class RollReader {
         let firstCPNoteInd = 4;
         let cantFirmIndex = 6;
         let cPointIndex = 0;
-        
         let indArr = [timeSigIndex,clefIndex,keyIndex,firstCFNoteInd,firstCPNoteInd];
         for(let i = 0; i < indArr.length; i++){
             let index = this.lines[indArr[i]].indexOf(":");
@@ -96,7 +97,6 @@ class RollReader {
                 i = this.lines.length;
             }
         }
-
         //cantus firmus and counter point
         for(let i = cantFirmIndex; i < this.lines.length; i++){
             let ind = this.lines[i].indexOf(":");
@@ -129,6 +129,4 @@ class RollReader {
         let CP = [this.counterpointDegrees,this.counterpointDurs,this.counterpointAccs];
         return [this.timeSig,this.clef,this.key,this.firstCFNote,this.firstCPNote,CF,CP];
     }
-
-    
 }
