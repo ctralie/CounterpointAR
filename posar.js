@@ -39,7 +39,6 @@ const PATTERNS_AR = [
  * @param {DAGenerator} digitalAudio
  * @param {boolean} useCantusFirmus
  * @param {boolean} useCounterpoint
- * 
  */
 function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     const that = this;
@@ -48,134 +47,53 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     this.setupDigitalAudio(digitalAudio);
     this.setupNoteInformation(useCantusFirmus,useCounterpoint);
     this.initializeGlobalVariables();
-    this.setupTracker();
+    this.setupColorTracking();
+    this.setupMarkerTracker();
     this.setupGhostNote();
     this.setupFirstSpeciesNotes();
     this.setupFirstSpeciesMeasureLines();
-    setTimeout(() => {this.setupColorTracking()},2000);
     this.repaint();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-// Setup Functions
+// COLOR AND MARKER TRACKER SETUP
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @param {boolean} antialias
+ * Setup Color Tracking library (tracking.js)
  */
-PositionalAR.prototype.setupRenderer = function(antialias){
-    // Setup three.js WebGL renderer
-    const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
-    this.renderer = renderer;
-    renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-    renderer.setSize(640, 480);
-    renderer.domElement.style.position = 'absolute'
-    renderer.domElement.style.top = '0px'
-    renderer.domElement.style.left = '0px'
-    document.body.appendChild( renderer.domElement );
-};
-
-/**
- * @param {BasicScene} sceneObj
- */
-PositionalAR.prototype.setupScene = function(sceneObj){
-    this.sceneObj = sceneObj;
-    this.scene = this.sceneObj.scene;
-    this.camera = this.sceneObj.camera;
-    this.sceneRoot = this.sceneObj.sceneRoot;
-    this.noteXSpace = this.scene.xSpace;
-};
-
-/**
- * @param {DAGenerator} digitalAudio
- */
-PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
-    this.digAud = digitalAudio;
-    this.songLength = this.digAud.songLength;
-    this.SPL = this.digAud.SPL;
-};
-
-/**
- * @param {boolean} useCantusFirmus
- * @param {boolean} useCounterpoint
- */
-PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounterpoint){
-    this.linesToUse = [useCantusFirmus, useCounterpoint];
-    this.arrivedAtNote = [];
-    this.currentNoteInd = 0;
-    this.noteLists = [[],[]];
-    this.xPositions = [[],[]];
-    for(let i = 0; i < this.SPL.songLength; i++){
-        this.xPositions[0].push(this.SPL.cfMaster[i].pos);
-        this.noteLists[0].push(this.SPL.cfMaster[i].note);
-        this.xPositions[1].push(this.SPL.cpMaster[i].pos);
-        this.noteLists[1].push(this.SPL.cpMaster[i].note);
-    }
-};
-
-/**
- * Helper function for obtaining pixel data per frame
- */
-
-PositionalAR.prototype.setupColorTracking = function(){
+ PositionalAR.prototype.setupColorTracking = function(){
 
     var colors = new tracking.ColorTracker(['yellow']);
-
-    colors.on('track', function(event) {
+    colors.on('track', function(event){
         if (event.data.length === 0) {
         // No colors were detected in this frame.
+            console.log("is working");
         } else {
-        event.data.forEach(function(rect) {
-            console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
+            event.data.forEach(function(rect) {
+                console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
         });
         }
     });
+    this.colors = colors;
+    tracking.track(this.createColorTrackCamera(), this.colors);
+}
 
-    let hs = document.getElementById('arjs-video').style.height;
-    let ws = document.getElementById('arjs-video').style.width;
-    document.getElementById('myVideo').height = parseInt(hs.substring(0,hs.indexOf("p")));
-    document.getElementById('myVideo').width = parseInt(ws.substring(0,ws.indexOf("p")));
-    tracking.track('#myVideo', colors);
-    this.colorTracker = colors;
+PositionalAR.prototype.createColorTrackCamera = function(){
+    const colorTrackerVideo = document.querySelector("video");
+    let constraints = {video:true};
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        colorTrackerVideo.srcObject = stream;
+    });
+
+    document.getElementById('myVideo').style.left = "-1000px";
+    return colorTrackerVideo;
 }
 
 /**
  * 
  */
-PositionalAR.prototype.initializeGlobalVariables = function(){
-
-    this.arGroup = new THREE.Group();
-    this.sampAud = new SampledAudio();
-    this.clock = new THREE.Clock();
-
-    this.colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}];
-    this.globalTimes = [];
-    this.didPlayNoteAudio = [];
-    this.trackedPositions = [];
-    
-    this.endTracking = false;
-    this.madeEndScene = false;
-    this.gotOGQuat = false;
-    this.gotPlacement = false;
-    
-    this.moveThresh = 6;
-    this.ghostColor = 0;
-    this.noteColor  = 1;
-    this.replaceColor = 2;
-    this.noteGroupPlacement = -2;
-    this.spaceAboveStaff = .1;
-    this.totalTime = 0;
-
-    this.AGCFI = null;
-    this.AGCPI = null;
-    this.AGGNI = null;
-    this.NNGI = null;
-};
-
-/**
- * 
- */
-PositionalAR.prototype.setupTracker = function(){
+PositionalAR.prototype.setupMarkerTracker = function(){
     // create this.arToolkitSource
     const that = this;
     this.arToolkitSource = new THREEx.ArToolkitSource({
@@ -242,6 +160,96 @@ PositionalAR.prototype.setupTracker = function(){
     }
     this.arGroup.add(this.sceneRoot);
     this.scene.add(this.arGroup);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// OTHER SETUP FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @param {boolean} antialias
+ */
+ PositionalAR.prototype.setupRenderer = function(antialias){
+    // Setup three.js WebGL renderer
+    const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
+    this.renderer = renderer;
+    renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+    renderer.setSize(640, 480);
+    renderer.domElement.style.position = 'absolute'
+    renderer.domElement.style.top = '0px'
+    renderer.domElement.style.left = '0px'
+    document.body.appendChild( renderer.domElement );
+};
+
+/**
+ * @param {BasicScene} sceneObj
+ */
+PositionalAR.prototype.setupScene = function(sceneObj){
+    this.sceneObj = sceneObj;
+    this.scene = this.sceneObj.scene;
+    this.camera = this.sceneObj.camera;
+    this.sceneRoot = this.sceneObj.sceneRoot;
+    this.noteXSpace = this.scene.xSpace;
+};
+
+/**
+ * @param {DAGenerator} digitalAudio
+ */
+PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
+    this.digAud = digitalAudio;
+    this.songLength = this.digAud.songLength;
+    this.SPL = this.digAud.SPL;
+};
+
+/**
+ * @param {boolean} useCantusFirmus
+ * @param {boolean} useCounterpoint
+ */
+PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounterpoint){
+    this.linesToUse = [useCantusFirmus, useCounterpoint];
+    this.arrivedAtNote = [];
+    this.currentNoteInd = 0;
+    this.noteLists = [[],[]];
+    this.xPositions = [[],[]];
+    for(let i = 0; i < this.SPL.songLength; i++){
+        this.xPositions[0].push(this.SPL.cfMaster[i].pos);
+        this.noteLists[0].push(this.SPL.cfMaster[i].note);
+        this.xPositions[1].push(this.SPL.cpMaster[i].pos);
+        this.noteLists[1].push(this.SPL.cpMaster[i].note);
+    }
+};
+
+/**
+ * 
+ */
+PositionalAR.prototype.initializeGlobalVariables = function(){
+
+    this.arGroup = new THREE.Group();
+    this.sampAud = new SampledAudio();
+    this.clock = new THREE.Clock();
+
+    this.colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}];
+    this.globalTimes = [];
+    this.didPlayNoteAudio = [];
+    this.trackedPositions = [];
+    
+    this.endTracking = false;
+    this.madeEndScene = false;
+    this.gotOGQuat = false;
+    this.gotPlacement = false;
+    
+    this.moveThresh = 6;
+    this.ghostColor = 0;
+    this.noteColor  = 1;
+    this.replaceColor = 2;
+    this.noteGroupPlacement = -2;
+    this.spaceAboveStaff = .1;
+    this.totalTime = 0;
+
+    this.AGCFI = null;
+    this.AGCPI = null;
+    this.AGGNI = null;
+    this.NNGI = null;
 };
 
 /**
@@ -514,12 +522,20 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
  * 
  */
 PositionalAR.prototype.endProgram = function(){
+    this.stopColorTracking();
     this.formatPositions();
     this.digAud.getNoteResults(this.formattedPositions);
     this.createEndScene();
     this.digAud.mp3UserNoteSetup();
     this.playUserChoice();
 };
+
+/**
+ * 
+ */
+PositionalAR.prototype.stopColorTracking = function(){
+    this.colors.removeAllListeners();
+}
 
 /**
  * 

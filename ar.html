@@ -7,7 +7,9 @@
 </head>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
-<video id="myVideo" width="400" height="300" preload autoplay loop muted></video>
+<!--<video id="myVideo" width="400" height="300" preload autoplay loop muted></video>-->
+<video autoplay muted playsinline id="myVideo" style="width:400px;height:300px;
+position:absolute;top:0px;left:0px"></video>
 
 <script>
 document.addEventListener('touchmove', function(e) {
@@ -21,6 +23,7 @@ document.addEventListener('touchmove', function(e) {
 <script src="jslibs/ar.js"></script>
 
 <script src="tracking.js-master/build/tracking-min.js"></script>
+<script src="tracking.js-master/build/tracking.js"></script>
 
 <!-- Our Scripts -->
 <script src="keyboardhandler.js"></script>
