@@ -63,15 +63,17 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
  * Setup Color Tracking library (tracking.js)
  */
  PositionalAR.prototype.setupColorTracking = function(){
-
+    const that = this;
     var colors = new tracking.ColorTracker(['yellow']);
     colors.on('track', function(event){
         if (event.data.length === 0) {
-        // No colors were detected in this frame.
+            // No colors were detected in this frame.
             console.log("is working");
         } else {
             event.data.forEach(function(rect) {
-                console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
+                //console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
+                that.colorTrackX = rect.x + (rect.width/2);
+                that.colorTrackY = rect.y + (rect.height/2);
         });
         }
     });
@@ -245,6 +247,9 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
     this.noteGroupPlacement = -2;
     this.spaceAboveStaff = .1;
     this.totalTime = 0;
+
+    this.colorTrackX = 0;
+    this.colorTrackY = 0;
 
     this.AGCFI = null;
     this.AGCPI = null;
