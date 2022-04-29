@@ -68,27 +68,30 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     colors.on('track', function(event){
         if (event.data.length === 0) {
             // No colors were detected in this frame.
-            console.log("is working");
+            //console.log("is working");
         } else {
             event.data.forEach(function(rect) {
                 //console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
+                //TODO: make this in relative coordinates to global coords of ARMarkers
                 that.colorTrackX = rect.x + (rect.width/2);
                 that.colorTrackY = rect.y + (rect.height/2);
         });
         }
     });
-    this.colors = colors;
-    tracking.track(this.createColorTrackCamera(), this.colors);
+    this.colorT = colors;
+    tracking.track(this.createColorTrackCamera(), this.colorT);
 }
 
+/**
+ * 
+ */
 PositionalAR.prototype.createColorTrackCamera = function(){
     const colorTrackerVideo = document.querySelector("video");
     let constraints = {video:true};
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         colorTrackerVideo.srcObject = stream;
     });
-
-    document.getElementById('myVideo').style.left = "-1000px";
+    document.getElementById('colorTrackVideo').style.left = "-1000px";
     return colorTrackerVideo;
 }
 
@@ -129,6 +132,7 @@ PositionalAR.prototype.setupMarkerTracker = function(){
     this.vertCount = 0;
     for (let i = 0; i < PATTERNS_AR.length; i++) {
         let markerRoot = new THREE.Group();
+        markerRoot.name = "Marker Root " + i;
         markerRoot.visible = false;
         markerRoot.markerPos = PATTERNS_AR[i].pos;
         markerRoot.posHistory = [];
@@ -191,6 +195,7 @@ PositionalAR.prototype.setupScene = function(sceneObj){
     this.scene = this.sceneObj.scene;
     this.camera = this.sceneObj.camera;
     this.sceneRoot = this.sceneObj.sceneRoot;
+    this.sceneRoot.name = "Scene Root";
     this.noteXSpace = this.scene.xSpace;
 };
 
@@ -227,6 +232,7 @@ PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounte
 PositionalAR.prototype.initializeGlobalVariables = function(){
 
     this.arGroup = new THREE.Group();
+    this.arGroup.name = "AR Group";
     this.sampAud = new SampledAudio();
     this.clock = new THREE.Clock();
 
@@ -262,6 +268,7 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
  */
 PositionalAR.prototype.setupGhostNote = function(){
     let ghostNote = new THREE.Group();
+    ghostNote.name = "Ghost Note";
     ghostNote.add(this.makeNoteObject(this.ghostColor));
     this.ghostNote = ghostNote;
     this.arGroup.add(ghostNote);
@@ -275,7 +282,9 @@ PositionalAR.prototype.setupGhostNote = function(){
  */
 PositionalAR.prototype.setupFirstSpeciesNotes = function(){
     this.CFGroup = new THREE.Group();
+    this.CFGroup.name = "CantusFirmus Group";
     this.CPGroup = new THREE.Group();
+    this.CPGroup.name = "Counterpoint Group";
     for(let i = 0; i < this.linesToUse.length; i++){
         let noteSpacing = 1.5;
         let notePositionZ = 1;
@@ -330,6 +339,7 @@ PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
     newLine.position.y = this.spaceAboveStaff;
     newLine.position.z = linePosZ + .25;
     lineGroup.add(newLine);
+    lineGroup.name = "Line Group";
     this.arGroup.add(lineGroup);
 };
 
@@ -364,13 +374,13 @@ PositionalAR.prototype.repaint = function(){
     }
     this.totalTime += deltaTime;
     this.sceneObj.animate(deltaTime);
-
     if(this.endTracking){
         this.endProgram();
     }else{
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.repaint.bind(this));
     }
+    
 };
 
 /**
@@ -458,6 +468,22 @@ PositionalAR.prototype.placeSceneRoot = function(){
         }
     }
 };
+
+/**
+ * 
+ */
+PositionalAR.prototype.getColorPosition = function(){
+    let raycast = new THREE.Raycaster();
+    let point = new THREE.Vector2();
+    point.x = ((this.colorTrackX / window.innerWidth)*2)-1;
+    point.y = ((this.colorTrackY / window.innerHeight)*2)-1;
+
+    raycast.setFromCamera(point,this.camera);
+    let intersects = raycast.intersectObjects(this.scene.children);
+    for(let i = 0; i < intersects.length; i++){
+        //intersects[i].object.
+    }
+}
 
 /**
  * Updates ghost note position based on the position of the ARGROUP object in the 3D camera space

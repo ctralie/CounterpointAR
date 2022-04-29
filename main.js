@@ -16,7 +16,6 @@ class TestClass {
         this.notes= new RollReader();
         this.notes.loadFile(fileName);
         this.doSomethingWithFile();
-        
     }
 
     doSomethingWithFile() {
@@ -33,7 +32,7 @@ class TestClass {
             this.scene = new BasicScene();
             this.scene.makeScene(this.notes.parseInfo());
             const posAR = new PositionalAR(this.scene,
-            this.digAud, this.useCantusFirmus, this.useCounterpoint, this.p5Obj);
+            this.digAud, this.useCantusFirmus, this.useCounterpoint);
         }
     }
 }
