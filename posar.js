@@ -47,11 +47,12 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     this.setupDigitalAudio(digitalAudio);
     this.setupNoteInformation(useCantusFirmus,useCounterpoint);
     this.initializeGlobalVariables();
-    this.setupColorTracking();
     this.setupMarkerTracker();
     this.setupGhostNote();
     this.setupFirstSpeciesNotes();
     this.setupFirstSpeciesMeasureLines();
+    this.setupColorTracking();
+    this.setupRayCasting();
     this.repaint();
 };
 
@@ -66,20 +67,52 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     const that = this;
     var colors = new tracking.ColorTracker(['yellow']);
     colors.on('track', function(event){
-        if (event.data.length === 0) {
+        if(event.data.length === 0){
             // No colors were detected in this frame.
             //console.log("is working");
-        } else {
-            event.data.forEach(function(rect) {
+        }else{
+            event.data.forEach(function(rect){
                 //console.log(rect.x, rect.y, rect.height, rect.width, rect.color);
                 //TODO: make this in relative coordinates to global coords of ARMarkers
-                that.colorTrackX = rect.x + (rect.width/2);
-                that.colorTrackY = rect.y + (rect.height/2);
-        });
+                that.colorTrackX = (rect.x/that.colorCamW)*that.wX;// + (rect.width/2);
+                that.colorTrackY = (rect.y/that.colorCamH)*that.wY;// + (rect.height/2);
+                that.p.style.left = that.colorTrackX + "px";
+                that.p.style.top = that.colorTrackY + "px";
+
+                //console.log("gang");
+                console.log(that.colorTrackX,that.colorTrackY);
+            });
         }
     });
     this.colorT = colors;
-    tracking.track(this.createColorTrackCamera(), this.colorT);
+    setTimeout(() => {
+        tracking.track(this.createColorTrackCamera(), this.colorT);
+        this.createAuxilaryDOMElement();
+        this.getRatiosOfProgram();
+    }, 2000);
+}
+
+PositionalAR.prototype.getRatiosOfProgram = function(){
+    let ctWS = document.getElementById('colorTrackVideo').style.width;
+    let ctHS = document.getElementById('colorTrackVideo').style.height;
+    this.colorCamW = parseInt(ctHS.substring(0,ctHS.indexOf('p')));
+    this.colorCamH = parseInt(ctWS.substring(0,ctWS.indexOf('p')));
+    this.wX = window.innerWidth;
+    this.wY = window.innerHeight;
+}
+
+PositionalAR.prototype.createAuxilaryDOMElement = function(){
+    let p = document.createElement("p");
+    document.body.appendChild(p);
+    p.style.backgroundColor = "red";
+    p.style.innerHTML = "*";
+    p.style.position = 'absolute';
+    p.style.width = "40px";
+    p.style.height = "40px";
+    p.style.zIndex = 10;
+    p.style.left = "0px"
+    p.style.top = "0px";  
+    this.p = p;
 }
 
 /**
@@ -91,7 +124,7 @@ PositionalAR.prototype.createColorTrackCamera = function(){
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         colorTrackerVideo.srcObject = stream;
     });
-    document.getElementById('colorTrackVideo').style.left = "-1000px";
+    document.getElementById('colorTrackVideo').style.visibility = "hidden";
     return colorTrackerVideo;
 }
 
@@ -197,6 +230,7 @@ PositionalAR.prototype.setupScene = function(sceneObj){
     this.sceneRoot = this.sceneObj.sceneRoot;
     this.sceneRoot.name = "Scene Root";
     this.noteXSpace = this.scene.xSpace;
+
 };
 
 /**
@@ -343,6 +377,25 @@ PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
     this.arGroup.add(lineGroup);
 };
 
+/**
+ * 
+ */
+ PositionalAR.prototype.setupRayCasting = function(){
+    this.raycast = new THREE.Raycaster();
+    this.point = new THREE.Vector2();
+
+    let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
+    geo.scale(0.5,0.5,0.5);
+    geo.rotateX(1.57);
+    
+    let pointP = new THREE.Mesh(geo,new THREE.MeshStandardMaterial(this.colors[1]));
+    pointP.position.z = -5;
+    this.ng = new THREE.Group();
+    this.ng.add(pointP);
+    this.scene.add(this.ng);
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Main Program Functions
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -374,6 +427,8 @@ PositionalAR.prototype.repaint = function(){
     }
     this.totalTime += deltaTime;
     this.sceneObj.animate(deltaTime);
+    //this.arGroup.position.z = -20;
+    //this.arGroup.rotateX(.01);
     if(this.endTracking){
         this.endProgram();
     }else{
@@ -469,21 +524,34 @@ PositionalAR.prototype.placeSceneRoot = function(){
     }
 };
 
-/**
- * 
- */
-PositionalAR.prototype.getColorPosition = function(){
-    let raycast = new THREE.Raycaster();
-    let point = new THREE.Vector2();
-    point.x = ((this.colorTrackX / window.innerWidth)*2)-1;
-    point.y = ((this.colorTrackY / window.innerHeight)*2)-1;
 
-    raycast.setFromCamera(point,this.camera);
-    let intersects = raycast.intersectObjects(this.scene.children);
-    for(let i = 0; i < intersects.length; i++){
-        //intersects[i].object.
-    }
+PositionalAR.prototype.rayCast = function(){
+
+    //console.log(this.colorTrackX,this.colorTrackY);
+    let newX = (this.colorTrackX/this.colorCamW)*this.arCamW;
+    let newY = (this.colorTrackY/this.colorCamH)*this.arCamH;
+    console.log(newX,newY);
+
+    /*
+    this.ng.position.z = 0;
+    this.ng.position.x = (this.colorTrackX - (this.colorTrackX/2))/100;
+    this.ng.position.y = (this.colorTrackY - (this.colorTrackY/2))/100;
+    console.log(this.ng.position);
+    */
+    //this.point.x = this.colorTrackX * this.xCamScale;
+    //this.point.y = this.colorTrackY * this.yCamScale;
+    /*
+    this.point.x = ((2.0 / this.colorCamW) * this.colorTrackX)-1;
+    this.point.y = ((2.0 / this.colorCamH) * this.colorTrackY)-1;
+    console.log(this.point.x,this.point.y);
+    this.raycast.setFromCamera(this.point,this.camera);
+    const intersects = this.raycast.intersectObjects(this.sceneObj.sceneRoot.children);
+    
+    if(intersects.length > 0){console.log(intersects);}
+    */
+    //return intersects;
 }
+
 
 /**
  * Updates ghost note position based on the position of the ARGROUP object in the 3D camera space
@@ -496,6 +564,7 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
     //Takes world coordinates of ARGROUP and provides the inverse
     //Then applies the the inverse as a transformation of the identity
     //Giving the current position of the camera, relative to the ARGROUP object
+    //this.rayCast();
     let worldCoords = this.arGroup.matrixWorld;
     let inverseWorldCoords = worldCoords.getInverse(worldCoords);
     let transformVector = new THREE.Vector4(0,0,0,1);
@@ -565,7 +634,7 @@ PositionalAR.prototype.endProgram = function(){
  * 
  */
 PositionalAR.prototype.stopColorTracking = function(){
-    this.colors.removeAllListeners();
+    this.colorT.removeAllListeners();
 }
 
 /**
