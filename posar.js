@@ -564,7 +564,12 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
     //Takes world coordinates of ARGROUP and provides the inverse
     //Then applies the the inverse as a transformation of the identity
     //Giving the current position of the camera, relative to the ARGROUP object
-    //this.rayCast();
+
+    //needed position
+    let currentPosition = this.rayCast();
+
+
+    //old code for current position
     let worldCoords = this.arGroup.matrixWorld;
     let inverseWorldCoords = worldCoords.getInverse(worldCoords);
     let transformVector = new THREE.Vector4(0,0,0,1);
@@ -578,6 +583,9 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
     }
     let thresh = 0.1;
     let currentPosition = this.arGroup.children[this.AGGNI].position;
+    //end of old current position code
+
+
     //Checks position of currentPosition relative to notes on staff
     //If at Z coordinate of note, the note audio(s) will play and color is changed
     let checkPos = 0;
