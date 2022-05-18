@@ -92,6 +92,9 @@ function PositionalAR(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint){
     }, 2000);
 }
 
+/**
+ * Gets unneccesary dimensions of html elements
+ */
 PositionalAR.prototype.getRatiosOfProgram = function(){
     let ctWS = document.getElementById('colorTrackVideo').style.width;
     let ctHS = document.getElementById('colorTrackVideo').style.height;
@@ -101,6 +104,9 @@ PositionalAR.prototype.getRatiosOfProgram = function(){
     this.wY = window.innerHeight;
 }
 
+/**
+ * Creates an html element to visualize on screen where the color tracker is finding colors
+ */
 PositionalAR.prototype.createAuxilaryDOMElement = function(){
     let p = document.createElement("p");
     document.body.appendChild(p);
@@ -116,7 +122,9 @@ PositionalAR.prototype.createAuxilaryDOMElement = function(){
 }
 
 /**
+ * dynamically creates the color tracking camera html element
  * 
+ * @return colorTrackerVideo html video element
  */
 PositionalAR.prototype.createColorTrackCamera = function(){
     const colorTrackerVideo = document.querySelector("video");
@@ -129,7 +137,7 @@ PositionalAR.prototype.createColorTrackCamera = function(){
 }
 
 /**
- * 
+ * Setup of the AR.js marker tracker
  */
 PositionalAR.prototype.setupMarkerTracker = function(){
     // create this.arToolkitSource
@@ -207,6 +215,8 @@ PositionalAR.prototype.setupMarkerTracker = function(){
 
 /**
  * @param {boolean} antialias
+ * 
+ * Setup of the WebGL Renderer and adds to the HTML doc
  */
  PositionalAR.prototype.setupRenderer = function(antialias){
     // Setup three.js WebGL renderer
@@ -222,6 +232,8 @@ PositionalAR.prototype.setupMarkerTracker = function(){
 
 /**
  * @param {BasicScene} sceneObj
+ * 
+ * Assignment of the scene object global variables
  */
 PositionalAR.prototype.setupScene = function(sceneObj){
     this.sceneObj = sceneObj;
@@ -235,6 +247,8 @@ PositionalAR.prototype.setupScene = function(sceneObj){
 
 /**
  * @param {DAGenerator} digitalAudio
+ * 
+ * Setup/ instantiation of the digital audio global variables
  */
 PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
     this.digAud = digitalAudio;
@@ -245,6 +259,8 @@ PositionalAR.prototype.setupDigitalAudio = function(digitalAudio){
 /**
  * @param {boolean} useCantusFirmus
  * @param {boolean} useCounterpoint
+ * 
+ * Retreives the x position and note lists of each used music line from the SPL object
  */
 PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounterpoint){
     this.linesToUse = [useCantusFirmus, useCounterpoint];
@@ -261,7 +277,7 @@ PositionalAR.prototype.setupNoteInformation = function(useCantusFirmus,useCounte
 };
 
 /**
- * 
+ * Initializes the global variables
  */
 PositionalAR.prototype.initializeGlobalVariables = function(){
 
@@ -298,7 +314,9 @@ PositionalAR.prototype.initializeGlobalVariables = function(){
 };
 
 /**
+ * DEPRICATED(Soon)
  * 
+ * Setup of the current position ghost note tracker 
  */
 PositionalAR.prototype.setupGhostNote = function(){
     let ghostNote = new THREE.Group();
@@ -312,7 +330,9 @@ PositionalAR.prototype.setupGhostNote = function(){
 };
 
 /**
+ * Creates and adds note objects to the AR scene based on the x position of the notes
  * 
+ * (will need a different function for higher order species)
  */
 PositionalAR.prototype.setupFirstSpeciesNotes = function(){
     this.CFGroup = new THREE.Group();
@@ -349,7 +369,9 @@ PositionalAR.prototype.setupFirstSpeciesNotes = function(){
 };
 
 /**
+ * Creates and adds measure lines to the AR scene
  * 
+ * (will need a different function for higher order species)
  */
 PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
     let lineGeo = new THREE.BoxGeometry(4,.01,.05);
@@ -378,7 +400,7 @@ PositionalAR.prototype.setupFirstSpeciesMeasureLines = function(){
 };
 
 /**
- * 
+ * Setup of the raycasting object. Raycasting doesn't work yet
  */
  PositionalAR.prototype.setupRayCasting = function(){
     this.raycast = new THREE.Raycaster();
@@ -627,7 +649,7 @@ PositionalAR.prototype.notePositionUpdateAnalyze = function(){
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * 
+ * Function stops the tracking processes and sets up program results
  */
 PositionalAR.prototype.endProgram = function(){
     this.stopColorTracking();
@@ -639,14 +661,15 @@ PositionalAR.prototype.endProgram = function(){
 };
 
 /**
- * 
+ * Removes the tracking event listener for color tracking
  */
 PositionalAR.prototype.stopColorTracking = function(){
     this.colorT.removeAllListeners();
 }
 
 /**
- * 
+ * Function to format the user positions tracked while traversing the scene
+ * Will snap a position to either a line in the scene or the exact middle of two lines in the scene.
  */
  PositionalAR.prototype.formatPositions = function(){
     this.formattedPositions = [];
@@ -664,7 +687,7 @@ PositionalAR.prototype.stopColorTracking = function(){
 }
 
 /**
- * 
+ * Creates the end scene for viewing user progress and traversal
  */
 PositionalAR.prototype.createEndScene = function(){
     this.arGroup.setRotationFromQuaternion(this.OGQuat);
@@ -701,7 +724,8 @@ PositionalAR.prototype.createEndScene = function(){
 };
 
 /**
- * 
+ * Plays the music lines (counterpoint and/or cantus firmus, as well as the user position notes) simultaneously based on time
+ * tracked in the traversal.
  */
 PositionalAR.prototype.playUserChoice = function(){
     //this.sampAud.playAudio();
@@ -729,6 +753,8 @@ PositionalAR.prototype.playUserChoice = function(){
 
 /**
  * @param {Int} index
+ * 
+ * returns a THREE.Mesh note object in the color defined by the input index param
  */
 PositionalAR.prototype.makeNoteObject = function(index){
     let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
@@ -739,6 +765,8 @@ PositionalAR.prototype.makeNoteObject = function(index){
 
 /**
  * @param {Int} index
+ * 
+ * Changes the color of the notes from black to gold when you pass them by while traversing the scene
  */
 PositionalAR.prototype.changeNoteColor = function(index){
     if(this.linesToUse[0]){

@@ -30,7 +30,7 @@ class TestClass {
             let SPL = new ScalePositionLists(this.notes.parseInfo());
             this.digAud = new DAGenerator(SPL);
             this.scene = new BasicScene();
-            this.scene.makeScene(this.notes.parseInfo());
+            this.scene.makeScene(this.notes.formatInfo());
             const posAR = new PositionalAR(this.scene,
             this.digAud, this.useCantusFirmus, this.useCounterpoint);
         }

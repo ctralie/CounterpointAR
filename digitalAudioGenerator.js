@@ -2,7 +2,10 @@ class DAGenerator{
 
     /**
      * @constructor
-     * Initializes global variables 
+     * 
+     * @param {ScalePositionLists} SPL
+     * 
+     * Initializes global variables, initiates the mp3 arrays 
      */
     constructor(SPL){
         const that = this;
@@ -22,6 +25,11 @@ class DAGenerator{
 
     /**
      * @param {Float[]} formattedPositions
+     * 
+     * Function takes the stalf aligned user positions and
+     * finds notes containing the same position value
+     * 
+     * @return note results
      */
     getNoteResults(formattedPositions){
         this.noteResults = [];
@@ -67,7 +75,7 @@ class DAGenerator{
     }
 
     /**
-     * 
+     * loads user note mp3 files
      */
     mp3UserNoteSetup(){
         for(let i = 0; i < this.songLength; i++){
@@ -114,6 +122,8 @@ class DAGenerator{
 
     /**
      * @param {Int} noteNumber
+     * 
+     * will send a request to play a specific mp3 file from the mp3 arrays
      */
     playUserNote(noteNumber){
         if(this.userMp3Arrs[noteNumber].readyState >= 2){

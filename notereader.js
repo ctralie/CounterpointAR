@@ -2,6 +2,7 @@ class RollReader {
     /**
      * @constructor
      * 
+     * fills global member data
      */
     constructor() {
         this.fileReady = false;
@@ -19,6 +20,13 @@ class RollReader {
         this.counterpointDurs = [];
         this.counterpointAccs = [];
     }
+
+    /**
+     * @param {String} filename contains string with the filename
+     * 
+     * creates the promise of parsing text of a text file to be formatted into
+     * the note information for the AR scene and mp3 creation
+     */
     loadFile(filename) {
         console.log(filename);
         let that = this;
@@ -57,8 +65,12 @@ class RollReader {
     ...
     */
 
-    //returns parsed info
-    parseInfo(){
+    /**
+     * Function formats the parsed information from the text file upon fulfillment of text parse promise.
+     * 
+     * @return list of all the formatted information needed to start the program
+     */
+    formatInfo(){
         let timeSigIndex = 0;
         let clefIndex = 1;
         let keyIndex = 2;
