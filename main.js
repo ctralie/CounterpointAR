@@ -27,7 +27,7 @@ class TestClass {
         else {
             // Do some stuff now that it's ready
             //console.log("Lines after finished" + this.notes.lines);
-            let SPL = new ScalePositionLists(this.notes.parseInfo());
+            let SPL = new ScalePositionLists(this.notes.formatInfo());
             this.digAud = new DAGenerator(SPL);
             this.scene = new BasicScene();
             this.scene.makeScene(this.notes.formatInfo());
