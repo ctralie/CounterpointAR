@@ -9,17 +9,16 @@ class CounterpointCanvas {
      * @param {boolean} useCantusFirmus
      * @param {boolean} useCounterpoint
      */
-    constructor(sceneObj, digitalAudio, useCantusFirmus, useCounterpoint) {
+    constructor(notes, digitalAudio, useCantusFirmus, useCounterpoint) {
         const that = this;
-        this.sceneObj = sceneObj;
+        this.notes = notes;
         this.setupDigitalAudio(digitalAudio);
         this.setupNoteInformation(useCantusFirmus,useCounterpoint);
         this.initializeGlobalVariables();
-        this.setupMarkerTracker();
+        this.setupStaff();
         this.setupGhostNote();
         this.setupFirstSpeciesNotes();
         this.setupFirstSpeciesMeasureLines();
-        this.setupColorTracking();
         this.repaint();
     }
 
@@ -75,7 +74,7 @@ class CounterpointCanvas {
         
         this.endTracking = false;
         this.madeEndScene = false;
-        this.gotOGQuat = false;
+        this.started = false;
         this.gotPlacement = false;
         
         this.moveThresh = 6;
@@ -95,6 +94,46 @@ class CounterpointCanvas {
         this.NNGI = null;
     }
 
+    setupStaff() {
+        this.matColor = [{color: 0xFFFFFF},{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},
+            {color: 0x33F3FF},{color: 0x00ff00},{color: 0x0000ff}];
+        //make time sig and clef scene objects
+        let ret = this.notes.formatInfo();
+        this.timeSig = ret[0];
+        this.clef = ret[1];
+
+        let staffGroup = new THREE.Group();
+        staffGroup.name = "Staff Group";
+        this.partialStaff = new THREE.BoxGeometry(0.1,0.01,3);
+        for (let column = 0; column < 7; column++) {
+            let newCol = new THREE.Group();
+            newCol.name = "Column " + column;
+            for(let i = 0; i < this.matColor.length; i++){
+                if(column == 0 || column == 6){
+                    let invmat = new THREE.MeshStandardMaterial({color: 0x000000});
+                    invmat.visible = false;
+                    newCol.add(new THREE.Mesh(this.partialStaff,invmat));
+                }else{
+                    newCol.add(new THREE.Mesh(this.partialStaff, 
+                    new THREE.MeshStandardMaterial({color: this.matColor[i].color})));
+                }
+                newCol.children[i].position.x = -3;
+                newCol.children[i].position.z = i*-3 + 1.7;
+                }
+            newCol.position.x += (1*column);
+            staffGroup.add(newCol);
+            
+        }
+        let bottomGeo = new THREE.BoxGeometry(9,0.01,30);
+        let bottomMat = new THREE.MeshStandardMaterial({color: 0x111111});
+        staffGroup.add(new THREE.Mesh(bottomGeo,bottomMat));
+        let ind = staffGroup.children.length - 1;
+        staffGroup.children[ind].position.y = -0.1;
+        staffGroup.children[ind].position.z = -10;
+        staffGroup.children[ind].visible = false;
+        this.sceneRoot.add(staffGroup);
+    }
+    
     /**
      * DEPRICATED(Soon)
      * 
@@ -186,17 +225,12 @@ class CounterpointCanvas {
     //////////////////////////////////////////////////////
 
     repaint() {
-        if(!this.gotOGQuat){
-            this.OGQuat = this.sceneRoot.getWorldQuaternion();
-            this.gotOGQuat = true;
+        if(!this.started){
+            this.started = true;
             this.sampAud.startRecording();
             this.timeOffset = Date.now();
         }
         this.canRerun = false;
-        if ( this.arToolkitSource.initialized !== false ) {
-            this.arToolkitContext.update( this.arToolkitSource.domElement );
-        }
-        this.updateCalibration();
         let deltaTime = this.clock.getDelta();
         if (this.totalTime < 6 && (this.totalTime+deltaTime)%1 < this.totalTime%1) {
             // A hack to trigger resizing every second for the first 5 seconds
@@ -233,12 +267,6 @@ class CounterpointCanvas {
         //Takes world coordinates of sceneRoot and provides the inverse
         //Then applies the the inverse as a transformation of the identity
         //Giving the current position of the camera, relative to the sceneRoot object
-
-        //needed position
-        let currentPosition = this.rayCast();
-
-
-        //old code for current position
         let worldCoords = this.sceneRoot.matrixWorld;
         let inverseWorldCoords = worldCoords.getInverse(worldCoords);
         let transformVector = new THREE.Vector4(0,0,0,1);
@@ -251,8 +279,7 @@ class CounterpointCanvas {
             this.sceneRoot.children[this.AGGNI].position.z = newPosition.z - 2;
         }
         let thresh = 0.1;
-        currentPosition = this.sceneRoot.children[this.AGGNI].position;
-        //end of old current position code
+        let currentPosition = this.sceneRoot.children[this.AGGNI].position;
 
 
         //Checks position of currentPosition relative to notes on staff
@@ -337,7 +364,6 @@ class CounterpointCanvas {
      * Creates the end scene for viewing user progress and traversal
      */
     createEndScene() {
-        this.sceneRoot.setRotationFromQuaternion(this.OGQuat);
         this.sceneRoot.remove(this.ghostNote);
         this.sceneRoot.rotateX(1.57);
         this.sceneRoot.rotateY(-1.57);

@@ -29,9 +29,7 @@ class TestClass {
             //console.log("Lines after finished" + this.notes.lines);
             let SPL = new ScalePositionLists(this.notes.formatInfo());
             this.digAud = new DAGenerator(SPL);
-            this.scene = new BasicScene();
-            this.scene.makeScene(this.notes.formatInfo());
-            const posAR = new PositionalAR(this.scene,
+            new CounterpointCanvas(this.notes,
             this.digAud, this.useCantusFirmus, this.useCounterpoint);
         }
     }
