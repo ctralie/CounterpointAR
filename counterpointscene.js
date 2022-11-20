@@ -1,7 +1,7 @@
-class CounterpointCanvas {
+class CounterpointScene {
 
     /**
-     * @exports CounterpointCanvas
+     * @exports CounterpointScene
      * @constructor
      * 
      * @param {objecte} notes
