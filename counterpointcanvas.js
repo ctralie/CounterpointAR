@@ -49,10 +49,10 @@ class CounterpointCanvas {
         const intensity = 1;
         const light = new THREE.DirectionalLight(this.matColor[0].color, intensity);
         light.position.set(-1, 10, 4);
-        //light.position.set(1,0,5);
-        //this.scene.add(light);
+        light.position.set(1,0,5);
         this.sceneRoot = new THREE.Group();
         this.sceneRoot.name = "Scene Root";
+        this.sceneRoot.add(light);
         this.scene.add(this.sceneRoot);
         this.scene.add(this.camera);
         this.camera.position.z = 5;
@@ -264,6 +264,7 @@ class CounterpointCanvas {
 
         this.sceneRoot.position.x -= this.keyboard.movelr*deltaTime;
         this.sceneRoot.position.z += this.keyboard.movefb*deltaTime;
+        this.sceneRoot.position.y -= this.keyboard.moveud*deltaTime;
         //this.notePositionUpdateAnalyze();
 
         if(this.endTracking){
@@ -383,7 +384,7 @@ class CounterpointCanvas {
 
         //createbackground
         let backG = new THREE.BoxGeometry(50,0.1,70);
-        let backM = new THREE.MeshStandardMaterial(this.colors[this.noteColor]);
+        let backM = new THREE.MeshStandardMaterial({color:this.colors[this.noteColor]});
         let backGround = new THREE.Mesh(backG,backM);
         backGround.position.y = -10;
         this.sceneRoot.add(backGround);
@@ -442,7 +443,7 @@ class CounterpointCanvas {
         let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
         geo.scale(1.25,2,1);
         geo.rotateX(1.57);
-        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial(this.colors[index]));
+        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:this.colors[index]}));
     };
 
     /**
