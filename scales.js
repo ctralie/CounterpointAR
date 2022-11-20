@@ -54,7 +54,7 @@ class ScalePositionLists{
             "Cf5","C5","Cs5","Df5","D5","Ds5","Ef5","E5","Es5","Ff5","F5","Fs5","Gf5","G5","Gs5",
             "Af5","A5","As5"];
 
-        this.mainKeyIndicies = {
+        this.mainKeyIndices = {
             "C-Natural-Major":[1,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,55,58,61,64,67,70,73],
             "A-Natural-Minor":[1,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,55,58,61,64,67,70,73],
             "G-Natural-Major":[1,5,7,10,13,16,19,22,26,28,31,34,37,40,43,47,49,52,55,58,61,64,68,70,73],
@@ -99,10 +99,10 @@ class ScalePositionLists{
                 this.posArr = this.trebleXPositions;
                 break;
         }
-        let noteIndicies = this.mainKeyIndicies[key];
+        let noteIndices = this.mainKeyIndices[key];
         this.keyList = [];
-        for(let i = 0; i < noteIndicies.length; i++){
-            this.keyList.push(this.mainList[noteIndicies[i]]);
+        for(let i = 0; i < noteIndices.length; i++){
+            this.keyList.push(this.mainList[noteIndices[i]]);
         }
         this.possibilitiesDic = {};
         let dicIndexer = Object.entries(this.posArr);

@@ -4,29 +4,22 @@
 <head>
 <title>Counterpoint Augmented Reality Viewer</title>
 <meta charset="utf-8">
-</head>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
-<video autoplay muted playsinline id="colorTrackVideo" style="width:400px;height:300px;
-position:absolute;top:0px;left:0px"></video>
-<script>
-document.addEventListener('touchmove', function(e) {
-  e.preventDefault();
-});
-</script>
+<script type="text/javascript" src="jslibs/jquery-3.5.1.min.js"></script>
 
 <!-- three.js library -->
-<script src="jslibs/three.js"></script>
-<!-- include jsartookit -->
-<script src="jslibs/ar.js"></script>
+<script type="text/javascript" src="js-aruco2/samples/debug-posit/libs/Three.js"></script>
 
-<script src="tracking.js-master/build/tracking-min.js"></script>
-<script src="tracking.js-master/build/tracking.js"></script>
+<!-- Aruco2 AR Library-->
+<script type="text/javascript" src="js-aruco2/src/svd.js"></script> 
+<script type="text/javascript" src="js-aruco2/src/posit1.js"></script> 
+<script type="text/javascript" src="js-aruco2/src/cv.js"></script> 
+<script type="text/javascript" src="js-aruco2/src/aruco.js"></script> 
 
 <!-- Our Scripts -->
 <script src="keyboardhandler.js"></script>
-<script src="scenes.js"></script>
-<script src="posar.js"></script>
+<script src="arcanvas.js"></script>
+<script src="counterpointScene.js"></script>
 <script src="digitalAudioGenerator.js"></script>
 <script src="notereader.js"></script>
 <script src="scales.js"></script>
@@ -40,12 +33,21 @@ document.addEventListener('touchmove', function(e) {
 <script src="jsanov/wav.js"></script>
 <script src="jsanov/features.js"></script>
 <script src="jsanov/audio.js"></script>
-<script src="jsanov/libs/jquery-3.5.1.min.js"></script>
+</head>
 
-<div id="featurePlot"></div>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+<script>
+document.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+});
+</script>
 
+
+<div id="arcanvas"></div>
 
 <script src="main.js"></script>
+
+
 
 </body>
 </html>
