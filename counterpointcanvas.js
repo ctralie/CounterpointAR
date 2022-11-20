@@ -4,7 +4,7 @@ class CounterpointCanvas {
      * @exports CounterpointCanvas
      * @constructor
      * 
-     * @param {BasicScene} sceneObj
+     * @param {objecte} notes
      * @param {DAGenerator} digitalAudio
      * @param {boolean} useCantusFirmus
      * @param {boolean} useCounterpoint
@@ -12,6 +12,9 @@ class CounterpointCanvas {
     constructor(notes, digitalAudio, useCantusFirmus, useCounterpoint) {
         const that = this;
         this.notes = notes;
+        this.keyboard = new KeyboardHandler();
+        this.setupRenderer(true);
+        this.setupScene();
         this.setupDigitalAudio(digitalAudio);
         this.setupNoteInformation(useCantusFirmus,useCounterpoint);
         this.initializeGlobalVariables();
@@ -20,6 +23,41 @@ class CounterpointCanvas {
         this.setupFirstSpeciesNotes();
         this.setupFirstSpeciesMeasureLines();
         this.repaint();
+    }
+
+    setupRenderer(antialias){
+        // Setup three.js WebGL renderer
+        const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
+        this.renderer = renderer;
+        //renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+        renderer.setSize(640, 480);
+        renderer.domElement.style.position = 'absolute'
+        renderer.domElement.style.top = '0px'
+        renderer.domElement.style.left = '0px'
+        document.body.appendChild( renderer.domElement );
+    };
+
+    setupScene(){
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(50,400/300,0.01,50);
+        
+        this.matColor = [{color: 0xFFFFFF},{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},
+            {color: 0x33F3FF},{color: 0x00ff00},{color: 0x0000ff}];
+        
+        // Step 2: Setup lighting
+        //this allows for phong to occur
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(this.matColor[0].color, intensity);
+        light.position.set(-1, 10, 4);
+        //light.position.set(1,0,5);
+        //this.scene.add(light);
+        this.sceneRoot = new THREE.Group();
+        this.sceneRoot.name = "Scene Root";
+        this.scene.add(this.sceneRoot);
+        this.scene.add(this.camera);
+        this.camera.position.z = 5;
+
+        this.noteXSpace = this.scene.xSpace;
     }
 
     //////////////////////////////////////////////////////
@@ -61,9 +99,6 @@ class CounterpointCanvas {
      * Initializes the global variables
      */
     initializeGlobalVariables() {
-
-        this.sceneRoot = new THREE.Group();
-        this.sceneRoot.name = "AR Group";
         this.sampAud = new SampledAudio();
         this.clock = new THREE.Clock();
 
@@ -81,12 +116,8 @@ class CounterpointCanvas {
         this.ghostColor = 0;
         this.noteColor  = 1;
         this.replaceColor = 2;
-        this.noteGroupPlacement = -2;
         this.spaceAboveStaff = .1;
         this.totalTime = 0;
-
-        this.colorTrackX = 0;
-        this.colorTrackY = 0;
 
         this.AGCFI = null;
         this.AGCPI = null;
@@ -95,8 +126,6 @@ class CounterpointCanvas {
     }
 
     setupStaff() {
-        this.matColor = [{color: 0xFFFFFF},{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},
-            {color: 0x33F3FF},{color: 0x00ff00},{color: 0x0000ff}];
         //make time sig and clef scene objects
         let ret = this.notes.formatInfo();
         this.timeSig = ret[0];
@@ -230,43 +259,32 @@ class CounterpointCanvas {
             this.sampAud.startRecording();
             this.timeOffset = Date.now();
         }
-        this.canRerun = false;
         let deltaTime = this.clock.getDelta();
-        if (this.totalTime < 6 && (this.totalTime+deltaTime)%1 < this.totalTime%1) {
-            // A hack to trigger resizing every second for the first 5 seconds
-            // TODO: Try something more elegant?
-            this.onResize();
-        }else{
-            while(!this.canRerun){
-                this.notePositionUpdateAnalyze();
-            }
-        }
         this.totalTime += deltaTime;
-        this.sceneObj.animate(deltaTime);
-        //this.sceneRoot.position.z = -20;
-        //this.sceneRoot.rotateX(.01);
+
+        this.sceneRoot.position.x -= this.keyboard.movelr*deltaTime;
+        this.sceneRoot.position.z += this.keyboard.movefb*deltaTime;
+        //this.notePositionUpdateAnalyze();
+
         if(this.endTracking){
             this.endProgram();
         }else{
-            this.renderer.render(this.scene, this.camera);
+            const renderer = this.renderer;
+            renderer.autoClear = false;
+            renderer.clear();
+            renderer.render(this.scene, this.camera);
             requestAnimationFrame(this.repaint.bind(this));
         }
         
     }
 
+    notePositionUpdateAnalyze(){
+        //Takes world coordinates of ARGROUP and provides the inverse
+        //Then applies the the inverse as a transformation of tsshe identity
+        //Giving the current position of the camera, relative to the ARGROUP object
 
 
-    /**
-     * Updates ghost note position based on the position of the sceneRoot object in the 3D camera space
-     * Checks current position to position of notes on staff
-     * If user arrived at note's Z position, the music line to play will play audio
-     * Then tracks the X position of user to track placement of music line
-     * When the last note plays, the audio recording stops
-     */
-    notePositionUpdateAnalyze() {
-        //Takes world coordinates of sceneRoot and provides the inverse
-        //Then applies the the inverse as a transformation of the identity
-        //Giving the current position of the camera, relative to the sceneRoot object
+        //old code for current position
         let worldCoords = this.sceneRoot.matrixWorld;
         let inverseWorldCoords = worldCoords.getInverse(worldCoords);
         let transformVector = new THREE.Vector4(0,0,0,1);
@@ -280,8 +298,9 @@ class CounterpointCanvas {
         }
         let thresh = 0.1;
         let currentPosition = this.sceneRoot.children[this.AGGNI].position;
-
-
+        //end of old current position code
+    
+    
         //Checks position of currentPosition relative to notes on staff
         //If at Z coordinate of note, the note audio(s) will play and color is changed
         let checkPos = 0;
@@ -314,9 +333,7 @@ class CounterpointCanvas {
             this.sampAud.stopRecording();
             this.endTracking = true;
         }
-        //Allows repaint to occur, updating scene frame
-        this.canRerun = true;
-    }
+    };
 
     //////////////////////////////////////////////////////
     // End Program Functions
@@ -326,19 +343,11 @@ class CounterpointCanvas {
      * Function stops the tracking processes and sets up program results
      */
     endProgram () {
-        this.stopColorTracking();
         this.formatPositions();
         this.digAud.getNoteResults(this.formattedPositions);
         this.createEndScene();
         this.digAud.mp3UserNoteSetup();
         this.playUserChoice();
-    }
-
-    /**
-     * Removes the tracking event listener for color tracking
-     */
-    stopColorTracking() {
-        this.colorT.removeAllListeners();
     }
 
     /**
