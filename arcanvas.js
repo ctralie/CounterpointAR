@@ -40,7 +40,7 @@ class ARCanvas {
      * @param {float} modelSize Size of each marker in millimeters
      * @param {int} k Number of markers being used
      */
-    constructor(divName, scene, modelSize=150.0, k=10) {
+    constructor(divName, scene, modelSize=174.6, k=10) {
         this.scene = scene;
         this.sceneRoot = scene.sceneRoot;
         const div = document.getElementById(divName);
@@ -167,12 +167,17 @@ class ARCanvas {
         renderArea.height = this.video.videoHeight;
 
         // Step 1: Setup scene and link in scene root
-        let parentScene = new THREE.Scene();
+        const parentScene = new THREE.Scene();
         this.parentScene = parentScene;
-        let camera = new THREE.PerspectiveCamera(40, renderArea.width / renderArea.height, 1, 10000);
+        const camera = new THREE.PerspectiveCamera(40, renderArea.width / renderArea.height, 1, 10000);
         this.camera = camera;
         parentScene.add(camera);
         parentScene.add(this.sceneRoot);
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(0xFFFFFF, intensity);
+        light.position.set(0, 0, 0);
+        parentScene.add(light);
+
 
         // Step 2: Setup simple orthographic scene for displaying video texture
         this.videoScene = new THREE.Scene();
@@ -181,7 +186,7 @@ class ARCanvas {
         this.videoScene.add(this.videoTexture);
 
         // Step 3: Setup renderer object
-        let renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({antialias:true});
         this.renderer = renderer;
         renderer.setClearColor(0xffffff, 1);
         renderer.setSize(this.canvas.width, this.canvas.height);
