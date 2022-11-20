@@ -29,7 +29,8 @@ class CanvasWrapper {
             let SPL = new ScalePositionLists(this.notes.formatInfo());
             this.digAud = new DAGenerator(SPL);
             
-            new CounterpointCanvas(this.notes,this.digAud, this.useCantusFirmus, this.useCounterpoint);
+            let counterpointScene = new CounterpointCanvas(this.notes,this.digAud, this.useCantusFirmus, this.useCounterpoint);
+            let arcanvas = new ARCanvas("arcanvas", counterpointScene);
         }
     }
 }

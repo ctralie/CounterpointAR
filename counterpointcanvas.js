@@ -13,8 +13,7 @@ class CounterpointCanvas {
         const that = this;
         this.notes = notes;
         this.keyboard = new KeyboardHandler();
-        this.setupRenderer(true);
-        this.setupScene();
+        this.setupSceneRoot();
         this.setupDigitalAudio(digitalAudio);
         this.setupNoteInformation(useCantusFirmus,useCounterpoint);
         this.initializeGlobalVariables();
@@ -22,25 +21,9 @@ class CounterpointCanvas {
         this.setupGhostNote();
         this.setupFirstSpeciesNotes();
         this.setupFirstSpeciesMeasureLines();
-        this.repaint();
     }
 
-    setupRenderer(antialias){
-        // Setup three.js WebGL renderer
-        const renderer = new THREE.WebGLRenderer({antialias: antialias, alpha: true});
-        this.renderer = renderer;
-        //renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-        renderer.setSize(640, 480);
-        renderer.domElement.style.position = 'absolute'
-        renderer.domElement.style.top = '0px'
-        renderer.domElement.style.left = '0px'
-        document.body.appendChild( renderer.domElement );
-    };
-
-    setupScene(){
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(50,400/300,0.01,50);
-        
+    setupSceneRoot(){
         this.matColor = [{color: 0xFFFFFF},{color: 0xFFFFFF},{color: 0xff0000},{color: 0xffA500},
             {color: 0x33F3FF},{color: 0x00ff00},{color: 0x0000ff}];
         
@@ -53,11 +36,7 @@ class CounterpointCanvas {
         this.sceneRoot = new THREE.Group();
         this.sceneRoot.name = "Scene Root";
         this.sceneRoot.add(light);
-        this.scene.add(this.sceneRoot);
-        this.scene.add(this.camera);
-        this.camera.position.z = 5;
-
-        this.noteXSpace = this.scene.xSpace;
+        //this.camera.position.z = 5;
     }
 
     //////////////////////////////////////////////////////
@@ -100,7 +79,6 @@ class CounterpointCanvas {
      */
     initializeGlobalVariables() {
         this.sampAud = new SampledAudio();
-        this.clock = new THREE.Clock();
 
         this.colors = [{color: 0xB41697},{color: 0x000000},{color: 0xF5BB00}];
         this.globalTimes = [];
@@ -133,32 +111,32 @@ class CounterpointCanvas {
 
         let staffGroup = new THREE.Group();
         staffGroup.name = "Staff Group";
-        this.partialStaff = new THREE.BoxGeometry(0.1,0.01,3);
+        this.partialStaff = new THREE.BoxGeometry(0.1,3,0.01);
         for (let column = 0; column < 7; column++) {
             let newCol = new THREE.Group();
             newCol.name = "Column " + column;
             for(let i = 0; i < this.matColor.length; i++){
                 if(column == 0 || column == 6){
-                    let invmat = new THREE.MeshStandardMaterial({color: 0x000000});
+                    let invmat = new THREE.MeshBasicMaterial({color: 0x000000});
                     invmat.visible = false;
                     newCol.add(new THREE.Mesh(this.partialStaff,invmat));
                 }else{
                     newCol.add(new THREE.Mesh(this.partialStaff, 
-                    new THREE.MeshStandardMaterial({color: this.matColor[i].color})));
+                    new THREE.MeshBasicMaterial({color: this.matColor[i].color})));
                 }
                 newCol.children[i].position.x = -3;
-                newCol.children[i].position.z = i*-3 + 1.7;
-                }
+                newCol.children[i].position.y = i*-3 + 1.7;
+            }
             newCol.position.x += (1*column);
             staffGroup.add(newCol);
             
         }
-        let bottomGeo = new THREE.BoxGeometry(9,0.01,30);
-        let bottomMat = new THREE.MeshStandardMaterial({color: 0x111111});
+        let bottomGeo = new THREE.BoxGeometry(9,30,0.01);
+        let bottomMat = new THREE.MeshBasicMaterial({color: 0x111111});
         staffGroup.add(new THREE.Mesh(bottomGeo,bottomMat));
         let ind = staffGroup.children.length - 1;
-        staffGroup.children[ind].position.y = -0.1;
-        staffGroup.children[ind].position.z = -10;
+        staffGroup.children[ind].position.y = -10;
+        staffGroup.children[ind].position.z = -0.1;
         staffGroup.children[ind].visible = false;
         this.sceneRoot.add(staffGroup);
     }
@@ -191,14 +169,14 @@ class CounterpointCanvas {
         this.CPGroup.name = "Counterpoint Group";
         for(let i = 0; i < this.linesToUse.length; i++){
             let noteSpacing = 1.5;
-            let notePositionZ = 1;
+            let notePositionY = 1;
             if(this.linesToUse[i]){              
                 for(let j = 0; j < this.songLength; j++){
                     let newNote = this.makeNoteObject(this.noteColor);
-                    newNote.position.x = this.xPositions[i][j] * 0.5;
-                    newNote.position.y = this.spaceAboveStaff;
-                    newNote.position.z = notePositionZ - noteSpacing;
-                    notePositionZ = newNote.position.z;
+                    newNote.position.y = this.xPositions[i][j] * 0.5;
+                    newNote.position.x = notePositionY - noteSpacing;
+                    newNote.position.z = this.spaceAboveStaff;
+                    notePositionY = newNote.position.z;
                     if(i==0){
                         this.CFGroup.add(newNote);
                     }else if(i==1){
@@ -225,7 +203,7 @@ class CounterpointCanvas {
      */
     setupFirstSpeciesMeasureLines() {
         let lineGeo = new THREE.BoxGeometry(4,.01,.05);
-        let lineMat = new THREE.MeshStandardMaterial({color: 0xFFFFFF});
+        let lineMat = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
         let lineGroup = new THREE.Group();
 
         let linePosZ = .25;
@@ -253,30 +231,20 @@ class CounterpointCanvas {
     // Main Program Functions
     //////////////////////////////////////////////////////
 
-    repaint() {
+    /**
+     * Take a step in the animation
+     * @param {float} dt Elapsed time since last step
+     */
+    step(dt) {
         if(!this.started){
             this.started = true;
             this.sampAud.startRecording();
-            this.timeOffset = Date.now();
         }
-        let deltaTime = this.clock.getDelta();
-        this.totalTime += deltaTime;
-
-        this.sceneRoot.position.x -= this.keyboard.movelr*deltaTime;
-        this.sceneRoot.position.z += this.keyboard.movefb*deltaTime;
-        this.sceneRoot.position.y -= this.keyboard.moveud*deltaTime;
         //this.notePositionUpdateAnalyze();
 
         if(this.endTracking){
             this.endProgram();
-        }else{
-            const renderer = this.renderer;
-            renderer.autoClear = false;
-            renderer.clear();
-            renderer.render(this.scene, this.camera);
-            requestAnimationFrame(this.repaint.bind(this));
         }
-        
     }
 
     notePositionUpdateAnalyze(){
@@ -384,21 +352,21 @@ class CounterpointCanvas {
 
         //createbackground
         let backG = new THREE.BoxGeometry(50,0.1,70);
-        let backM = new THREE.MeshStandardMaterial({color:this.colors[this.noteColor]});
+        let backM = new THREE.MeshPhongMaterial({color:this.colors[this.noteColor]});
         let backGround = new THREE.Mesh(backG,backM);
         backGround.position.y = -10;
         this.sceneRoot.add(backGround);
 
         //add user positions
         let noteSpacing = 1.5;
-        let notePositionZ = 1;
+        let notePositionY = 1;
         let resGroup = new THREE.Group();
         for(let i = 0; i < this.formattedPositions.length; i++){
             let newNote = this.makeNoteObject(this.ghostColor);
             newNote.position.x = this.formattedPositions[i];
             newNote.position.y = 1000;
-            newNote.position.z = notePositionZ - noteSpacing;
-            notePositionZ = newNote.position.z;
+            newNote.position.z = notePositionY - noteSpacing;
+            notePositionY = newNote.position.z;
             resGroup.add(newNote);
         }
         this.sceneRoot.add(resGroup);
@@ -441,9 +409,10 @@ class CounterpointCanvas {
      */
     makeNoteObject(index) {
         let geo = new THREE.TorusGeometry(.25, .045, 10, 24);
-        geo.scale(1.25,2,1);
-        geo.rotateX(1.57);
-        return new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:this.colors[index]}));
+        console.log(geo);
+        //geo.scale(1.25,2,1);
+        //geo.rotateX(1.57);
+        return new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:this.colors[index]}));
     };
 
     /**
@@ -454,11 +423,11 @@ class CounterpointCanvas {
     changeNoteColor(index){
         if(this.linesToUse[0]){
             this.sceneRoot.children[this.AGCFI].children[index].material= 
-            new THREE.MeshStandardMaterial(this.colors[this.replaceColor]);
+            new THREE.MeshPhongMaterial(this.colors[this.replaceColor]);
         }
         if(this.linesToUse[1]){
             this.sceneRoot.children[this.AGCPI].children[index].material= 
-            new THREE.MeshStandardMaterial(this.colors[this.replaceColor]);
+            new THREE.MeshPhongMaterial(this.colors[this.replaceColor]);
         }
     }
 }
