@@ -1,3 +1,6 @@
+import {ARCanvas} from 'arcanvas';
+import {CounterpointScene} from 'counterpointScene';
+
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');

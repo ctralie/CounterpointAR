@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 class CounterpointScene {
 
     /**
@@ -423,3 +425,5 @@ class CounterpointScene {
         }
     }
 }
+
+export {CounterpointScene}
